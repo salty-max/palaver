@@ -9,7 +9,7 @@ One download for Classic Era, TBC Anniversary and World of Warcraft: Forever.
 ## Using it
 
 Talk to an NPC: their words, their quests and their options open in the
-panel, the NPC still in view.
+family's window, the NPC's face in its corner and the NPC still in view.
 
 - **Space** (or Enter) answers yes: Accept, Continue, Complete Quest.
 - **Escape** says goodbye.
@@ -28,10 +28,9 @@ where it sits in its chain, like part 2 of 7.
 Books, letters and plaques open in the same panel. Space turns the page,
 Backspace turns back.
 
-Palaver can also hide the game's interface while you talk or read, so only
-the panel and the one you speak to stay on screen. It comes back for a fight,
-a vendor or a question of the game's. It's off at first: turn it on with
-/palaver hud or in the Options.
+While you talk or read, the game's interface fades away, so only the window
+and the one you speak to stay on screen. It comes back for a fight, a vendor
+or a question of the game's. /palaver hud or the Options keep it on screen.
 
 When a quest offers a choice of rewards, two marks help you pick. A green
 arrow sits on the one best for your character, and a gold coin on the one
@@ -47,7 +46,7 @@ Every setting is also on Palaver's page in the game's Options, under AddOns.
 /palaver font 16         its text, 12 to 22
 /palaver keys            the keys on or off
 /palaver books           books and letters in Palaver, or the game's window
-/palaver hud             the game's interface hidden while you talk (off at first)
+/palaver hud             the game's interface hidden while you talk, or kept
 /palaver camera          the view moves in on whoever speaks (off at first)
 /palaver value           the coin on the reward that sells for most
 /palaver upgrades        the arrow on the reward best for you

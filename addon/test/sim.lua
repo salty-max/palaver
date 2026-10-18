@@ -13,7 +13,9 @@ local function check(ok, what)
   count = count + 1
 end
 local function rows() return P.page and P.page.rows and #P.page.rows or 0 end
-local function title() return PalaverFrame.title:GetText() end
+-- the window's title bar, and the quest's title beside the face (none: "")
+local function bar() return PalaverFrame.titleText end
+local function title() return PalaverFrame.title.shown and PalaverFrame.title:GetText() or "" end
 local function words(tag) return _G[tag]:gsub("%s*[:：]%s*$", "") end
 -- Space as a reader presses it: through a page longer than the panel to its
 -- end (it reads on first), then once more to answer
@@ -82,11 +84,20 @@ check(O.opened == 42, "/palaver settings opens the page")
 -- ── a gossip: the NPC's words, a quest and an option as lines ────────────────
 s.npc, s.quest, s.talking = RAGNAR, RIBS, true
 fire("GOSSIP_SHOW")
-check(P.shown() and title() == "Ragnar Thunderbrew", "a gossip opens the panel, the NPC's name its title")
+check(P.shown() and bar() == "Ragnar Thunderbrew", "a gossip opens the window, the NPC's name in its title bar")
+check(title() == "", "a gossip: no title beside the face, the name is in the bar")
+check(
+  PalaverFrame.template == "ButtonFrameTemplate" and PalaverFrame.parent == nil,
+  "the family's window, outside the interface"
+)
 check(rows() == 2 and P.page.rows[1].text == "Beer Basted Boar Ribs", "the quest, then the option, as lines")
 check(PalaverFrame.secondary.label:GetText() == words("GOODBYE"), "a gossip's button says the game's own Goodbye")
 check(not PalaverFrame.primary.shown, "a gossip has no yes")
-check(PalaverFrame.portrait.tex.portrait == "npc", "the speaker's face in the ring")
+check(PalaverFrame.face == "npc", "the speaker's face in the window's corner")
+G.forget()
+PalaverFrame.CloseButton.scripts.OnClick(PalaverFrame.CloseButton)
+check(not P.shown() and G.called("CloseGossip") == 1, "the window's close button: goodbye, as Escape")
+fire("GOSSIP_SHOW")
 local gossipHeight = PalaverFrame:GetHeight()
 
 -- the quest picked with its key, then the game's close and the quest's page
@@ -103,7 +114,7 @@ check(
   P.shown() and P.page.kind == "detail" and title() == "Beer Basted Boar Ribs",
   "the offer follows, the panel never gone"
 )
-check(PalaverFrame.sub:GetText() == "Ragnar Thunderbrew", "the offer's subtitle: who offers it")
+check(bar() == "Ragnar Thunderbrew", "the title bar: who offers it")
 check(PalaverFrame:GetHeight() == gossipHeight, "the offer as tall as the gossip: the buttons stay where they were")
 check(G.called("CloseGossip") == 0 and G.called("CloseQuest") == 0, "no close sent while the conversation goes on")
 check(PalaverFrame.primary.label:GetText() == words("ACCEPT"), "the offer's yes is the game's own Accept")
@@ -318,7 +329,7 @@ end
 local function tip(i)
   local c = P.cards[i]
   c.scripts.OnEnter(c)
-  return table.concat(GameTooltip.lines, "\n")
+  return table.concat(P.tooltip().lines, "\n")
 end
 fire("QUEST_COMPLETE")
 check(marks() == "||^$", "a warrior: the hammer the best for them, and it sells for most")
@@ -603,8 +614,15 @@ s.book = {
 fire("ITEM_TEXT_BEGIN")
 check(not P.shown(), "the book's start: its page follows")
 fire("ITEM_TEXT_READY")
-check(P.shown() and P.page.kind == "book" and title() == "The Story of Morgan Ladimore", "a book opens in the panel")
-check(PalaverFrame.sub:GetText() == ns.game.word("PAGE_NUMBER", "x"):format(1), "its page number")
+check(
+  P.shown() and P.page.kind == "book" and bar() == "The Story of Morgan Ladimore",
+  "a book opens, its name in the bar"
+)
+check(PalaverFrame.face == "Interface\\QuestFrame\\UI-QuestLog-BookIcon", "the book's face in the corner")
+check(
+  PalaverFrame.kicker.shown and PalaverFrame.kicker:GetText() == ns.game.word("PAGE_NUMBER", "x"):format(1),
+  "its page number beside it"
+)
 check(
   PalaverFrame.primary.label:GetText() == words("NEXT") and PalaverFrame.secondary.label:GetText() == words("CLOSE"),
   "the game's Next and Close"
@@ -634,7 +652,7 @@ check(not P.shown(), "the game's close: the panel away")
 s.book = { title = "A Letter", pages = { "Meet me at the inn." }, page = 1, creator = "Thrall" }
 fire("ITEM_TEXT_READY")
 check(P.page.text:find(words("ITEM_TEXT_FROM") .. "\nThrall", 1, true), "a letter says who wrote it")
-check(PalaverFrame.sub:GetText() == "", "one page: no page number")
+check(not PalaverFrame.kicker.shown, "one page: no page number")
 G.forget()
 G.key("ESCAPE")
 check(G.called("CloseItemText") == 1 and not P.shown(), "Escape closes a book")
@@ -656,11 +674,7 @@ s.book = nil
 
 -- ── the game's interface hidden while talking ────────────────────────────────
 s.npc, s.quest, s.talking = RAGNAR, RIBS, true
-fire("GOSSIP_SHOW")
-G.advance(0.5)
-check(UIParent.shown and not ns.hud.hidden(), "by default the interface stays")
-G.key("ESCAPE")
-O.settings.PALAVER_HIDEUI.set(true)
+check(ns.settings.hideUI, "the interface hidden by default")
 check(PalaverFrame.parent == nil and PalaverKeys.parent == nil, "the panel and its keys outside the game's interface")
 G.forget()
 fire("GOSSIP_SHOW")
@@ -790,6 +804,19 @@ for k, v in pairs(keep) do
 end
 check(back and PalaverSettings.cameraBackup == nil, "the next login puts back what a crash left changed")
 check(G4.state.zoom == 15, "but not the old session's zoom, which was the session's own")
+
+-- settings saved before the interface hid by default: on, once
+local G6 = dofile("addon/test/game.lua")
+PalaverSettings = { enabled = true, hideUI = false }
+G6.login()
+check(
+  PalaverSettings.hideUI == true and PalaverSettings.version == 2,
+  "an older saved file: the interface hidden, as the new default"
+)
+local G7 = dofile("addon/test/game.lua")
+PalaverSettings = { enabled = true, hideUI = false, version = 2 }
+G7.login()
+check(PalaverSettings.hideUI == false, "turned off since: left off")
 
 io.write(
   ("Palaver: %d checks passed (%s, %s).\n"):format(

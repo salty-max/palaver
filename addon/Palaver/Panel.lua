@@ -1,9 +1,11 @@
 -- The panel: DialogueUI's way of talking to an NPC (a panel beside them, the
 -- NPC left in view, the text large, the answers as lines, two buttons with
--- their keys) in the family's materials: the game's dark dialog box with its
--- gold border (the kit's K.dialog), titles in the display face and gold, the
--- bronze ring around the speaker's face, the bag's slots for items. Mock-ups:
--- ~/code/wow-addons/ideas/palaver/.
+-- their keys) in the family's window (the kit's K.gameWindow, its body dark:
+-- the user's call, 18 October 2026, in place of the gold dialog box). As
+-- Blizzard's quest and gossip windows have it: the speaker's face in the
+-- window's corner, their name in its title bar; a quest's title in gold
+-- beside the face, the text on the kit's panel below, the buttons with their
+-- keys under it. Mock-ups: ~/code/wow-addons/ideas/palaver/ (G, I).
 --
 -- It only shows: what the player does goes to Core (ns.core), which answers
 -- the game. Hiding it never ends a conversation (the game's own windows end
@@ -16,10 +18,14 @@ local T = K.T
 local P = {}
 ns.panel = P
 
-local WIDTH, PAD, PORTRAIT = 400, 24, 56
-local HEADER = 72 -- the portrait and title, above the rule
-local BUTTON_H, BUTTON_GAP, FOOTER_GAP = 32, 12, 16
+local WIDTH = 400
 local HEIGHT = 424 -- every page the same height: Blizzard's quest window's (TBC on, interface units)
+local EDGE = 8 -- the panel's and the buttons' distance from the window's sides
+local TOP = 62 -- the panel's top, under the window's corner face (Yonder's: 58)
+local INNER = 12 -- the text's distance from the panel's sides
+local BUTTON_H, BUTTON_GAP = 32, 12
+local FOOT = EDGE + BUTTON_H + 8 -- the panel's bottom, above the buttons
+local BOOK_ICON = "Interface\\QuestFrame\\UI-QuestLog-BookIcon"
 local TEXT = T.text
 local KEY_BADGE = { 0, 0, 0, 0.6 }
 
@@ -124,19 +130,22 @@ local function releaseAll()
 end
 
 -- ── the frame ────────────────────────────────────────────────────────────────
--- No parent: the panel stays when the game's interface is hidden around it
--- (Hud.lua, DialogueUI's way), at the interface's scale all the same (place).
+-- The family's window, without a parent: the panel stays when the game's
+-- interface is hidden around it (Hud.lua, DialogueUI's way), at the
+-- interface's scale all the same (place). Where the game has no such window,
+-- the kit's dialog box. Its close button, or anything else that hides it,
+-- ends the conversation as Escape does (Core's close).
+local quietly = false -- (Palaver hiding it itself: no conversation to end)
 local function build()
-  frame = CreateFrame("Frame", "PalaverFrame", nil, "BackdropTemplate")
-  frame:SetBackdrop({
-    bgFile = "Interface\\DialogFrame\\UI-DialogBox-Background-Dark",
-    edgeFile = "Interface\\DialogFrame\\UI-DialogBox-Gold-Border",
-    tile = true,
-    tileSize = 32,
-    edgeSize = 32,
-    insets = { left = 11, right = 12, top = 12, bottom = 11 },
-  })
-  frame:SetWidth(WIDTH)
+  frame = K.gameWindow("PalaverFrame", "")
+  P.windowed = frame ~= nil
+  if not frame then
+    frame = K.dialog("PalaverFrame", "")
+    frame.barLabel = K.label(frame, K.TITLE_FONT, 16, T.accent)
+    frame.barLabel:SetPoint("TOP", 0, -16)
+  end
+  frame:SetParent(nil)
+  frame:SetSize(WIDTH, HEIGHT)
   frame:SetFrameStrata("HIGH")
   frame:SetToplevel(true)
   frame:SetClampedToScreen(true)
@@ -149,25 +158,27 @@ local function build()
     local point, _, relPoint, x, y = self:GetPoint(1)
     if ns.settings then ns.settings.point = { point, relPoint, x, y } end
   end)
+  frame:HookScript("OnHide", function()
+    if not quietly then ns.core.close() end
+  end)
   frame:Hide()
 
-  frame.portrait = K.roundIcon(frame, PORTRAIT, true)
-  frame.portrait:SetPoint("TOPLEFT", PAD + 2, -PAD - 2)
-  frame.title = K.label(frame, K.TITLE_FONT, 22, T.gold)
-  frame.title:SetPoint("TOPLEFT", frame.portrait, "TOPRIGHT", 14, -6)
-  frame.title:SetPoint("RIGHT", frame, "RIGHT", -PAD, 0)
+  -- a quest's title beside the face, a book's page there in a small line
+  frame.title = K.label(frame, K.TITLE_FONT, 18, T.gold)
+  frame.title:SetPoint("LEFT", frame, "TOPLEFT", 66, -(21 + TOP) / 2)
+  frame.title:SetPoint("RIGHT", frame, "RIGHT", -12, 0)
   frame.title:SetMaxLines(2)
-  frame.sub = K.label(frame, K.BODY_FONT, 12, T.soft)
-  frame.sub:SetPoint("TOPLEFT", frame.title, "BOTTOMLEFT", 0, -6)
-  frame.sub:SetPoint("RIGHT", frame, "RIGHT", -PAD, 0)
-  frame.sub:SetWordWrap(false)
-  frame.rule = K.rule(frame)
-  frame.rule:SetPoint("TOPLEFT", PAD, -PAD - HEADER)
-  frame.rule:SetPoint("TOPRIGHT", -PAD, -PAD - HEADER)
+  frame.kicker = K.label(frame, K.BODY_FONT, 12, T.soft)
+  frame.kicker:SetPoint("LEFT", frame, "TOPLEFT", 66, -(21 + TOP) / 2)
+  frame.kicker:SetPoint("RIGHT", frame, "RIGHT", -12, 0)
+  frame.kicker:SetWordWrap(false)
 
-  scroll = K.scrollArea(frame, WIDTH - 2 * PAD, "PalaverScroll")
-  scroll:SetPoint("TOPLEFT", PAD, -PAD - HEADER - 14)
-  scroll:SetPoint("RIGHT", frame, "RIGHT", -PAD, 0)
+  frame.sheet = K.panel(frame)
+  frame.sheet:SetPoint("TOPLEFT", EDGE, -TOP)
+  frame.sheet:SetPoint("BOTTOMRIGHT", -EDGE, FOOT)
+  scroll = K.scrollArea(frame.sheet, WIDTH - 2 * EDGE - 2 * INNER, "PalaverScroll")
+  scroll:SetPoint("TOPLEFT", INNER, -10)
+  scroll:SetPoint("RIGHT", frame.sheet, "RIGHT", -INNER, 0)
   child = scroll.child
 
   frame.primary = button(true)
@@ -192,9 +203,30 @@ local function build()
     tip:Show()
   end)
   frame.back:HookScript("OnLeave", function() P.tooltip():Hide() end)
-  frame.hint = K.label(frame, K.BODY_FONT, 11, T.soft)
-  frame.hint:SetPoint("BOTTOMLEFT", PAD, PAD + BUTTON_H + 4)
-  frame.hint:SetPoint("RIGHT", frame, "RIGHT", -PAD, 0)
+  frame.hint = K.label(frame.sheet, K.BODY_FONT, 11, T.soft)
+  frame.hint:SetPoint("BOTTOMLEFT", INNER, 8)
+  frame.hint:SetPoint("RIGHT", frame.sheet, "RIGHT", -INNER, 0)
+end
+
+-- The title bar's words: the speaker's name, a book's.
+local function setBar(text)
+  P.bar = text
+  if frame.barLabel then return frame.barLabel:SetText(text) end
+  if frame.SetTitle then
+    frame:SetTitle(text)
+  elseif type(frame.TitleText) == "table" then
+    frame.TitleText:SetText(text)
+  end
+end
+
+-- The face in the window's corner: the speaker's, else the book's.
+local function setFace(unit)
+  if not P.windowed then return end
+  if unit and UnitExists(unit) and frame.SetPortraitToUnit then
+    frame:SetPortraitToUnit(unit)
+  elseif frame.SetPortraitToAsset then
+    frame:SetPortraitToAsset(BOOK_ICON)
+  end
 end
 
 local function place()
@@ -497,13 +529,13 @@ local function footer(page)
   local a = page.actions or {}
   local both = a.primary and a.secondary
   -- (a book's page back first, a square, the buttons beside it)
-  local left = PAD + (a.back and BUTTON_H + 8 or 0)
-  local avail = WIDTH - PAD - left
+  local left = EDGE + (a.back and BUTTON_H + 8 or 0)
+  local avail = WIDTH - EDGE - left
   local bw = both and math.floor((avail - BUTTON_GAP) / 2) or avail
   frame.back:ClearAllPoints()
   frame.back:SetShown(a.back ~= nil)
   if a.back then
-    frame.back:SetPoint("BOTTOMLEFT", PAD, PAD)
+    frame.back:SetPoint("BOTTOMLEFT", EDGE, EDGE)
     frame.back.tip = a.back.label
     frame.back.disabled = false
     frame.back.run = function() ns.core.act("back") end
@@ -526,12 +558,12 @@ local function footer(page)
     end
   end
   if both then
-    frame.primary:SetPoint("BOTTOMLEFT", left, PAD)
-    frame.secondary:SetPoint("BOTTOMRIGHT", -PAD, PAD)
+    frame.primary:SetPoint("BOTTOMLEFT", left, EDGE)
+    frame.secondary:SetPoint("BOTTOMRIGHT", -EDGE, EDGE)
   elseif a.primary then
-    frame.primary:SetPoint("BOTTOMLEFT", left, PAD)
+    frame.primary:SetPoint("BOTTOMLEFT", left, EDGE)
   elseif a.secondary then
-    frame.secondary:SetPoint("BOTTOMLEFT", left, PAD)
+    frame.secondary:SetPoint("BOTTOMLEFT", left, EDGE)
   end
 end
 
@@ -542,17 +574,20 @@ function P.show(page)
   P.choosing = nil
   P.choice = nil
   P.factsLine = nil
-  inner = WIDTH - 2 * PAD - 8
+  inner = WIDTH - 2 * EDGE - 2 * INNER - 8
   y = 0
 
-  -- the speaker's face in the ring, the book's when no one speaks (an item)
-  if page.unit and UnitExists(page.unit) then
-    K.unitPortrait(page.unit)(frame.portrait)
-  else
-    frame.portrait.tex:SetTexture("Interface\\QuestFrame\\UI-QuestLog-BookIcon")
-  end
-  frame.title:SetText(page.title or page.name or "")
-  frame.sub:SetText(page.title ~= page.name and page.name or "")
+  -- The speaker's face in the corner, their name in the title bar (a quest
+  -- from an item, a book: the book's face, its name); a quest's title beside
+  -- the face, a book's page there in a small line.
+  setFace(page.unit)
+  local bar = (page.name and page.name ~= "") and page.name or page.title or ""
+  setBar(bar)
+  local named = page.title ~= bar and page.title or ""
+  frame.title:SetText(named)
+  frame.title:SetShown(named ~= "")
+  frame.kicker:SetText(page.kicker or "")
+  frame.kicker:SetShown(named == "" and (page.kicker or "") ~= "")
 
   facts(page.facts)
   para(page.text)
@@ -584,9 +619,7 @@ function P.show(page)
   -- scale as every window does (two thirds of the screen did not, and towered
   -- over them); the buttons stay where they were, a long text scrolls.
   if not frame:IsShown() then place() end
-  local top = PAD + HEADER + 14
-  local bottom = FOOTER_GAP + BUTTON_H + PAD + (page.choose and 16 or 0)
-  scroll:SetHeight(HEIGHT - top - bottom)
+  scroll:SetHeight(HEIGHT - TOP - FOOT - 10 - 10 - (page.choose and 16 or 0))
   scroll:SetScript("OnUpdate", nil)
   scroll:ScrollTo(0)
   frame:SetHeight(HEIGHT)
@@ -620,7 +653,11 @@ function P.readOn()
 end
 
 function P.hide()
-  if frame then frame:Hide() end
+  if frame then
+    quietly = true
+    frame:Hide()
+    quietly = false
+  end
   P.page = nil
 end
 

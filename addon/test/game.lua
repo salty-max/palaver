@@ -144,6 +144,11 @@ G.methods = {
   end,
   GetName = function(self) return self.name end,
   SetAlpha = function(self, a) self.alpha = a end,
+  SetParent = function(self, p) self.parent = p end,
+  -- the game's window: its title bar, the face in its corner
+  SetTitle = function(self, t) self.titleText = t end,
+  SetPortraitToUnit = function(self, unit) self.face = unit end,
+  SetPortraitToAsset = function(self, asset) self.face = asset end,
   GetAlpha = function(self) return self.alpha or 1 end,
   -- a ModelScene's actor: the NPC's model loaded at once, as tall as state.npcHeight
   CreateActor = function(self, _, template)
@@ -175,6 +180,17 @@ function CreateFrame(kind, name, parent, template)
   f.parent = parent
   f.template = template
   if name then _G[name] = f end
+  -- (the game's window: a close button that hides it, as HideUIPanel does)
+  if template == "ButtonFrameTemplate" then
+    f.CloseButton = CreateFrame("Button", nil, f)
+    f.CloseButton:SetScript("OnClick", function(self) self.parent:Hide() end)
+  end
+  -- (a tooltip of the template: it keeps its lines, as the game's does)
+  if kind == "GameTooltip" then
+    f.lines = {}
+    function f:SetOwner() wipe(self.lines) end
+    function f:AddLine(text) table.insert(self.lines, text) end
+  end
   return f
 end
 UIParent = obj("Frame", "UIParent")

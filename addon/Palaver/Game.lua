@@ -305,7 +305,8 @@ end
 -- ── a book, a letter, a plaque ───────────────────────────────────────────────
 -- What the game's book window shows (Blizzard_UIPanels_Game's
 -- ItemTextFrame.lua): the item's or the object's name, a page of its text
--- and who wrote it (a letter), the page's number where there are several.
+-- and who wrote it (a letter), the page's number where there are several
+-- (kicker: the small line beside the window's face).
 -- A page in HTML (a heading, paragraphs) read as plain text: its tags gone,
 -- its breaks kept.
 function G.plain(text)
@@ -338,7 +339,7 @@ function G.book()
   return {
     kind = "book",
     title = ItemTextGetItem() or "",
-    name = paged and word("PAGE_NUMBER", "Page %d"):format(page) or "",
+    kicker = paged and word("PAGE_NUMBER", "Page %d"):format(page) or nil,
     text = text,
     actions = {
       primary = hasNext and { label = word("NEXT", "Next"), run = turn(ItemTextNextPage) } or close,
@@ -354,7 +355,6 @@ function G.translating()
   return {
     kind = "book",
     title = ItemTextGetItem and ItemTextGetItem() or "",
-    name = "",
     text = ns.kit.L["Translating..."],
     actions = { secondary = { label = word("CLOSE", "Close"), run = CloseItemText } },
   }

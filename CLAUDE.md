@@ -3,12 +3,14 @@
 A World of Warcraft addon: DialogueUI's way of talking to NPCs (a panel
 beside them, the NPC left in view, large text, the answers as lines, two
 buttons with their keys) in the family's look (Hearthtale, the Codex, Yonder,
-Second Wind): the game's dark dialog box with its gold border (the kit's
-K.dialog), titles in the display face and gold, the bronze ring around the
-speaker's face, the bag's slots for items. Decided 18 October 2026, after a
-first prototype (`../conversations`, "Conversations", by another agent) was
-rejected: its camera and its interaction controller broke in the game.
-Mock-ups the user chose (frame A, the gold border): `../ideas/palaver/`.
+Second Wind): their window (the kit's K.gameWindow, its body dark), the
+speaker's face in its corner as Blizzard's quest and gossip windows have it,
+titles in the display face and gold, the bag's slots for items. Decided 18
+October 2026, after a first prototype (`../conversations`, "Conversations",
+by another agent) was rejected: its camera and its interaction controller
+broke in the game. The gold dialog box (mock A) was the first look; the user
+switched to the family's window the same evening (mocks G and I in
+`../ideas/palaver/`).
 Local only so far: no GitHub repository, no store page.
 
 ## Layout
@@ -45,14 +47,22 @@ Local only so far: no GitHub repository, no store page.
   Books, letters and plaques (`G.book`: Blizzard's ItemTextFrame.lua's
   calls, a page in HTML read as plain text, the writer of a letter, the
   page number; Next and Close the game's words, Prev a page back).
-- `Panel.lua`: the panel. It only shows: hiding it never ends a
-  conversation. No parent: it stays when the interface is hidden (Hud.lua),
+- `Panel.lua`: the panel. It only shows: hiding it itself never ends a
+  conversation, but its window's close button (or anything else hiding it)
+  does, as Escape. The family's window (K.gameWindow; K.dialog where a game
+  has none): the speaker's name in the title bar (SetTitle), their face in
+  the corner (SetPortraitToUnit, the book's icon for a book or an item's
+  quest: Blizzard's GossipFrameShared's calls), a quest's title in gold
+  beside the face (a book's page number there in a small line), the kit's
+  panel (K.panel) from 62 units down (clear of the face, Yonder's 58), the
+  keyed buttons under it. No parent: it stays when the interface is hidden (Hud.lua),
   at UIParent's scale times Palaver's, followed on UI_SCALE_CHANGED; its
   keys' listener (Core) the same; its tooltip Palaver's own while the
   interface is hidden (the game's goes with it). The offer's facts a line
   above its text (the level in the game's difficulty colour, the kind in
   gold); a book's page back a square footer button with the spellbook's
-  arrow (mocks: `../ideas/palaver/E-facts.png`, `F-book.png`). Space or Enter
+  arrow (mocks: `../ideas/palaver/E-facts.png`, `F-book.png`, in the gold
+  box then; the family's window: `I-family-palaver.png`). Space or Enter
   on a page longer than the panel scrolls a panel's height first (`readOn`,
   on: no quest accepted with its rewards unseen; a click answers at once). One height for every page, Blizzard's quest window's (424
   interface units: it follows the UI scale as the game's windows do; a
@@ -100,7 +110,8 @@ Local only so far: no GitHub repository, no store page.
   not, the size, the camera put back, the marks again). Account-wide, no
   profiles: a reading panel's settings. `/palaver settings` opens it.
 - `Hud.lua`: the game's interface hidden while a conversation or a book
-  lasts (`hideUI`, off until tried in the game; DialogueUI's fade helper the
+  lasts (`hideUI`, on by default since 18 October 2026, saved files of
+  before switched on once by `version`; DialogueUI's fade helper the
   reference): a quarter second's fade, then SetUIVisibility. Back at once
   for a fight (PLAYER_REGEN_DISABLED comes before the lock), a popup of the
   game's (StaticPopup_Show hooked), a cinematic, a page that fails, the

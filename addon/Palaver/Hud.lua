@@ -1,8 +1,8 @@
 -- The game's interface hidden while a conversation or a book lasts, only the
 -- panel and the speaker left on screen: DialogueUI's "hide UI" (its
 -- Camera.lua's fade helper, read as the reference). A quarter of a second's
--- fade, then the game's own Alt+Z (SetUIVisibility). Off by default
--- (/palaver hud, the Options page), until tried in the game.
+-- fade, then the game's own Alt+Z (SetUIVisibility). On by default (the
+-- user's call, 18 October 2026): /palaver hud or the Options page turns it off.
 --
 -- The interface comes back, at once, whenever it must: the conversation over
 -- (Core's hide), a combat starting (PLAYER_REGEN_DISABLED comes before the

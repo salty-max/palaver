@@ -16,8 +16,8 @@
 -- (its ITEM_TEXT_ events), where the books setting says.
 --
 -- PalaverSettings: { enabled, scale, font, keys, readOn, camera, value,
--- upgrades, books, hideUI, point, cameraBackup }. PalaverErrors: the last
--- few errors (a page that failed to draw hands its conversation to
+-- upgrades, books, hideUI, version, point, cameraBackup }. PalaverErrors:
+-- the last few errors (a page that failed to draw hands its conversation to
 -- Blizzard's window for the rest of the session, said once in chat; a
 -- reward's mark that failed only drops the marks).
 local addonName, ns = ...
@@ -38,7 +38,8 @@ local DEFAULTS = {
   upgrades = true,
   readOn = true,
   books = true,
-  hideUI = false,
+  hideUI = true,
+  version = 2,
 }
 ns.DEFAULTS = DEFAULTS -- (the Options page's defaults: Settings.lua)
 local RIVALS = { "DialogueUI", "Immersion", "Storyline", "Conversations" } -- (the last: the prototype Palaver replaces)
@@ -348,6 +349,12 @@ E:SetScript("OnEvent", function(_, event, ...)
   if event == "ADDON_LOADED" then
     if ... ~= addonName then return end
     PalaverSettings = PalaverSettings or {}
+    -- (settings saved before version 2 held hideUI off by default, not by
+    -- choice: on, as the default became, 18 October 2026)
+    if PalaverSettings.enabled ~= nil and (PalaverSettings.version or 1) < 2 then
+      PalaverSettings.hideUI = true
+      PalaverSettings.version = 2
+    end
     for k, v in pairs(DEFAULTS) do
       if PalaverSettings[k] == nil then PalaverSettings[k] = v end
     end
