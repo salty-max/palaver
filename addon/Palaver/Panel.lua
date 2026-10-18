@@ -19,6 +19,7 @@ ns.panel = P
 local WIDTH, PAD, PORTRAIT = 400, 24, 56
 local HEADER = 72 -- the portrait and title, above the rule
 local BUTTON_H, BUTTON_GAP, FOOTER_GAP = 32, 12, 16
+local HEIGHT = 0.66 -- of the screen: every page the same height
 local TEXT = T.text
 local KEY_BADGE = { 0, 0, 0, 0.6 }
 
@@ -426,18 +427,18 @@ function P.show(page)
   frame.hint:SetText(page.choose and not P.choice and L["Choose a reward, then complete the quest."] or "")
   frame.hint:SetShown(page.choose and not P.choice)
 
-  -- as tall as its content, at most most of the screen, the rest scrolling
+  -- One height for every page, as DialogueUI's (the user's call, 18 October
+  -- 2026): the buttons stay where they were from one page to the next, a long
+  -- text scrolls. Two thirds of the screen, at the panel's scale, never less
+  -- than room for a short quest.
+  if not frame:IsShown() then place() end
   local top = PAD + HEADER + 14
   local bottom = FOOTER_GAP + BUTTON_H + PAD + (page.choose and 16 or 0)
-  local most = UIParent:GetHeight() * 0.72 - top - bottom
-  local h = math.min(math.max(y, 40), most)
-  scroll:SetHeight(h)
+  local height = math.max(440, UIParent:GetHeight() * HEIGHT / frame:GetScale())
+  scroll:SetHeight(height - top - bottom)
   scroll:ScrollTo(0)
-  frame:SetHeight(top + h + bottom)
-  if not frame:IsShown() then
-    place()
-    frame:Show()
-  end
+  frame:SetHeight(height)
+  if not frame:IsShown() then frame:Show() end
   scroll:UpdateThumb()
 end
 

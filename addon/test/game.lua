@@ -139,6 +139,8 @@ G.methods = {
     self.propagate = on
   end,
   GetName = function(self) return self.name end,
+  SetScale = function(self, v) self.scale = v end,
+  GetScale = function(self) return self.scale or 1 end,
   GetParent = function(self) return self.parent end,
 }
 

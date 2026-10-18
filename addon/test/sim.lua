@@ -59,6 +59,7 @@ check(rows() == 2 and P.page.rows[1].text == "Beer Basted Boar Ribs", "the quest
 check(PalaverFrame.secondary.label:GetText() == words("GOODBYE"), "a gossip's button says the game's own Goodbye")
 check(not PalaverFrame.primary.shown, "a gossip has no yes")
 check(PalaverFrame.portrait.tex.portrait == "npc", "the speaker's face in the ring")
+local gossipHeight = PalaverFrame:GetHeight()
 
 -- the quest picked with its key, then the game's close and the quest's page
 G.forget()
@@ -75,6 +76,7 @@ check(
   "the offer follows, the panel never gone"
 )
 check(PalaverFrame.sub:GetText() == "Ragnar Thunderbrew", "the offer's subtitle: who offers it")
+check(PalaverFrame:GetHeight() == gossipHeight, "the offer as tall as the gossip: the buttons stay where they were")
 check(G.called("CloseGossip") == 0 and G.called("CloseQuest") == 0, "no close sent while the conversation goes on")
 check(PalaverFrame.primary.label:GetText() == words("ACCEPT"), "the offer's yes is the game's own Accept")
 check(#P.page.rewards.given == 2 and P.page.rewards.money == 175 and P.page.rewards.xp == 625, "the rewards read")
@@ -107,6 +109,7 @@ RIBS.choice =
 fire("QUEST_COMPLETE")
 G.advance(1)
 check(P.page.kind == "complete" and P.choosing and PalaverFrame.hint.shown, "two rewards: the panel asks to choose")
+check(PalaverFrame:GetHeight() == gossipHeight, "the hand-in too, its hint inside the same height")
 G.forget()
 G.key("SPACE")
 check(G.called("GetQuestReward") == 0, "no reward chosen, no hand-in")
