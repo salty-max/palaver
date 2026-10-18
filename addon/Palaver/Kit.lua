@@ -1,4 +1,4 @@
--- addon-kit 0310ad2: a copy (kit:sync); edit the addon-kit repository's Kit.lua instead
+-- addon-kit 7ea016c: a copy (kit:sync); edit the addon-kit repository's Kit.lua instead
 -- The kit shared by Hearthtale, Lorekeeper's Codex, Yonder and
 -- Second Wind: the books' look and the pieces their windows are made of
 -- (the list on the left, the page on the right and every part of a page, a
@@ -2241,8 +2241,9 @@ function K.collectSetting(category, variable, C)
 end
 
 -- ── the window ───────────────────────────────────────────────────────────────
--- The standard game window (portrait, title bar), its inset removed; art: the
--- portrait's picture, if the addon has one (else the addon sets its own).
+-- The standard game window (portrait, title bar), its inset removed, its body
+-- dark; art: the portrait's picture, if the addon has one (else the addon
+-- sets its own).
 -- Nil where the client has no such template.
 function K.gameWindow(name, title, art)
   local ok, frame = pcall(CreateFrame, "Frame", name, UIParent, "ButtonFrameTemplate")
@@ -2250,6 +2251,12 @@ function K.gameWindow(name, title, art)
   frame.kitName = name
   if ButtonFrameTemplate_HideButtonBar then ButtonFrameTemplate_HideButtonBar(frame) end
   if type(frame.Inset) == "table" then frame.Inset:Hide() end
+  -- Its body the dialog box's dark (black at 87%, tiled), not the game's grey
+  -- stone (UI-Background-Rock, Bg in both games' template): the user's call,
+  -- 18 October 2026. The title bar, the frame and the panels inside as they were.
+  if type(frame.Bg) == "table" and frame.Bg.SetTexture then
+    frame.Bg:SetTexture("Interface\\DialogFrame\\UI-DialogBox-Background-Dark", "REPEAT", "REPEAT")
+  end
   if art then
     if frame.SetPortraitToAsset then
       frame:SetPortraitToAsset(art)
