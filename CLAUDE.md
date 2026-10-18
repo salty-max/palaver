@@ -28,7 +28,9 @@ Local only so far: no GitHub repository, no store page.
   use the game's own interface strings (`G.word`: ACCEPT, REWARDS...), so
   every client language gets the game's wording.
 - `Panel.lua`: the panel. It only shows: hiding it never ends a
-  conversation. Not in UISpecialFrames (the game hides those at moments of
+  conversation. One height for every page, Blizzard's quest window's (424
+  interface units: it follows the UI scale as the game's windows do; a
+  long text scrolls). Not in UISpecialFrames (the game hides those at moments of
   its own, which cut trainer conversations short in the prototype).
 - `Core.lua`: the conversation. Blizzard's windows muted once at login, as
   DialogueUI does (QuestFrame's events, GossipFrame's, Forever's
