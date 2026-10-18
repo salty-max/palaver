@@ -1,0 +1,396 @@
+# The game's globals the addon uses (selene.toml), and its own: saved
+# variables and the slash command.
+base: lua51
+name: wow
+globals:
+  AcceptQuest:
+    any: true
+  C_AddOns:
+    any: true
+  C_CurrencyInfo:
+    any: true
+  C_PlayerInteractionManager:
+    any: true
+  C_QuestInfoSystem:
+    any: true
+  CloseQuest:
+    any: true
+  CompleteQuest:
+    any: true
+  CustomGossipFrameManager:
+    any: true
+  DeclineQuest:
+    any: true
+  GetActiveTitle:
+    any: true
+  GetAvailableQuestInfo:
+    any: true
+  GetAvailableTitle:
+    any: true
+  GetCoinTextureString:
+    any: true
+  GetCurrentKeyBoardFocus:
+    any: true
+  GetGreetingText:
+    any: true
+  GetNumActiveQuests:
+    any: true
+  GetNumAvailableQuests:
+    any: true
+  GetNumQuestChoices:
+    any: true
+  GetNumQuestItems:
+    any: true
+  GetNumQuestRewards:
+    any: true
+  GetQuestItemInfo:
+    any: true
+  GetQuestMoneyToGet:
+    any: true
+  GetQuestReward:
+    any: true
+  GetRewardHonor:
+    any: true
+  GetRewardMoney:
+    any: true
+  GetRewardSpell:
+    any: true
+  GetRewardTitle:
+    any: true
+  GetRewardXP:
+    any: true
+  GossipFrame:
+    any: true
+  IsActiveQuestTrivial:
+    any: true
+  IsAddOnLoaded:
+    any: true
+  IsModifierKeyDown:
+    any: true
+  IsQuestCompletable:
+    any: true
+  MoneyFrame_Update:
+    any: true
+  PalaverErrors:
+    any: true
+  PalaverSettings:
+    any: true
+  PlayAutoAcceptQuestSound:
+    any: true
+  QuestFrame:
+    any: true
+  QuestInfoFrame:
+    any: true
+  SLASH_PALAVER1:
+    any: true
+  STATICPOPUP_NUMDIALOGS:
+    any: true
+  SelectActiveQuest:
+    any: true
+  SelectAvailableQuest:
+    any: true
+  StaticPopup_Show:
+    any: true
+  debugstack:
+    any: true
+  wipe:
+    any: true
+  AchievementShield_Desaturate:
+    any: true
+  AchievementShield_OnLoad:
+    any: true
+  AchievementShield_Saturate:
+    any: true
+  AlertFrame:
+    any: true
+  AlertFrame_OnClick:
+    any: true
+  and:
+    any: true
+  as:
+    any: true
+  be:
+    any: true
+  bit:
+    any: true
+  ButtonFrameTemplate_HideButtonBar:
+    any: true
+  C_Container:
+    any: true
+  C_DamageMeter:
+    any: true
+  C_DeathRecap:
+    any: true
+  C_GameRules:
+    any: true
+  C_Item:
+    any: true
+  C_LossOfControl:
+    any: true
+  C_Secrets:
+    any: true
+  C_Spell:
+    any: true
+  C_Texture:
+    any: true
+  C_Timer:
+    any: true
+  C_UnitAuras:
+    any: true
+  C_XMLUtil:
+    any: true
+  can:
+    any: true
+  cause:
+    any: true
+  ChatFontNormal:
+    any: true
+  CombatLogGetCurrentEventInfo:
+    any: true
+  confusing:
+    any: true
+  CreateFrame:
+    any: true
+  CreateUnitHealPredictionCalculator:
+    any: true
+  date:
+    any: true
+  debug:
+    any: true
+  during:
+    any: true
+  encoding:
+    any: true
+  Enum:
+    any: true
+  GameTooltip:
+    any: true
+  GetBuildInfo:
+    any: true
+  GetCursorPosition:
+    any: true
+  GetCVarBool:
+    any: true
+  geterrorhandler:
+    any: true
+  GetInventoryItemCooldown:
+    any: true
+  GetInventoryItemID:
+    any: true
+  GetItemCooldown:
+    any: true
+  GetItemCount:
+    any: true
+  GetItemInfo:
+    any: true
+  GetLocale:
+    any: true
+  GetRealmName:
+    any: true
+  GetRealZoneText:
+    any: true
+  GetSpellBaseCooldown:
+    any: true
+  GetSpellCooldown:
+    any: true
+  GetSpellInfo:
+    any: true
+  GetSubZoneText:
+    any: true
+  GetTime:
+    any: true
+  GetUIPanel:
+    any: true
+  hard:
+    any: true
+  HasFullControl:
+    any: true
+  hooksecurefunc:
+    any: true
+  InCombatLockdown:
+    any: true
+  IsInGroup:
+    any: true
+  IsInInstance:
+    any: true
+  issecretvalue:
+    any: true
+  issues:
+    any: true
+  IsUsableItem:
+    any: true
+  IsUsableSpell:
+    any: true
+  ITEM_QUALITY_COLORS:
+    any: true
+  iteration:
+    any: true
+  LinkProcessorResponse:
+    any: true
+  LinkUtil:
+    any: true
+  LowHealthFrame:
+    any: true
+  MenuUtil:
+    any: true
+  Minimap:
+    any: true
+  mixed:
+    any: true
+  or:
+    any: true
+  PanelTemplates_SetNumTabs:
+    any: true
+  PanelTemplates_SetTab:
+    any: true
+  PanelTemplates_TabResize:
+    any: true
+  PlaySound:
+    any: true
+  SetItemRef:
+    any: true
+  SetPortraitTexture:
+    any: true
+  Settings:
+    any: true
+  should:
+    any: true
+  SlashCmdList:
+    any: true
+  SOUNDKIT:
+    any: true
+  STANDARD_TEXT_FONT:
+    any: true
+  StartDuel:
+    any: true
+  strtrim:
+    any: true
+  such:
+    any: true
+  tables:
+    any: true
+  they:
+    any: true
+  time:
+    any: true
+  to:
+    any: true
+  UIDropDownMenu_AddButton:
+    any: true
+  UIDropDownMenu_CreateInfo:
+    any: true
+  UIDropDownMenu_DisableDropDown:
+    any: true
+  UIDropDownMenu_EnableDropDown:
+    any: true
+  UIDropDownMenu_Initialize:
+    any: true
+  UIDropDownMenu_SetText:
+    any: true
+  UIDropDownMenu_SetWidth:
+    any: true
+  UIParent:
+    any: true
+  UISpecialFrames:
+    any: true
+  UnitAffectingCombat:
+    any: true
+  UnitCanAttack:
+    any: true
+  UnitClass:
+    any: true
+  UnitClassification:
+    any: true
+  UnitCreatureType:
+    any: true
+  UnitDebuff:
+    any: true
+  UnitExists:
+    any: true
+  UnitGetDetailedHealPrediction:
+    any: true
+  UnitGUID:
+    any: true
+  UnitHealth:
+    any: true
+  UnitHealthMax:
+    any: true
+  UnitIsDeadOrGhost:
+    any: true
+  UnitPlayerControlled:
+    args:
+      - type: string
+  UnitIsPlayer:
+    any: true
+  UnitLevel:
+    any: true
+  UnitName:
+    any: true
+  UnitSex:
+    any: true
+  UnitTokenFromGUID:
+    any: true
+  CLASS_ICON_TCOORDS:
+    any: true
+  LOCALIZED_CLASS_NAMES_MALE:
+    any: true
+  LOSS_OF_CONTROL_DISPLAY_STUN:
+    any: true
+  LOSS_OF_CONTROL_DISPLAY_STUN_MECHANIC:
+    any: true
+  LOSS_OF_CONTROL_DISPLAY_FEAR:
+    any: true
+  LOSS_OF_CONTROL_DISPLAY_FEAR_MECHANIC:
+    any: true
+  LOSS_OF_CONTROL_DISPLAY_CONFUSE:
+    any: true
+  LOSS_OF_CONTROL_DISPLAY_SLEEP:
+    any: true
+  LOSS_OF_CONTROL_DISPLAY_CHARM:
+    any: true
+  LOSS_OF_CONTROL_DISPLAY_POSSESS:
+    any: true
+  GetItemIcon:
+    any: true
+  GetPlayerInfoByGUID:
+    any: true
+  GetSpellTexture:
+    any: true
+  SetPortraitTextureFromCreatureDisplayID:
+    any: true
+  C_GossipInfo:
+    any: true
+  GetGossipText:
+    any: true
+  GetObjectiveText:
+    any: true
+  GetProgressText:
+    any: true
+  GetQuestID:
+    any: true
+  GetQuestText:
+    any: true
+  GetRewardText:
+    any: true
+  GetTitleText:
+    any: true
+  UnitReaction:
+    any: true
+  UnitCreatureFamily:
+    any: true
+  GetNumLootItems:
+    any: true
+  GetLootSlotLink:
+    any: true
+  GetLootSourceInfo:
+    any: true
+  UnitRace:
+    any: true
+  C_Map:
+    any: true
+  C_CreatureInfo:
+    any: true
+  SaltyMaxCollector:
+    any: true
+  C_Seasons:
+    any: true

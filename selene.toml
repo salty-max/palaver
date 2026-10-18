@@ -1,0 +1,8 @@
+# The addon's Lua, linted by selene (bun run lint:lua): Lua 5.1 and the game's
+# globals the addon uses (wow.yml).
+std = "wow"
+exclude = ["addon/Palaver/Text_*.lua"]
+
+[lints]
+# layout is StyLua's: a guard or a callback on one line is as it writes them
+multiple_statements = "allow"

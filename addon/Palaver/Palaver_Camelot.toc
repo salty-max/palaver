@@ -1,0 +1,22 @@
+## Interface: 16001
+## Title: Palaver
+## Notes: Quests and conversations with NPCs in a panel beside them, read and answered from the keyboard.
+## Notes-frFR: Les quêtes et les conversations avec les PNJ dans un panneau à leurs côtés, à lire et à répondre au clavier.
+## Notes-deDE: Quests und Gespräche mit NPCs in einem Fenster neben ihnen, gelesen und beantwortet mit der Tastatur.
+## Notes-esES: Las misiones y conversaciones con los PNJ en un panel a su lado, para leer y responder con el teclado.
+## Notes-esMX: Las misiones y conversaciones con los PNJ en un panel a su lado, para leer y responder con el teclado.
+## Category: Quests & Leveling
+## Author: salty-max
+## Version: 0.1.0
+## SavedVariables: PalaverSettings, PalaverErrors
+## IconTexture: Interface\GossipFrame\GossipGossipIcon
+## X-License: MIT
+
+# Each game loads its own TOC (_Vanilla: Classic Era, _TBC: TBC Anniversary,
+# _Camelot: Forever), the same but for the interface (scripts/package.ts checks).
+Kit.lua
+Locale.lua
+Text_[TextLocale].lua
+Game.lua
+Panel.lua
+Core.lua
