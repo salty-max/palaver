@@ -21,10 +21,9 @@ modifier held, the keys stay the game's. Drag the panel to move it.
 
 When a quest offers a choice of rewards, two marks help you pick. A green
 arrow sits on the one best for your character, and a gold coin on the one
-that sells for most. Hover a marked reward to see why. With Pawn installed,
-the arrow follows Pawn's verdict, your own scales. Without it, Palaver
-weighs the stats your class wants against what you wear. The marks never
-choose for you.
+that sells for most. Hover a marked reward to see why. The arrow weighs the
+stats your class wants against what you wear, and Palaver needs no other
+addon for it. The marks never choose for you.
 
 ```text
 /palaver on | off        Palaver's panel, or the game's own windows

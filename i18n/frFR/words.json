@@ -5,8 +5,6 @@
   "Better for you than your %s, by the stats your class wants.": "Meilleur pour vous que votre %s, selon les caractéristiques que demande votre classe.",
   "Choose a reward, then complete the quest.": "Choisissez une récompense, puis terminez la quête.",
   "Esc": "Échap",
-  "Pawn: %d%% better for %s.": "Pawn : %d %% de mieux pour %s.",
-  "Pawn: a clear upgrade for %s.": "Pawn : une nette amélioration pour %s.",
   "Sells for the most of these: %s.": "Se vend le plus cher de ces récompenses : %s.",
   "Space": "Espace",
   "an error stopped this page, so the game's own window takes over until you reload. /palaver errors shows what went wrong.": "une erreur a interrompu cette page, la fenêtre du jeu prend donc le relais jusqu'au prochain rechargement. /palaver errors montre ce qui s'est passé.",
@@ -23,5 +21,5 @@
   "text size %d.": "taille du texte %d.",
   "the panel is back in its place, at its size.": "le panneau retrouve sa place et sa taille.",
   "upgrades off: no arrow on the rewards.": "améliorations désactivées : aucune flèche sur les récompenses.",
-  "upgrades on: an arrow marks the reward best for you, by Pawn if you have it.": "améliorations activées : une flèche marque la récompense la meilleure pour vous, selon Pawn si vous l'avez."
+  "upgrades on: an arrow marks the reward best for you, by the stats your class wants.": "améliorations activées : une flèche marque la récompense la meilleure pour vous, selon les caractéristiques que demande votre classe."
 }

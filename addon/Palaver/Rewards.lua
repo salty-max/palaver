@@ -2,13 +2,11 @@
 -- sells for most (a coin on its card), the one best for the character (the
 -- game's green arrow). Marks only: the choice stays the player's.
 --
--- Best for the character: Pawn's verdict when Pawn is there and ready (the
--- player's own scales: PawnIsItemAnUpgrade, the largest upgrade among the
--- choices the character can use, as its quest advisor reads them), else a
--- rough rule of Palaver's own, said so on the card's tooltip: an item the game
--- says the character can use, scored on the stats its class wants (a hybrid
--- by the talent tree holding most of its points), better than what it wears
--- there. A trinket never: its worth is its effect, which no stat tells.
+-- Best for the character, by Palaver's own rule (no other addon asked: the
+-- user's call, 18 October 2026), said so on the card's tooltip: an item the
+-- game says the character can use, scored on the stats its class wants (a
+-- hybrid by the talent tree holding most of its points), better than what it
+-- wears there. A trinket never: its worth is its effect, which no stat tells.
 -- An upgrade only: when nothing beats what the character wears, no arrow.
 --
 -- Each answer says when the game has yet to tell an item (its price, its
@@ -47,38 +45,12 @@ function R.bestValue(choices)
   if best and not tie then return { index = best, price = most } end
 end
 
--- ── Pawn's verdict ───────────────────────────────────────────────────────────
--- (PawnIsReady: its scales read, a moment after login. Its "upgrade" for an
--- empty slot is PawnBigUpgradeThreshold, 10,000%: no number then.)
-local function pawnReady() return PawnIsReady and PawnGetItemData and PawnIsItemAnUpgrade and PawnIsReady() end
-
-local function pawn(link)
-  local ok, item = pcall(PawnGetItemData, link)
-  if not ok then return nil end
-  if not item then return nil, true end
-  local fine, upgrades = pcall(PawnIsItemAnUpgrade, item)
-  if not fine then return nil end
-  local best
-  for _, u in ipairs(upgrades or {}) do
-    if type(u.PercentUpgrade) == "number" and (not best or u.PercentUpgrade > best.PercentUpgrade) then best = u end
-  end
-  return best
-end
-
-local function pawnWhy(u)
-  local scale = u.LocalizedScaleName or u.ScaleName or ""
-  if u.PercentUpgrade >= (PawnBigUpgradeThreshold or 100) then
-    return L["Pawn: a clear upgrade for %s."]:format(scale)
-  end
-  return L["Pawn: %d%% better for %s."]:format(math.floor(u.PercentUpgrade * 100 + 0.5), scale)
-end
-
 -- ── Palaver's own rule ───────────────────────────────────────────────────────
 -- What each class wants, a hybrid by its tree (Classic's order: a paladin's
 -- Holy, Protection, Retribution...), until one holds most of its points the
 -- tree it most often levels in (LEVELING). dps: a melee weapon's damage per
--- second, ranged: a bow's, a gun's, a wand's. Rough by design: Pawn for
--- precision.
+-- second, ranged: a bow's, a gun's, a wand's. Rough by design: a hint for
+-- the choice, not a theorycrafter's answer.
 local STR, AGI, STA, INT, SPI =
   "ITEM_MOD_STRENGTH_SHORT",
   "ITEM_MOD_AGILITY_SHORT",
@@ -231,26 +203,16 @@ local function own(it, w)
 end
 
 -- ── the best for the character ───────────────────────────────────────────────
--- Among the choices: { index, why, pawn } or nil (no upgrade among them),
--- and true when the game has yet to tell one of them.
+-- Among the choices: { index, why } or nil (no upgrade among them), and true
+-- when the game has yet to tell one of them.
 function R.bestForYou(choices)
-  local byPawn = pawnReady()
-  local w = not byPawn and weights()
-  if not (byPawn or w) then return nil end
+  local w = weights()
+  if not w then return nil end
   local best, gain, why, waiting
   for i, it in ipairs(choices) do
     if not it.link then return nil, true end
     if it.usable ~= false then
-      local g, wait, because
-      if byPawn then
-        local u
-        u, wait = pawn(it.link)
-        if u then
-          g, because = u.PercentUpgrade, pawnWhy(u)
-        end
-      else
-        g, wait, because = own(it, w)
-      end
+      local g, wait, because = own(it, w)
       if wait then waiting = true end
       if g and (not gain or g > gain) then
         best, gain, why = i, g, because
@@ -258,5 +220,5 @@ function R.bestForYou(choices)
     end
   end
   if waiting then return nil, true end
-  if best then return { index = best, why = why, pawn = byPawn and true or false } end
+  if best then return { index = best, why = why } end
 end

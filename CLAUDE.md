@@ -36,14 +36,13 @@ Local only so far: no GitHub repository, no store page.
   pick from DialogueUI's options, 18 October 2026), on the offer and the
   hand-in. A gold coin (UI-GoldIcon) on the one that sells for most (a stack
   at its count, none on a tie), a green arrow (UI-MicroStream-Green, flipped)
-  on the best for the character: Pawn's verdict when Pawn is ready
-  (PawnIsReady, PawnIsItemAnUpgrade's largest upgrade among the usable
-  choices, as its quest advisor; Pawn's 10,000% for an empty slot never
-  printed), else Palaver's rough rule (class weights, a hybrid by the tree
+  on the best for the character, by Palaver's own rule: no other addon
+  asked, Pawn included (the user's call, 18 October 2026: no dependency on
+  another addon, even an optional one). Class weights, a hybrid by the tree
   holding ten points and more than half, as Hearthtale's Life.lua reads it,
   else the tree it levels in; GetItemStats against what is worn, a two-hand
   weapon against both hands, an off hand only for one who dual wields;
-  trinkets never). An upgrade only: no arrow when nothing beats what is worn.
+  trinkets never. An upgrade only: no arrow when nothing beats what is worn.
   Each says why on the card's tooltip. Worked out again when the game tells
   an item late (GET_ITEM_INFO_RECEIVED) or the gear changes; a mark that
   fails drops the marks and keeps the page (PalaverErrors). Unusable rewards

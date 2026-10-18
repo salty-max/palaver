@@ -1,7 +1,7 @@
 -- Palaver played through: an NPC's gossip, a quest offered, accepted, brought
--- back, handed in with a reward chosen, the rewards' marks (with Pawn and
--- without), a vendor, the keys, Escape, an error
--- that hands the conversation to Blizzard, turning Palaver off and on. Each
+-- back, handed in with a reward chosen, the rewards' marks, a vendor, the
+-- keys, Escape, an error that hands the conversation to Blizzard, turning
+-- Palaver off and on. Each
 -- step as the game sends it (events, keys), each answer checked against the
 -- game's calls. FOREVER=1, TBC=1, LOCALE=frFR: those clients.
 local G = dofile("addon/test/game.lua")
@@ -377,46 +377,29 @@ fire("QUEST_COMPLETE")
 check(marks() == "|^$", "a few points here and there: still Retribution")
 s.talents = { 0, 0, 0 }
 
--- Pawn: its verdict, the player's own scales, when it is there and ready
+-- no other addon asked: Pawn loaded and saying otherwise changes nothing
 s.class, s.worn = "WARRIOR", { [16] = "item:mh", [7] = "item:legs0" }
 HERD.choice = {
   { name = "Rancher's Trousers", icon = 134582, link = "item:trousers" },
   { name = "Soft Leather Tunic", icon = 132719, link = "item:tunic" },
   { name = "Coldridge Hammer", icon = 133052, link = "item:hammer" },
 }
-local pawnReady, verdicts, pawnBroken = true, {}, false
-PawnBigUpgradeThreshold = 100
-function PawnIsReady() return pawnReady end
+local asked = false
+function PawnIsReady()
+  asked = true
+  return true
+end
 function PawnGetItemData(link)
-  if items[link].pending then return nil end
+  asked = true
   return { Link = link }
 end
-function PawnIsItemAnUpgrade(item)
-  if pawnBroken then error("Pawn broke") end
-  return verdicts[item.Link]
+function PawnIsItemAnUpgrade()
+  asked = true
+  return { { ScaleName = "a", LocalizedScaleName = "Arms", PercentUpgrade = 0.5 } }
 end
-verdicts["item:tunic"] = { { ScaleName = "a", LocalizedScaleName = "Arms", PercentUpgrade = 0.12 } }
-verdicts["item:trousers"] = { { ScaleName = "a", LocalizedScaleName = "Arms", PercentUpgrade = 0.05 } }
 fire("QUEST_COMPLETE")
-check(marks() == "|^|$", "Pawn: its largest upgrade, not Palaver's rule")
-check(tip(2):find(L["Pawn: %d%% better for %s."]:format(12, "Arms"), 1, true), "Pawn's number on the tooltip")
-verdicts["item:tunic"][1].PercentUpgrade = 100
-fire("QUEST_COMPLETE")
-check(tip(2):find(L["Pawn: a clear upgrade for %s."]:format("Arms"), 1, true), "an empty slot: no 10000%")
-verdicts = {}
-fire("QUEST_COMPLETE")
-check(marks() == "||$", "Pawn sees no upgrade: no arrow, Palaver's rule unasked")
-items["item:tunic"].pending = true
-fire("QUEST_COMPLETE")
-check(P.waiting and not P.cards[2].best.shown, "Pawn without the item yet: waiting")
-items["item:tunic"].pending = nil
-pawnBroken = true
-fire("QUEST_COMPLETE")
-check(P.shown() and marks() == "||$", "Pawn failing: no arrow, the page as it was")
-pawnBroken, pawnReady = false, false
-fire("QUEST_COMPLETE")
-check(marks() == "||^$", "Pawn not ready yet: Palaver's rule")
-PawnIsReady, PawnGetItemData, PawnIsItemAnUpgrade, PawnBigUpgradeThreshold = nil, nil, nil, nil
+check(marks() == "||^$" and not asked, "Pawn loaded: Palaver's own rule, Pawn never asked")
+PawnIsReady, PawnGetItemData, PawnIsItemAnUpgrade = nil, nil, nil
 
 -- a mark that fails: kept for /palaver errors, the page kept, Palaver kept
 local real = ns.rewards.bestValue

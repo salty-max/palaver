@@ -15,14 +15,6 @@ globals:
     any: true
   CanDualWield:
     any: true
-  PawnIsReady:
-    any: true
-  PawnGetItemData:
-    any: true
-  PawnIsItemAnUpgrade:
-    any: true
-  PawnBigUpgradeThreshold:
-    any: true
   PalaverMeasureActorMixin:
     any: true
   C_CVar:
