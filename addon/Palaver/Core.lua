@@ -24,7 +24,7 @@ ns.core = C
 
 local PREFIX = K.hex(K.T.accent) .. "Palaver|r: "
 local DEFAULTS = { enabled = true, scale = 1, font = 15, keys = true }
-local RIVALS = { "DialogueUI", "Immersion", "Storyline" }
+local RIVALS = { "DialogueUI", "Immersion", "Storyline", "Conversations" } -- (the last: the prototype Palaver replaces)
 
 local function say(text) print(PREFIX .. text) end
 -- (a sound by its name in the game's list, if this game has it)
