@@ -124,8 +124,10 @@ local function releaseAll()
 end
 
 -- ── the frame ────────────────────────────────────────────────────────────────
+-- No parent: the panel stays when the game's interface is hidden around it
+-- (Hud.lua, DialogueUI's way), at the interface's scale all the same (place).
 local function build()
-  frame = CreateFrame("Frame", "PalaverFrame", UIParent, "BackdropTemplate")
+  frame = CreateFrame("Frame", "PalaverFrame", nil, "BackdropTemplate")
   frame:SetBackdrop({
     bgFile = "Interface\\DialogFrame\\UI-DialogBox-Background-Dark",
     edgeFile = "Interface\\DialogFrame\\UI-DialogBox-Gold-Border",
@@ -170,6 +172,26 @@ local function build()
 
   frame.primary = button(true)
   frame.secondary = button(false)
+  -- a book's page back: a square button of the footer's, the spellbook's
+  -- arrow in it, as the game's book window has it (mock: book page)
+  frame.back = button(false)
+  frame.back.badge:Hide()
+  frame.back.label:Hide()
+  frame.back:SetWidth(BUTTON_H)
+  frame.back.arrow = frame.back:CreateTexture(nil, "ARTWORK")
+  frame.back.arrow:SetTexture("Interface\\Buttons\\UI-SpellbookIcon-PrevPage-Up")
+  frame.back.arrow:SetSize(BUTTON_H - 2, BUTTON_H - 2)
+  frame.back.arrow:SetPoint("CENTER")
+  frame.back:HookScript("OnEnter", function(self)
+    local tip = P.tooltip()
+    tip:SetOwner(self, "ANCHOR_TOP")
+    tip:SetText(self.tip or "")
+    if ns.settings and ns.settings.keys ~= false then
+      tip:AddLine(ns.game.word("KEY_BACKSPACE", "Backspace"), T.soft[1], T.soft[2], T.soft[3])
+    end
+    tip:Show()
+  end)
+  frame.back:HookScript("OnLeave", function() P.tooltip():Hide() end)
   frame.hint = K.label(frame, K.BODY_FONT, 11, T.soft)
   frame.hint:SetPoint("BOTTOMLEFT", PAD, PAD + BUTTON_H + 4)
   frame.hint:SetPoint("RIGHT", frame, "RIGHT", -PAD, 0)
@@ -184,7 +206,21 @@ local function place()
     -- (DialogueUI's place: the right of the screen, a little above its middle)
     frame:SetPoint("RIGHT", UIParent, "RIGHT", -UIParent:GetWidth() * 0.08, 20)
   end
-  frame:SetScale(ns.settings and ns.settings.scale or 1)
+  -- (the interface's scale, as a window of the game's has it, then Palaver's)
+  frame:SetScale(UIParent:GetScale() * (ns.settings and ns.settings.scale or 1))
+end
+
+-- The tooltip a card or a button shows: the game's, or Palaver's own while
+-- the game's interface is hidden (the game's goes with it).
+local own
+function P.tooltip()
+  if not (ns.hud and ns.hud.hidden()) then return GameTooltip end
+  if not own then
+    own = CreateFrame("GameTooltip", "PalaverTooltip", nil, "GameTooltipTemplate")
+    own:SetFrameStrata("TOOLTIP")
+  end
+  own:SetScale(UIParent:GetScale())
+  return own
 end
 
 -- ── the page's content, top to bottom ────────────────────────────────────────
@@ -200,6 +236,30 @@ local function para(text, color, size)
   fs:SetText(text)
   fs:SetPoint("TOPLEFT", child, "TOPLEFT", 0, -y)
   y = y + fs:GetStringHeight() + 10
+end
+
+-- A quest's facts, a line above its text: its level in the colour of how hard
+-- it is for the character, its kind in gold (the game's own names), the group
+-- the game suggests, its place in its chain.
+local function facts(f)
+  if not f then return end
+  local bits = {}
+  if (f.level or 0) > 0 then
+    local text = ns.game.word("LEVEL", "Level") .. " " .. f.level
+    local c = GetQuestDifficultyColor and GetQuestDifficultyColor(f.level)
+    if c and c.r then text = ("|cff%02x%02x%02x%s|r"):format(c.r * 255, c.g * 255, c.b * 255, text) end
+    table.insert(bits, text)
+  end
+  local kind = (f.kind or 0) > 0 and ns.questTypes[f.kind]
+  if kind then table.insert(bits, K.hex(T.gold) .. kind .. "|r") end
+  if f.group then
+    table.insert(bits, ns.game.word("QUEST_SUGGESTED_GROUP_NUM", "Suggested Players [%d]"):format(f.group))
+  end
+  if (f.of or 0) > 1 then table.insert(bits, L["Part %d of %d"]:format(f.part, f.of)) end
+  if #bits == 0 then return end
+  P.factsLine = table.concat(bits, "  \194\183  ")
+  para(P.factsLine, T.soft, 12)
+  y = y - 2
 end
 
 local function heading(text)
@@ -289,7 +349,7 @@ local function card(item, x, chooseIndex)
     f.value:SetPoint("TOPRIGHT", -4, -4)
     f:SetHighlightTexture(K.HIGHLIGHT, "ADD")
     f:SetScript("OnEnter", function(self) ns.game.itemTooltip(self, self.item, self.notes) end)
-    f:SetScript("OnLeave", function() GameTooltip:Hide() end)
+    f:SetScript("OnLeave", function() P.tooltip():Hide() end)
     f:SetScript("OnClick", function(self)
       if self.chooseIndex then ns.core.choose(self.chooseIndex) end
     end)
@@ -436,7 +496,19 @@ end
 local function footer(page)
   local a = page.actions or {}
   local both = a.primary and a.secondary
-  local bw = both and math.floor((WIDTH - 2 * PAD - BUTTON_GAP) / 2) or (WIDTH - 2 * PAD)
+  -- (a book's page back first, a square, the buttons beside it)
+  local left = PAD + (a.back and BUTTON_H + 8 or 0)
+  local avail = WIDTH - PAD - left
+  local bw = both and math.floor((avail - BUTTON_GAP) / 2) or avail
+  frame.back:ClearAllPoints()
+  frame.back:SetShown(a.back ~= nil)
+  if a.back then
+    frame.back:SetPoint("BOTTOMLEFT", PAD, PAD)
+    frame.back.tip = a.back.label
+    frame.back.disabled = false
+    frame.back.run = function() ns.core.act("back") end
+    frame.back:Paint(false)
+  end
   local keyed = ns.settings and ns.settings.keys ~= false
   for _, spec in ipairs({ { frame.primary, a.primary, "Space" }, { frame.secondary, a.secondary, "Esc" } }) do
     local b, act, key = spec[1], spec[2], spec[3]
@@ -454,12 +526,12 @@ local function footer(page)
     end
   end
   if both then
-    frame.primary:SetPoint("BOTTOMLEFT", PAD, PAD)
+    frame.primary:SetPoint("BOTTOMLEFT", left, PAD)
     frame.secondary:SetPoint("BOTTOMRIGHT", -PAD, PAD)
   elseif a.primary then
-    frame.primary:SetPoint("BOTTOMLEFT", PAD, PAD)
+    frame.primary:SetPoint("BOTTOMLEFT", left, PAD)
   elseif a.secondary then
-    frame.secondary:SetPoint("BOTTOMLEFT", PAD, PAD)
+    frame.secondary:SetPoint("BOTTOMLEFT", left, PAD)
   end
 end
 
@@ -469,6 +541,7 @@ function P.show(page)
   P.page = page
   P.choosing = nil
   P.choice = nil
+  P.factsLine = nil
   inner = WIDTH - 2 * PAD - 8
   y = 0
 
@@ -481,6 +554,7 @@ function P.show(page)
   frame.title:SetText(page.title or page.name or "")
   frame.sub:SetText(page.title ~= page.name and page.name or "")
 
+  facts(page.facts)
   para(page.text)
   if page.objectives and page.objectives ~= "" then
     heading(ns.game.word("QUEST_OBJECTIVES", "Objectives"))
@@ -513,10 +587,36 @@ function P.show(page)
   local top = PAD + HEADER + 14
   local bottom = FOOTER_GAP + BUTTON_H + PAD + (page.choose and 16 or 0)
   scroll:SetHeight(HEIGHT - top - bottom)
+  scroll:SetScript("OnUpdate", nil)
   scroll:ScrollTo(0)
   frame:SetHeight(HEIGHT)
   if not frame:IsShown() then frame:Show() end
   scroll:UpdateThumb()
+end
+
+-- ── reading on ───────────────────────────────────────────────────────────────
+-- Space or Enter on a page longer than the panel: the text scrolls down a
+-- panel's height, less a few lines kept in view, before the key answers
+-- (DialogueUI's "scroll down then accept"): no quest accepted with its
+-- rewards unseen below. A short slide, a fifth of a second.
+local SLIDE = 0.18
+local function slide(self, elapsed)
+  self.t = self.t + elapsed
+  local k = math.min(1, self.t / SLIDE)
+  k = 1 - (1 - k) * (1 - k)
+  self:ScrollTo(self.from + (self.to - self.from) * k)
+  if k >= 1 then self:SetScript("OnUpdate", nil) end
+end
+
+-- (true: there was more below, and the text moved to it)
+function P.readOn()
+  if not (scroll and frame:IsShown()) then return false end
+  local range, at = scroll:Range(), scroll:GetVerticalScroll()
+  local goal = scroll.to and scroll:GetScript("OnUpdate") and scroll.to or at
+  if range - goal < 2 then return false end
+  scroll.from, scroll.to, scroll.t = at, math.min(range, goal + scroll:GetHeight() - 48), 0
+  scroll:SetScript("OnUpdate", slide)
+  return true
 end
 
 function P.hide()
@@ -541,3 +641,10 @@ function P.frame() return frame end
 function P.reposition()
   if frame and frame:IsShown() then place() end
 end
+
+-- (the interface's scale changed: the panel follows, as the game's windows do)
+local scaler = CreateFrame("Frame")
+for _, event in ipairs({ "UI_SCALE_CHANGED", "DISPLAY_SIZE_CHANGED" }) do
+  pcall(scaler.RegisterEvent, scaler, event)
+end
+scaler:SetScript("OnEvent", function() P.reposition() end)

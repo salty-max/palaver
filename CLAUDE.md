@@ -15,10 +15,22 @@ Local only so far: no GitHub repository, no store page.
 
 - `addon/Palaver`: one package for every game (`Palaver_Vanilla.toc`: Classic
   Era, 11509; `_TBC.toc`: TBC Anniversary, 20506; `_Camelot.toc`: Forever,
-  16001), the same but for the interface. Loads `Kit.lua` (the kit's copy,
-  `bun run kit:sync`; never edit it), `Locale.lua`, `Text_[TextLocale].lua`,
-  `Game.lua`, `Rewards.lua`, `Panel.lua`, `Camera.xml`, `Camera.lua`, `Core.lua`,
-  `Settings.lua`.
+  16001), the same but for the interface and each game's quest facts
+  (`Quests_Classic.lua`, TBC Anniversary's too, `Quests_Forever.lua`). Loads
+  `Kit.lua` (the kit's copy, `bun run kit:sync`; never edit it),
+  `Locale.lua`, `Text_[TextLocale].lua`, `Quests_<game>.lua`, `Game.lua`,
+  `Rewards.lua`, `Panel.lua`, `Hud.lua`, `Camera.xml`, `Camera.lua`,
+  `Core.lua`, `Settings.lua`.
+- `scripts/quests.ts`: the quest facts from wow-data's databases, each game's
+  own (`--check` in `bun run check`; the daily `game-data.yml`, once the
+  repository is on GitHub): a quest's level, its kind (the client's
+  QuestInfo: elite, dungeon, raid, PvP), its place in its chain, packed in a
+  number by its id; and `i18n/quest_types.json`, the kinds' names, the
+  client's own, in every language (`scripts/locales.ts` puts them in each
+  Text file, English one of them). A chain is the game's NextQuestInChain
+  alone: a prerequisite is no chain ("Dwarven Outfitters" opens eleven of
+  Coldridge's quests, none its part 2); the Defias Brotherhood comes out 7
+  parts, Northshire's kobolds 5, Stalvan's legend 13.
 - `Game.lua`: what the game says, read into plain pages (gossip, greeting,
   detail, progress, complete), and the answers, through the same calls
   Blizzard's windows make (Blizzard_UIPanels_Game's GossipFrameShared.lua,
@@ -27,9 +39,22 @@ Local only so far: no GitHub repository, no store page.
   lacks is checked before use (Forever: coins only in C_CurrencyInfo, spells
   through C_QuestInfoSystem; Classic: GetRewardSpell). Buttons and headings
   use the game's own interface strings (`G.word`: ACCEPT, REWARDS...), so
-  every client language gets the game's wording.
+  every client language gets the game's wording. The offer page's facts
+  (`G.facts`: the data above, and the game's suggested group,
+  GetSuggestedGroupNum, which Blizzard's Classic window no longer shows).
+  Books, letters and plaques (`G.book`: Blizzard's ItemTextFrame.lua's
+  calls, a page in HTML read as plain text, the writer of a letter, the
+  page number; Next and Close the game's words, Prev a page back).
 - `Panel.lua`: the panel. It only shows: hiding it never ends a
-  conversation. One height for every page, Blizzard's quest window's (424
+  conversation. No parent: it stays when the interface is hidden (Hud.lua),
+  at UIParent's scale times Palaver's, followed on UI_SCALE_CHANGED; its
+  keys' listener (Core) the same; its tooltip Palaver's own while the
+  interface is hidden (the game's goes with it). The offer's facts a line
+  above its text (the level in the game's difficulty colour, the kind in
+  gold); a book's page back a square footer button with the spellbook's
+  arrow (mocks: `../ideas/palaver/E-facts.png`, `F-book.png`). Space or Enter
+  on a page longer than the panel scrolls a panel's height first (`readOn`,
+  on: no quest accepted with its rewards unseen; a click answers at once). One height for every page, Blizzard's quest window's (424
   interface units: it follows the UI scale as the game's windows do; a
   long text scrolls). Not in UISpecialFrames (the game hides those at moments of
   its own, which cut trainer conversations short in the prototype).
@@ -74,6 +99,15 @@ Local only so far: no GitHub repository, no store page.
   through the same `ns.core.set` (what each changes at once: Palaver muted or
   not, the size, the camera put back, the marks again). Account-wide, no
   profiles: a reading panel's settings. `/palaver settings` opens it.
+- `Hud.lua`: the game's interface hidden while a conversation or a book
+  lasts (`hideUI`, off until tried in the game; DialogueUI's fade helper the
+  reference): a quarter second's fade, then SetUIVisibility. Back at once
+  for a fight (PLAYER_REGEN_DISABLED comes before the lock), a popup of the
+  game's (StaticPopup_Show hooked), a cinematic, a page that fails, the
+  setting off, and before the window a gossip option opens: GOSSIP_CLOSED's
+  interactionIsContinuing after an option picked (UIParent_OnShow closes
+  every window open, the vendor's with it, if it comes back after). Never
+  touched in combat, and one the player hid (Alt+Z) left alone.
 - `Camera.lua` (and `Camera.xml`, the unseen actor that measures the NPC):
   DialogueUI's "zoom to the NPC", read from its Camera.lua. Off by default
   (`/palaver camera`, until the user has tried it in the game). While a
@@ -102,8 +136,6 @@ Local only so far: no GitHub repository, no store page.
 
 ## Not yet
 
-- The HUD hidden while talking (DialogueUI's option): the panel would need a
-  parent other than UIParent first.
 - A minimap button, a welcome page: the kit has them when wanted.
 - Releases: a GitHub repository, `.pkgmeta`, the release workflow, store
   pages: when the user decides.
@@ -115,6 +147,7 @@ bun run check        # kit, languages, lint, the simulation on four clients, TOC
 bun run package      # dist/Palaver-<version>.zip for a test in the game
 bun run kit:sync     # after a change to ../addon-kit/Kit.lua
 bun run locales      # after a new L["..."] (then --keys for i18n/words.json)
+bun run quests       # the quest facts again, after wow-data's databases change
 ```
 
 ## Conventions

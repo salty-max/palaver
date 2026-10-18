@@ -222,9 +222,29 @@ local function quest(kind)
   return { kind = kind, unit = unit, name = name, title = GetTitleText() or "" }
 end
 
+-- ── a quest's facts ──────────────────────────────────────────────────────────
+-- What the offer page tells before it is accepted (scripts/quests.ts, from
+-- wow-data's databases, each game's own Quests_<game>.lua): its level, its
+-- kind (elite, dungeon, raid, PvP...), its place in its chain; and the group
+-- the game suggests for it, where it says. nil: nothing known.
+function G.facts(questID)
+  local f = {}
+  local v = questID and ns.quests and ns.quests[questID]
+  if v then
+    f.level = v % 100
+    f.kind = math.floor(v / 100) % 100
+    f.part = math.floor(v / 10000) % 100
+    f.of = math.floor(v / 1000000)
+  end
+  local group = GetSuggestedGroupNum and GetSuggestedGroupNum() or 0
+  if type(group) == "number" and group > 1 then f.group = group end
+  if (f.level or 0) > 0 or (f.kind or 0) > 0 or (f.of or 0) > 1 or f.group then return f end
+end
+
 -- Offered: what it is, what it asks, what it gives.
 function G.detail()
   local p = quest("detail")
+  p.facts = G.facts(GetQuestID and GetQuestID())
   p.text = GetQuestText() or ""
   p.objectives = GetObjectiveText() or ""
   p.rewards = G.rewards()
@@ -282,20 +302,80 @@ function G.turnIn(choice)
   return true
 end
 
+-- ── a book, a letter, a plaque ───────────────────────────────────────────────
+-- What the game's book window shows (Blizzard_UIPanels_Game's
+-- ItemTextFrame.lua): the item's or the object's name, a page of its text
+-- and who wrote it (a letter), the page's number where there are several.
+-- A page in HTML (a heading, paragraphs) read as plain text: its tags gone,
+-- its breaks kept.
+function G.plain(text)
+  if not text:find("^%s*<[Hh][Tt][Mm][Ll]") then return text end
+  text = text:gsub("<[Bb][Rr]%s*/?>", "\n")
+  text = text:gsub("</[Pp]>", "\n\n"):gsub("</[Hh]%d>", "\n\n")
+  text = text:gsub("<[^>]*>", "")
+  text = text:gsub("&lt;", "<"):gsub("&gt;", ">"):gsub("&quot;", '"'):gsub("&nbsp;", " "):gsub("&amp;", "&")
+  text = text:gsub("[ \t]*\n[ \t]*", "\n"):gsub("\n\n\n+", "\n\n")
+  return (text:gsub("^%s+", ""):gsub("%s+$", ""))
+end
+
+local function turn(fn)
+  return function()
+    if PlaySound and SOUNDKIT and SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON then
+      PlaySound(SOUNDKIT.IG_MAINMENU_OPTION_CHECKBOX_ON)
+    end
+    fn()
+  end
+end
+
+function G.book()
+  local page = ItemTextGetPage and ItemTextGetPage() or 1
+  local hasNext = ItemTextHasNextPage and ItemTextHasNextPage()
+  local text = G.plain(ItemTextGetText() or "")
+  local creator = ItemTextGetCreator and ItemTextGetCreator()
+  if creator and creator ~= "" then text = text .. "\n\n" .. word("ITEM_TEXT_FROM", "From") .. "\n" .. creator end
+  local paged = page > 1 or hasNext
+  local close = { label = word("CLOSE", "Close"), run = CloseItemText }
+  return {
+    kind = "book",
+    title = ItemTextGetItem() or "",
+    name = paged and word("PAGE_NUMBER", "Page %d"):format(page) or "",
+    text = text,
+    actions = {
+      primary = hasNext and { label = word("NEXT", "Next"), run = turn(ItemTextNextPage) } or close,
+      secondary = hasNext and close or nil,
+      back = page > 1 and { label = word("PREV", "Prev"), run = turn(ItemTextPrevPage) } or nil,
+    },
+  }
+end
+
+-- A text the game is still translating (ITEM_TEXT_TRANSLATION): its name,
+-- a word that it comes.
+function G.translating()
+  return {
+    kind = "book",
+    title = ItemTextGetItem and ItemTextGetItem() or "",
+    name = "",
+    text = ns.kit.L["Translating..."],
+    actions = { secondary = { label = word("CLOSE", "Close"), run = CloseItemText } },
+  }
+end
+
 -- An item a quest asks for or gives, in the game's tooltip, and Palaver's
 -- word on it below (notes: { text, color }, why a reward is marked).
+-- (the game's tooltip, or Palaver's own while the interface is hidden)
 function G.itemTooltip(owner, item, notes)
-  GameTooltip:SetOwner(owner, "ANCHOR_RIGHT")
+  local tip = ns.panel.tooltip()
+  tip:SetOwner(owner, "ANCHOR_RIGHT")
   if item.spell then
-    if type(item.spell) == "number" and GameTooltip.SetSpellByID then GameTooltip:SetSpellByID(item.spell) end
+    if type(item.spell) == "number" and tip.SetSpellByID then tip:SetSpellByID(item.spell) end
   else
-    GameTooltip:SetQuestItem(item.type, item.index)
+    tip:SetQuestItem(item.type, item.index)
   end
   for i, note in ipairs(notes or {}) do
-    if i == 1 then GameTooltip:AddLine(" ") end
-    GameTooltip:AddLine(note[1], note[2][1], note[2][2], note[2][3], true)
+    if i == 1 then tip:AddLine(" ") end
+    tip:AddLine(note[1], note[2][1], note[2][2], note[2][3], true)
   end
-  GameTooltip:Show()
+  tip:Show()
 end
 
 -- A quest started from an item: the game accepts it itself (Blizzard closes

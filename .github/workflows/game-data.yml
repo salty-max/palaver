@@ -1,0 +1,28 @@
+# Every day, and by hand: Palaver's game data built again from wow-data's
+# pins (salty-max/wow-data's addon-data.yml: wow-data beside it, the
+# databases downloaded; addon-kit beside it, for the check): the quests' facts and their kinds' names in every
+# language, then the language files. When one changes, a pull request with
+# the checks run, then merged by itself and told to the owner's phone.
+name: Game data
+
+on:
+  schedule:
+    - cron: "52 6 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  data:
+    uses: salty-max/wow-data/.github/workflows/addon-data.yml@main
+    secrets: inherit
+    with:
+      kit: true
+      generate: |
+        bun scripts/quests.ts
+        bun scripts/locales.ts
+      paths: |
+        i18n
+        addon/Palaver

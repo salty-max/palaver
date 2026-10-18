@@ -22,9 +22,10 @@ const SRC = join(ROOT, "addon", NAME);
 const DIST = join(ROOT, "dist");
 // Each game's TOC, its interface and the files only it loads.
 const GAMES = [
-  { toc: `${NAME}_Vanilla.toc`, interface: "11509", own: [] as string[] },
-  { toc: `${NAME}_TBC.toc`, interface: "20506", own: [] as string[] },
-  { toc: `${NAME}_Camelot.toc`, interface: "16001", own: [] as string[] },
+  // (the quests' facts: each game's own, TBC Anniversary reading Classic Era's)
+  { toc: `${NAME}_Vanilla.toc`, interface: "11509", own: ["Quests_Classic.lua"] },
+  { toc: `${NAME}_TBC.toc`, interface: "20506", own: ["Quests_Classic.lua"] },
+  { toc: `${NAME}_Camelot.toc`, interface: "16001", own: ["Quests_Forever.lua"] },
 ];
 
 const fail = (why: string) => {

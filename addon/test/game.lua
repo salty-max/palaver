@@ -143,6 +143,8 @@ G.methods = {
     self.propagate = on
   end,
   GetName = function(self) return self.name end,
+  SetAlpha = function(self, a) self.alpha = a end,
+  GetAlpha = function(self) return self.alpha or 1 end,
   -- a ModelScene's actor: the NPC's model loaded at once, as tall as state.npcHeight
   CreateActor = function(self, _, template)
     local a = obj("Actor")
@@ -322,6 +324,14 @@ local WORDS = {
     MONEY = "Money",
     REWARD_CHOOSE = "Choose your reward:",
     REWARD_ITEMS = "You will also receive:",
+    LEVEL = "Level",
+    NEXT = "Next",
+    PREV = "Prev",
+    CLOSE = "Close",
+    PAGE_NUMBER = "Page %d",
+    ITEM_TEXT_FROM = "From",
+    KEY_BACKSPACE = "Backspace",
+    QUEST_SUGGESTED_GROUP_NUM = "Suggested Players [%d]",
   },
   frFR = {
     ACCEPT = "Accepter",
@@ -336,6 +346,14 @@ local WORDS = {
     MONEY = "Argent",
     REWARD_CHOOSE = "Choisissez votre récompense :",
     REWARD_ITEMS = "Vous recevrez également :",
+    LEVEL = "Niveau",
+    NEXT = "Suivante",
+    PREV = "Précédente",
+    CLOSE = "Fermer",
+    PAGE_NUMBER = "Page %d",
+    ITEM_TEXT_FROM = "De",
+    KEY_BACKSPACE = "Retour arrière",
+    QUEST_SUGGESTED_GROUP_NUM = "Joueurs suggérés [%d]",
   },
 }
 for k, v in pairs(WORDS[LOCALE] or WORDS.enUS) do
@@ -409,7 +427,43 @@ else
 end
 GossipFrame:SetScript("OnEvent", function(_, e) call("GossipFrame", e) end)
 G.native = {}
-for _, f in ipairs({ QuestFrame, GossipFrame, CustomGossipFrameManager }) do
+-- the game's book window, and the book on show (state.book: { title, pages,
+-- page, creator, material })
+ItemTextFrame = CreateFrame("Frame", "ItemTextFrame")
+for _, e in ipairs({ "ITEM_TEXT_BEGIN", "ITEM_TEXT_TRANSLATION", "ITEM_TEXT_READY", "ITEM_TEXT_CLOSED" }) do
+  ItemTextFrame:RegisterEvent(e)
+end
+ItemTextFrame:SetScript("OnEvent", function(_, e) call("ItemTextFrame", e) end)
+local function book() return state.book end
+function ItemTextGetItem() return book() and book().title end
+function ItemTextGetText() return book().pages[book().page] end
+function ItemTextGetPage() return book().page end
+function ItemTextHasNextPage() return book().page < #book().pages end
+function ItemTextGetCreator() return book().creator end
+function ItemTextGetMaterial() return book().material end
+function ItemTextNextPage() call("ItemTextNextPage") end
+function ItemTextPrevPage() call("ItemTextPrevPage") end
+function CloseItemText() call("CloseItemText") end
+
+-- the game's interface, hidden and shown as Alt+Z does (shown: the game
+-- closes every window open, UIParent_OnShow)
+function SetUIVisibility(on)
+  call("SetUIVisibility", on)
+  if on and not UIParent.shown then call("CloseAllWindows") end
+  UIParent.shown = on
+end
+function hooksecurefunc(name, fn)
+  local old = _G[name]
+  _G[name] = function(...)
+    local r = { old(...) }
+    fn(...)
+    return unpack(r)
+  end
+end
+function GetSuggestedGroupNum() return state.quest and state.quest.group or 0 end
+function GetQuestDifficultyColor() return { r = 1, g = 1, b = 0 } end
+
+for _, f in ipairs({ QuestFrame, GossipFrame, ItemTextFrame, CustomGossipFrameManager }) do
   local list = {}
   for e in pairs(f.events) do
     list[#list + 1] = e
@@ -573,10 +627,12 @@ for _, file in ipairs({
   "Kit.lua",
   "Locale.lua",
   "Text_" .. LOCALE .. ".lua",
+  FOREVER and "Quests_Forever.lua" or "Quests_Classic.lua",
   "Game.lua",
   "Rewards.lua",
   "Panel.lua",
   "Camera.lua",
+  "Hud.lua",
   "Core.lua",
   "Settings.lua",
 }) do

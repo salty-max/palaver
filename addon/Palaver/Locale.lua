@@ -20,6 +20,15 @@ function ns.translate(t)
   if t.plural and PLURALS[t.plural] then K.isOne = PLURALS[t.plural] end
 end
 
+-- The game's own names in the reader's language (its Text file, from
+-- wow-data's databases: the quests' kinds), by id, every language's whole.
+ns.questTypes = {}
+function ns.names(t)
+  for id, name in pairs(t.questTypes or {}) do
+    ns.questTypes[id] = name
+  end
+end
+
 -- The game this is: Forever's client is a modern one (interface 1.60, 16001).
 local build = select(4, GetBuildInfo())
 ns.forever = build >= 16000 and build < 17000

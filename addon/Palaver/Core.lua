@@ -12,11 +12,14 @@
 -- one of those windows opening step the panel aside without a word to the
 -- game. Only the player ends a conversation (Goodbye, Decline, Escape).
 --
--- PalaverSettings: { enabled, scale, font, keys, camera, value, upgrades,
--- point, cameraBackup }. PalaverErrors: the last few errors (a page that
--- failed to draw hands its conversation to Blizzard's window for the rest of
--- the session, said once in chat; a reward's mark that failed only drops the
--- marks).
+-- Books, letters and plaques too: the game's book window muted the same way
+-- (its ITEM_TEXT_ events), where the books setting says.
+--
+-- PalaverSettings: { enabled, scale, font, keys, readOn, camera, value,
+-- upgrades, books, hideUI, point, cameraBackup }. PalaverErrors: the last
+-- few errors (a page that failed to draw hands its conversation to
+-- Blizzard's window for the rest of the session, said once in chat; a
+-- reward's mark that failed only drops the marks).
 local addonName, ns = ...
 local K = ns.kit
 local L = K.L
@@ -25,7 +28,18 @@ local C = {}
 ns.core = C
 
 local PREFIX = K.hex(K.T.accent) .. "Palaver|r: "
-local DEFAULTS = { enabled = true, scale = 1, font = 15, keys = true, camera = false, value = true, upgrades = true }
+local DEFAULTS = {
+  enabled = true,
+  scale = 1,
+  font = 15,
+  keys = true,
+  camera = false,
+  value = true,
+  upgrades = true,
+  readOn = true,
+  books = true,
+  hideUI = false,
+}
 ns.DEFAULTS = DEFAULTS -- (the Options page's defaults: Settings.lua)
 local RIVALS = { "DialogueUI", "Immersion", "Storyline", "Conversations" } -- (the last: the prototype Palaver replaces)
 
@@ -51,6 +65,8 @@ local QUEST_EVENTS = {
   "LEARNED_SPELL_IN_TAB",
 }
 local GOSSIP_EVENTS = { "GOSSIP_SHOW", "GOSSIP_CLOSED", "QUEST_LOG_UPDATE" }
+-- (books, letters and plaques: the game's book window, where the setting says)
+local BOOK_EVENTS = { "ITEM_TEXT_BEGIN", "ITEM_TEXT_TRANSLATION", "ITEM_TEXT_READY", "ITEM_TEXT_CLOSED" }
 local removed = {}
 
 local function registered(f, event)
@@ -64,6 +80,7 @@ function C.mute()
     { QuestFrame, QUEST_EVENTS },
     { GossipFrame, GOSSIP_EVENTS },
     { CustomGossipFrameManager, { "GOSSIP_SHOW", "GOSSIP_CLOSED" } },
+    { ns.settings.books ~= false and ItemTextFrame or nil, BOOK_EVENTS },
   }) do
     local f, events = spec[1], spec[2]
     if f then
@@ -89,12 +106,15 @@ function C.unmute()
 end
 
 function C.muted() return next(removed) ~= nil end
+-- (the books Palaver's: the game's book window muted)
+local function books() return ItemTextFrame ~= nil and removed[ItemTextFrame] ~= nil end
 
 -- ── the conversation's state ─────────────────────────────────────────────────
 local shown = 0 -- pages shown so far: a close waits to see if another comes
 local expecting = 0 -- until when the player's last answer may bring a page
 local continuing = false -- the game said the interaction goes on elsewhere
 local handedOver = false -- an error gave the rest of the session to Blizzard
+local picked -- what the player last picked: a quest, or an option (a vendor's...)
 C.kind = nil
 
 local function now() return GetTime() end
@@ -114,8 +134,10 @@ function C.hide()
   P.hide()
   C.kind = nil
   continuing = false
+  picked = nil
   if keys then keys.off() end
   ns.camera.stop()
+  ns.hud.show()
 end
 
 -- A close the game sent: acted on a moment later, if no page came since and
@@ -148,6 +170,7 @@ end
 local function failed(err, event, ...)
   C.keep(err, event)
   handedOver = true
+  pcall(ns.hud.show, true)
   pcall(ns.camera.stop)
   pcall(P.hide)
   if keys then pcall(keys.off) end
@@ -170,7 +193,8 @@ local function show(event, read, ...)
   continuing = false
   if not was then sound("IG_QUEST_LIST_OPEN") end
   if keys then keys.on() end
-  ns.camera.start()
+  if C.kind ~= "book" then ns.camera.start() end
+  ns.hud.hide()
 end
 
 -- Blizzard's own handlers, fed the event Palaver could not show.
@@ -180,6 +204,10 @@ replay = function(event, ...)
       CustomGossipFrameManager:HandleOpenEvent(...)
     elseif GossipFrame and GossipFrame:GetScript("OnEvent") then
       GossipFrame:GetScript("OnEvent")(GossipFrame, event, ...)
+    end
+  elseif event:find("^ITEM_TEXT_") then
+    if ItemTextFrame and ItemTextFrame:GetScript("OnEvent") then
+      ItemTextFrame:GetScript("OnEvent")(ItemTextFrame, event, ...)
     end
   elseif QuestFrame and QuestFrame:GetScript("OnEvent") then
     QuestFrame:GetScript("OnEvent")(QuestFrame, event, ...)
@@ -200,7 +228,12 @@ function ON.GOSSIP_SHOW(textureKit)
 end
 
 function ON.GOSSIP_CLOSED(interactionIsContinuing)
-  if interactionIsContinuing then continuing = true end
+  if interactionIsContinuing then
+    continuing = true
+    -- (the interface back before the window an option opens: its coming back
+    -- would close that window. A quest picked comes to the panel: hidden on.)
+    if picked ~= "quest" then ns.hud.show(true) end
+  end
   closeSoon()
 end
 
@@ -228,6 +261,19 @@ function ON.QUEST_ITEM_UPDATE()
   local choice = P.choice
   show("QUEST_ITEM_UPDATE", read)
   if choice then P.choose(choice) end
+end
+
+-- A book, a letter, a plaque: its page when the game has it ready (the begin
+-- only says one comes), a word while the game translates it, the panel away
+-- when the game closes it.
+function ON.ITEM_TEXT_READY()
+  if books() then show("ITEM_TEXT_READY", G.book) end
+end
+function ON.ITEM_TEXT_TRANSLATION(delay)
+  if books() then show("ITEM_TEXT_TRANSLATION", G.translating, delay) end
+end
+function ON.ITEM_TEXT_CLOSED()
+  if books() and C.kind == "book" then C.hide() end
 end
 
 -- (the marks on the rewards: an item the game had yet to tell, or a change
@@ -293,6 +339,9 @@ local CONVERSATION = {
   "QUEST_FINISHED",
   "QUEST_ITEM_UPDATE",
   "QUEST_LOG_UPDATE",
+  "ITEM_TEXT_READY",
+  "ITEM_TEXT_TRANSLATION",
+  "ITEM_TEXT_CLOSED",
 }
 
 E:SetScript("OnEvent", function(_, event, ...)
@@ -370,6 +419,7 @@ end
 function C.pick(n)
   local r = P.page and P.page.rows and P.page.rows[n]
   if not r then return end
+  picked = r.kind
   r.pick()
   answered()
 end
@@ -382,6 +432,8 @@ end
 function C.close()
   if C.kind == "gossip" then
     G.closeGossip()
+  elseif C.kind == "book" then
+    CloseItemText()
   elseif C.kind then
     G.closeQuest()
   end
@@ -394,8 +446,9 @@ end
 -- a key held down never accepts the next quest. Never in combat (the game
 -- keeps the keyboard then), never while typing or with a modifier held.
 keys = {}
-local listener = CreateFrame("Frame", "PalaverKeys", UIParent)
-listener:SetAllPoints()
+-- (no parent: it keeps listening while the game's interface is hidden)
+local listener = CreateFrame("Frame", "PalaverKeys")
+listener:SetAllPoints(UIParent)
 listener:Hide()
 local down -- { key, page }
 -- (one of the game's own questions open, a paid turn-in's: Escape is its)
@@ -416,6 +469,7 @@ local function mine(key)
     local a = page.actions and page.actions.primary
     return a ~= nil and not a.disabled
   end
+  if key == "BACKSPACE" then return page.actions ~= nil and page.actions.back ~= nil end
   local n = tonumber(key)
   if n and n >= 1 and n <= 9 then return (page.rows and page.rows[n] ~= nil) or (P.choosing and P.cards[n] ~= nil) end
   return false
@@ -431,7 +485,12 @@ listener:SetScript("OnKeyUp", function(_, key)
   down = nil
   if not (d and d.key == key and d.page == shown and P.shown()) then return end
   if key == "ESCAPE" then return C.close() end
-  if key == "SPACE" or key == "ENTER" then return C.act("primary") end
+  if key == "SPACE" or key == "ENTER" then
+    -- (a long page read to its end first, where the setting says so)
+    if ns.settings.readOn ~= false and P.readOn() then return end
+    return C.act("primary")
+  end
+  if key == "BACKSPACE" then return C.act("back") end
   local n = tonumber(key)
   if P.page.rows and P.page.rows[n] then return C.pick(n) end
   C.choose(n)
@@ -472,6 +531,19 @@ function C.set(key, value)
     if not value then ns.camera.stop() end
   elseif key == "value" or key == "upgrades" then
     if P.shown() then P.remark() end
+  elseif key == "hideUI" then
+    if value and P.shown() then
+      ns.hud.hide()
+    else
+      ns.hud.show()
+    end
+  elseif key == "books" then
+    -- (the game's book window muted or not, the rest as it was)
+    if not value and C.kind == "book" then C.close() end
+    if C.muted() then
+      C.unmute()
+      C.mute()
+    end
   end
 end
 
@@ -490,6 +562,18 @@ SlashCmdList.PALAVER = function(msg)
   elseif cmd == "keys" then
     C.set("keys", not s.keys)
     say(s.keys and L["keys on: Space, Escape and 1 to 9 answer."] or L["keys off: only the mouse answers."])
+  elseif cmd == "books" then
+    C.set("books", not s.books)
+    say(
+      s.books and L["books on: books, letters and plaques open here."]
+        or L["books off: the game's own book window is back."]
+    )
+  elseif cmd == "hud" then
+    C.set("hideUI", not s.hideUI)
+    say(
+      s.hideUI and L["interface hidden while you talk or read: only the panel stays."]
+        or L["interface kept while you talk or read."]
+    )
   elseif cmd == "camera" then
     C.set("camera", not s.camera)
     say(
@@ -520,7 +604,7 @@ SlashCmdList.PALAVER = function(msg)
     if not ns.openSettings() then say(L["no settings page in this client."]) end
   else
     say(
-      L["/palaver on or off, scale 0.7 to 1.5, font 12 to 22, keys, camera, value, upgrades, reset, errors, settings."]
+      L["/palaver on or off, scale 0.7 to 1.5, font 12 to 22, keys, books, hud, camera, value, upgrades, reset, errors, settings."]
     )
   end
 end

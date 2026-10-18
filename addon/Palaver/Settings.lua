@@ -66,6 +66,21 @@ function ns.createSettingsPanel()
     L["Space or Enter answers yes, Escape says goodbye, 1 to 9 pick a line or a reward. Never in combat or while you type."]
   )
   checkbox(
+    "readOn",
+    L["Read to the end first"],
+    L["On a page longer than the panel, Space and Enter scroll down first, and answer once you have seen it all."]
+  )
+  checkbox(
+    "books",
+    L["Books and letters in Palaver"],
+    L["Books, letters and plaques you read open in Palaver's panel. Off, the game's own book window."]
+  )
+  checkbox(
+    "hideUI",
+    L["Hide the interface while you talk"],
+    L["While you talk or read, the game's interface fades away and only the panel stays. It comes back for a fight, a vendor or a question of the game's."]
+  )
+  checkbox(
     "camera",
     L["Move the camera in"],
     L["While you talk, the view moves in on whoever speaks, and comes back when you are done."]

@@ -1,0 +1,98 @@
+{
+  "enUS": {
+    "1": "Elite",
+    "41": "PvP",
+    "62": "Raid",
+    "81": "Dungeon",
+    "82": "World Event",
+    "83": "Legendary"
+  },
+  "enGB": {
+    "1": "Elite",
+    "41": "PvP",
+    "62": "Raid",
+    "81": "Dungeon",
+    "82": "World Event",
+    "83": "Legendary"
+  },
+  "deDE": {
+    "1": "Elite",
+    "41": "PvP",
+    "62": "Schlachtzug",
+    "81": "Dungeon",
+    "82": "Weltereignis",
+    "83": "Legendär"
+  },
+  "frFR": {
+    "1": "Élite",
+    "41": "JcJ",
+    "62": "Raid",
+    "81": "Donjon",
+    "82": "Événement mondial",
+    "83": "Légendaire"
+  },
+  "esES": {
+    "1": "Élite",
+    "41": "JcJ",
+    "62": "Banda",
+    "81": "Mazmorra",
+    "82": "Suceso mundial",
+    "83": "Legendaria"
+  },
+  "esMX": {
+    "1": "Élite",
+    "41": "JcJ",
+    "62": "Banda",
+    "81": "Calabozo",
+    "82": "Evento del mundo",
+    "83": "Legendaria"
+  },
+  "ruRU": {
+    "1": "Элитный",
+    "41": "PvP",
+    "62": "Рейд",
+    "81": "Подземелье",
+    "82": "Игровое событие",
+    "83": "Легенда"
+  },
+  "ptBR": {
+    "1": "Elite",
+    "41": "JxJ",
+    "62": "Raide",
+    "81": "Masmorra",
+    "82": "Evento Mundial",
+    "83": "Lendário"
+  },
+  "itIT": {
+    "1": "Elite",
+    "41": "PvP",
+    "62": "Raid",
+    "81": "Dungeon",
+    "82": "World Event",
+    "83": "Legendary"
+  },
+  "koKR": {
+    "1": "정예",
+    "41": "전쟁",
+    "62": "공격대",
+    "81": "던전",
+    "82": "세계",
+    "83": "전설"
+  },
+  "zhCN": {
+    "1": "精英",
+    "41": "PvP",
+    "62": "团队",
+    "81": "地下城",
+    "82": "世界事件",
+    "83": "传说"
+  },
+  "zhTW": {
+    "1": "精英",
+    "41": "PvP",
+    "62": "團隊",
+    "81": "地下城",
+    "82": "世界事件",
+    "83": "傳說"
+  }
+}

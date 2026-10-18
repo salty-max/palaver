@@ -3,6 +3,34 @@
 base: lua51
 name: wow
 globals:
+  ItemTextFrame:
+    any: true
+  ItemTextGetItem:
+    any: true
+  ItemTextGetText:
+    any: true
+  ItemTextGetPage:
+    any: true
+  ItemTextHasNextPage:
+    any: true
+  ItemTextGetCreator:
+    any: true
+  ItemTextGetMaterial:
+    any: true
+  ItemTextNextPage:
+    any: true
+  ItemTextPrevPage:
+    any: true
+  CloseItemText:
+    any: true
+  SetUIVisibility:
+    any: true
+  GetSuggestedGroupNum:
+    any: true
+  GetQuestDifficultyColor:
+    any: true
+  PalaverTooltip:
+    any: true
   GetQuestItemLink:
     any: true
   GetItemStats:

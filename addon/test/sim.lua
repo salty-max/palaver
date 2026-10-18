@@ -15,6 +15,17 @@ end
 local function rows() return P.page and P.page.rows and #P.page.rows or 0 end
 local function title() return PalaverFrame.title:GetText() end
 local function words(tag) return _G[tag]:gsub("%s*[:：]%s*$", "") end
+-- Space as a reader presses it: through a page longer than the panel to its
+-- end (it reads on first), then once more to answer
+local function yes()
+  for _ = 1, 12 do
+    local sc = PalaverScroll
+    if not (P.shown() and ns.settings.readOn and sc:Range() - sc:GetVerticalScroll() >= 2) then break end
+    G.key("SPACE")
+    G.advance(0.3)
+  end
+  return G.key("SPACE")
+end
 
 local RAGNAR = {
   name = "Ragnar Thunderbrew",
@@ -102,7 +113,7 @@ check(#P.page.rewards.given == 2 and P.page.rewards.money == 175 and P.page.rewa
 G.forget()
 G.key("SPACE", function() fire("QUEST_DETAIL") end)
 check(G.called("AcceptQuest") == 0, "a key pressed on one page and released on the next does nothing")
-check(G.key("SPACE") == "palaver" and G.called("AcceptQuest") == 1, "Space accepts")
+check(yes() == "palaver" and G.called("AcceptQuest") == 1, "Space accepts")
 fire("QUEST_FINISHED")
 s.talking = false
 G.advance(1)
@@ -118,7 +129,7 @@ G.forget()
 check(G.key("SPACE") == "game" and G.called("CompleteQuest") == 0, "Space with nothing to say goes to the game")
 RIBS.completable = true
 fire("QUEST_PROGRESS")
-check(G.key("SPACE") == "palaver" and G.called("CompleteQuest") == 1, "finished: Space continues")
+check(yes() == "palaver" and G.called("CompleteQuest") == 1, "finished: Space continues")
 
 -- the hand-in: a reward to choose
 RIBS.choice =
@@ -128,10 +139,10 @@ G.advance(1)
 check(P.page.kind == "complete" and P.choosing and PalaverFrame.hint.shown, "two rewards: the panel asks to choose")
 check(PalaverFrame:GetHeight() == gossipHeight, "the hand-in too, its hint inside the same height")
 G.forget()
-G.key("SPACE")
+yes()
 check(G.called("GetQuestReward") == 0, "no reward chosen, no hand-in")
 check(G.key("2") == "palaver" and P.choice == 2 and not PalaverFrame.hint.shown, "2 chooses the second reward")
-G.key("SPACE")
+yes()
 local paid = G.TBC or G.FOREVER
 n, c = G.called("GetQuestReward")
 check(n == 1 and c[2] == 2, "Space hands it in with the reward chosen")
@@ -141,7 +152,7 @@ RIBS.cost = 500
 fire("QUEST_COMPLETE")
 G.key("1")
 G.forget()
-G.key("SPACE")
+yes()
 if paid then
   n, c = G.called("StaticPopup_Show")
   check(
@@ -160,7 +171,7 @@ RIBS.cost, RIBS.choice = nil, nil
 RIBS.choice = { { name = "Thick Cloak", icon = 133768 } }
 fire("QUEST_COMPLETE")
 G.forget()
-G.key("SPACE")
+yes()
 n, c = G.called("GetQuestReward")
 check(n == 1 and c[2] == 1, "one reward to choose is the one given")
 RIBS.choice = nil
@@ -523,11 +534,205 @@ check(restored(), "a logout mid-conversation: the camera back before the game sa
 s.mounted = nil
 G.key("ESCAPE")
 
+-- ── reading on: Space through a long page before it answers ────────────────
+local LONG = {
+  id = 99999,
+  title = "A Long Tale",
+  text = string.rep("The road east was long and the night was cold. ", 60),
+  objectives = "Listen.",
+}
+s.npc, s.quest, s.talking = RAGNAR, LONG, true
+fire("QUEST_DETAIL")
+G.forget()
+check(G.key("SPACE") == "palaver" and G.called("AcceptQuest") == 0, "a long offer: Space reads on, no answer yet")
+G.advance(0.3)
+check(PalaverScroll:GetVerticalScroll() > 0, "the text moved down")
+check(yes() == "palaver" and G.called("AcceptQuest") == 1, "read to its end, Space accepts")
+fire("QUEST_DETAIL")
+G.forget()
+PalaverFrame.primary.scripts.OnClick(PalaverFrame.primary)
+check(G.called("AcceptQuest") == 1, "a click on Accept answers at once")
+fire("QUEST_DETAIL")
+O.settings.PALAVER_READON.set(false)
+G.forget()
+G.key("SPACE")
+check(G.called("AcceptQuest") == 1, "reading on turned off: Space answers at once")
+O.settings.PALAVER_READON.set(true)
+G.key("ESCAPE")
+check(not P.factsLine and P.page == nil, "a quest the data doesn't know: no facts")
+
+-- ── a quest's facts on its offer page ────────────────────────────────────────
+local function fact(id, group)
+  s.quest = { id = id, title = "Quest " .. id, text = "Words.", objectives = "Do it.", group = group }
+  fire("QUEST_DETAIL")
+  return P.factsLine or ""
+end
+local level = function(n) return ns.game.word("LEVEL", "Level") .. " " .. n end
+local line = fact(132)
+check(line:find(level(18), 1, true), "the Defias Brotherhood's second part: level 18")
+check(line:find(L["Part %d of %d"]:format(2, 7), 1, true), "and part 2 of 7, by the game's own chain")
+line = fact(166)
+check(
+  line:find(ns.questTypes[81], 1, true) and line:find(L["Part %d of %d"]:format(7, 7), 1, true),
+  "its end: a dungeon, part 7 of 7"
+)
+check(ns.questTypes[81] == (G.LOCALE == "frFR" and "Donjon" or "Dungeon"), "the kind in the game's own word")
+line = fact(314, 3)
+check(line:find(ns.questTypes[1], 1, true), "Protecting the Herd: elite")
+check(line:find(ns.game.word("QUEST_SUGGESTED_GROUP_NUM", "x"):format(3), 1, true), "the group the game suggests")
+check(not line:find(L["Part %d of %d"]:format(1, 1), 1, true), "no chain: no part")
+fact(99999)
+check(not P.factsLine, "nothing known: no line")
+s.quest = { id = 132, title = "The Defias Brotherhood", progress = "Back so soon?", required = {} }
+fire("QUEST_PROGRESS")
+check(not P.factsLine, "the offer only: not on its return")
+G.key("ESCAPE")
+
+-- ── books, letters and plaques in the panel ──────────────────────────────────
+s.npc, s.talking = nil, false
+check(not ItemTextFrame:IsEventRegistered("ITEM_TEXT_READY"), "the game's book window muted")
+s.book = {
+  title = "The Story of Morgan Ladimore",
+  pages = {
+    "Morgan Ladimore was a hero of the Second War.",
+    "<HTML><BODY><H1>Chapter</H1><P>Two &amp; more<BR/>lines</P></BODY></HTML>",
+    "The end.",
+  },
+  page = 1,
+}
+fire("ITEM_TEXT_BEGIN")
+check(not P.shown(), "the book's start: its page follows")
+fire("ITEM_TEXT_READY")
+check(P.shown() and P.page.kind == "book" and title() == "The Story of Morgan Ladimore", "a book opens in the panel")
+check(PalaverFrame.sub:GetText() == ns.game.word("PAGE_NUMBER", "x"):format(1), "its page number")
+check(
+  PalaverFrame.primary.label:GetText() == words("NEXT") and PalaverFrame.secondary.label:GetText() == words("CLOSE"),
+  "the game's Next and Close"
+)
+check(not PalaverFrame.back.shown, "the first page: no way back")
+check(not ns.camera.active(), "a book: the camera stays")
+G.forget()
+yes()
+check(G.called("ItemTextNextPage") == 1, "Space turns the page")
+s.book.page = 2
+fire("ITEM_TEXT_READY")
+check(P.page.text == "Chapter\n\nTwo & more\nlines", "a page in HTML read as plain text")
+check(PalaverFrame.back.shown, "a page back")
+G.forget()
+check(G.key("BACKSPACE") == "palaver" and G.called("ItemTextPrevPage") == 1, "Backspace turns back")
+s.book.page = 3
+fire("ITEM_TEXT_READY")
+check(
+  PalaverFrame.primary.label:GetText() == words("CLOSE") and not PalaverFrame.secondary.shown,
+  "the last page: Space closes"
+)
+G.forget()
+yes()
+check(G.called("CloseItemText") == 1, "the book closed")
+fire("ITEM_TEXT_CLOSED")
+check(not P.shown(), "the game's close: the panel away")
+s.book = { title = "A Letter", pages = { "Meet me at the inn." }, page = 1, creator = "Thrall" }
+fire("ITEM_TEXT_READY")
+check(P.page.text:find(words("ITEM_TEXT_FROM") .. "\nThrall", 1, true), "a letter says who wrote it")
+check(PalaverFrame.sub:GetText() == "", "one page: no page number")
+G.forget()
+G.key("ESCAPE")
+check(G.called("CloseItemText") == 1 and not P.shown(), "Escape closes a book")
+fire("ITEM_TEXT_CLOSED")
+fire("ITEM_TEXT_TRANSLATION", 3)
+check(P.shown() and P.page.text == L["Translating..."], "a text the game translates: a word while it does")
+fire("ITEM_TEXT_READY")
+check(P.page.text:find("Meet me at the inn.", 1, true) == 1, "then its page")
+fire("ITEM_TEXT_CLOSED")
+O.settings.PALAVER_BOOKS.set(false)
+check(ItemTextFrame:IsEventRegistered("ITEM_TEXT_READY"), "books off: the game's book window back")
+check(not QuestFrame:IsEventRegistered("QUEST_DETAIL"), "the conversations still Palaver's")
+G.forget()
+fire("ITEM_TEXT_READY")
+check(not P.shown() and G.called("ItemTextFrame") == 1, "a book read by the game's window, Palaver out of it")
+O.settings.PALAVER_BOOKS.set(true)
+check(not ItemTextFrame:IsEventRegistered("ITEM_TEXT_READY"), "books on again")
+s.book = nil
+
+-- ── the game's interface hidden while talking ────────────────────────────────
+s.npc, s.quest, s.talking = RAGNAR, RIBS, true
+fire("GOSSIP_SHOW")
+G.advance(0.5)
+check(UIParent.shown and not ns.hud.hidden(), "by default the interface stays")
+G.key("ESCAPE")
+O.settings.PALAVER_HIDEUI.set(true)
+check(PalaverFrame.parent == nil and PalaverKeys.parent == nil, "the panel and its keys outside the game's interface")
+G.forget()
+fire("GOSSIP_SHOW")
+G.advance(0.1)
+check(UIParent.shown and UIParent:GetAlpha() < 1, "talking: the interface fades")
+G.advance(0.3)
+check(not UIParent.shown and UIParent:GetAlpha() == 1 and P.shown(), "then it is hidden, the panel stays")
+check(P.tooltip() == PalaverTooltip, "a card's tooltip Palaver's own, the game's hidden with the interface")
+G.key("1")
+fire("GOSSIP_CLOSED", true)
+check(not UIParent.shown, "a quest picked, the interaction going on: hidden still, the quest comes to the panel")
+fire("QUEST_DETAIL")
+G.advance(0.5)
+check(not UIParent.shown and P.page.kind == "detail", "its offer, the interface away throughout")
+fire("GOSSIP_SHOW")
+check(G.key("2") == "palaver", "the keys still answer")
+G.forget()
+fire("GOSSIP_CLOSED", true)
+check(UIParent.shown and G.called("CloseAllWindows") == 1, "a vendor's coming: the interface back first")
+fire("MERCHANT_SHOW")
+check(not P.shown() and G.called("CloseAllWindows") == 1, "so its coming back never closes the vendor's window")
+fire("GOSSIP_SHOW")
+G.advance(0.5)
+G.key("ESCAPE")
+check(UIParent.shown, "the conversation over: the interface back")
+G.advance(0.3)
+check(UIParent:GetAlpha() == 1, "faded in")
+fire("GOSSIP_SHOW")
+G.advance(0.5)
+fire("PLAYER_REGEN_DISABLED")
+check(UIParent.shown and UIParent:GetAlpha() == 1, "a fight: the interface back at once")
+fire("PLAYER_REGEN_ENABLED")
+G.key("ESCAPE")
+fire("GOSSIP_SHOW")
+G.advance(0.5)
+StaticPopup_Show("CONFIRM_BINDER")
+check(UIParent.shown, "a question of the game's: the interface back to ask it")
+StaticPopup1:Hide()
+G.key("ESCAPE")
+fire("GOSSIP_SHOW")
+G.advance(0.5)
+O.settings.PALAVER_HIDEUI.set(false)
+check(UIParent.shown, "the setting off: the interface back")
+O.settings.PALAVER_HIDEUI.set(true)
+check(ns.hud.hidden(), "on again mid-conversation: hidden again")
+G.advance(0.5)
+check(not UIParent.shown, "once faded")
+G.key("ESCAPE")
+G.advance(0.5)
+UIParent.shown = false -- (the player's own Alt+Z)
+G.forget()
+fire("GOSSIP_SHOW")
+G.advance(0.5)
+G.key("ESCAPE")
+check(G.called("SetUIVisibility") == 0 and not UIParent.shown, "an interface the player hid: left as they left it")
+UIParent.shown = true
+s.combat = true
+fire("GOSSIP_SHOW")
+G.advance(0.5)
+check(UIParent.shown, "in combat: never touched")
+s.combat = false
+G.key("ESCAPE")
+
 -- ── an error: the conversation handed to Blizzard's window ───────────────────
 RIBS.broken = true
+s.npc, s.quest, s.talking = RAGNAR, RIBS, true
+fire("GOSSIP_SHOW")
+G.advance(0.5)
 G.forget()
 fire("QUEST_DETAIL")
 check(not P.shown(), "a page that fails is not shown")
+check(UIParent.shown, "and the game's interface is back")
 check(G.called("QuestFrame") == 1, "the game's own window gets it")
 check(QuestFrame:IsEventRegistered("QUEST_DETAIL"), "and the game's windows hear the conversations again")
 check(PalaverErrors and PalaverErrors[1].event == "QUEST_DETAIL", "the error kept for /palaver errors")
@@ -544,6 +749,7 @@ local native = G2.native[QuestFrame]
 SlashCmdList.PALAVER("off")
 check(G2.events(QuestFrame) == native, "off: QuestFrame's events as the client registered them")
 check(G2.events(GossipFrame) == G2.native[GossipFrame], "off: GossipFrame's as well")
+check(G2.events(ItemTextFrame) == G2.native[ItemTextFrame], "off: the book window's as well")
 if G2.FOREVER then
   check(
     G2.events(CustomGossipFrameManager) == G2.native[CustomGossipFrameManager],

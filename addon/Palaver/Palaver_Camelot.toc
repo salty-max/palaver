@@ -13,13 +13,16 @@
 ## X-License: MIT
 
 # Each game loads its own TOC (_Vanilla: Classic Era, _TBC: TBC Anniversary,
-# _Camelot: Forever), the same but for the interface (scripts/package.ts checks).
+# _Camelot: Forever), the same but for the interface and each game's quest
+# facts, Quests_<game>.lua (scripts/package.ts checks).
 Kit.lua
 Locale.lua
 Text_[TextLocale].lua
+Quests_Forever.lua
 Game.lua
 Rewards.lua
 Panel.lua
+Hud.lua
 Camera.xml
 Camera.lua
 Core.lua

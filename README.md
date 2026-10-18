@@ -16,8 +16,22 @@ panel, the NPC still in view.
 - **1 to 9** pick a line, or the reward to take when a quest offers a choice.
 
 A key acts when you let it go, and only on the page you pressed it on: a
-held Space never accepts the next quest. In combat, while typing or with a
-modifier held, the keys stay the game's. Drag the panel to move it.
+held Space never accepts the next quest. On a page longer than the panel,
+Space first scrolls down, so you never accept a quest with its rewards
+unseen. In combat, while typing or with a modifier held, the keys stay the
+game's. Drag the panel to move it.
+
+A quest's offer shows what the game's own window keeps quiet: its level in
+the colour of how hard it is for you, whether it's elite or a dungeon, and
+where it sits in its chain, like part 2 of 7.
+
+Books, letters and plaques open in the same panel. Space turns the page,
+Backspace turns back.
+
+Palaver can also hide the game's interface while you talk or read, so only
+the panel and the one you speak to stay on screen. It comes back for a fight,
+a vendor or a question of the game's. It's off at first: turn it on with
+/palaver hud or in the Options.
 
 When a quest offers a choice of rewards, two marks help you pick. A green
 arrow sits on the one best for your character, and a gold coin on the one
@@ -32,6 +46,8 @@ Every setting is also on Palaver's page in the game's Options, under AddOns.
 /palaver scale 1.1       its size, 0.7 to 1.5
 /palaver font 16         its text, 12 to 22
 /palaver keys            the keys on or off
+/palaver books           books and letters in Palaver, or the game's window
+/palaver hud             the game's interface hidden while you talk (off at first)
 /palaver camera          the view moves in on whoever speaks (off at first)
 /palaver value           the coin on the reward that sells for most
 /palaver upgrades        the arrow on the reward best for you
