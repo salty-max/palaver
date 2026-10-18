@@ -233,6 +233,96 @@ check(PalaverFrame.primary.badge.text:GetText() == ns.kit.L["Space"], "the key's
 if G.LOCALE == "frFR" then check(ns.kit.L["Space"] == "Espace", "French: Espace") end
 G.key("ESCAPE")
 
+-- ── the camera: still by default, DialogueUI's move in when turned on ────────
+s.npc, s.quest, s.talking = RAGNAR, RIBS, true
+fire("GOSSIP_SHOW")
+check(not ns.camera.active() and s.zoom == 15, "the camera stays still by default")
+G.key("ESCAPE")
+SlashCmdList.PALAVER("camera")
+check(ns.settings.camera, "/palaver camera turns it on")
+local function restored()
+  for k, v in pairs(G.cvarsAtStart) do
+    if s.cvars[k] ~= v then return false end
+  end
+  return s.zoom == 15 and s.pitchlimit == 88 and ns.settings.cameraBackup == nil
+end
+s.npcHeight = 1.7 -- (a dwarf)
+fire("GOSSIP_SHOW")
+check(ns.camera.active(), "a conversation moves the camera")
+check(
+  s.cvars.test_cameraTargetFocusInteractEnable == "1" and s.cvars.test_cameraOverShoulder == "1.5",
+  "the game's focus on the speaker, the view over the shoulder"
+)
+check(s.zoom == 2, "a dwarf, 1.7 tall: two yards")
+local b = ns.settings.cameraBackup
+check(b and b.cvars.test_cameraOverShoulder == "0" and b.zoom == 15, "what it changes, saved as it changes it")
+check(
+  not UIParent:IsEventRegistered("EXPERIMENTAL_CVAR_CONFIRMATION_NEEDED"),
+  "the game's experimental-settings warning kept quiet"
+)
+G.advance(1.2)
+check(
+  s.pitchlimit == 88 and s.cvars.test_cameraTargetFocusInteractStrengthPitch == "1",
+  "the tilt done, the pitch limit released"
+)
+G.key("1")
+fire("GOSSIP_CLOSED", false)
+fire("QUEST_DETAIL")
+G.advance(1)
+check(ns.camera.active() and s.zoom == 2, "the next page keeps the camera where it is")
+G.key("ESCAPE")
+check(
+  not ns.camera.active() and restored(),
+  "the conversation over: every setting, the pitch limit and the zoom as they were"
+)
+check(UIParent:IsEventRegistered("EXPERIMENTAL_CVAR_CONFIRMATION_NEEDED"), "the warning back")
+
+fire("GOSSIP_SHOW")
+fire("PLAYER_REGEN_DISABLED")
+check(not ns.camera.active() and restored(), "combat: the camera back at once")
+fire("PLAYER_REGEN_ENABLED")
+G.key("ESCAPE")
+
+s.npcIsPlayer = true
+fire("QUEST_DETAIL")
+check(not ns.camera.active() and s.zoom == 15, "a quest from an item: no one to look at")
+G.key("ESCAPE")
+s.npcIsPlayer = nil
+
+s.npcHeight = nil
+fire("GOSSIP_SHOW")
+check(s.zoom == 15, "a model slow to load: the camera waits for it")
+G.advance(0.6)
+check(s.zoom == 4, "no size within half a second: a middling four yards")
+G.key("ESCAPE")
+-- (two conversations in quick succession, both models slow: the first one's
+-- half second never moves the second's camera)
+fire("GOSSIP_SHOW")
+G.advance(0.1)
+G.key("ESCAPE")
+G.advance(0.1)
+fire("GOSSIP_SHOW")
+G.advance(0.35)
+check(s.zoom == 15, "an earlier conversation's wait never moves the next one's camera")
+G.advance(0.2)
+check(s.zoom == 4, "the next one's own wait does")
+G.key("ESCAPE")
+s.npcHeight = 7.7 -- (a tall one)
+fire("GOSSIP_SHOW")
+check(s.zoom == 10, "an NPC 7.7 tall: ten yards")
+G.key("ESCAPE")
+s.npcHeight, s.zoom = 1.7, 1.5
+fire("GOSSIP_SHOW")
+check(s.zoom == 1.5, "already closer than it would go: the camera never zooms out")
+G.key("ESCAPE")
+s.zoom, s.mounted = 15, true
+fire("GOSSIP_SHOW")
+check(s.cvars.test_cameraOverShoulder == "4.8", "mounted: further over the shoulder, the mount between")
+fire("PLAYER_LOGOUT")
+check(restored(), "a logout mid-conversation: the camera back before the game saves its settings")
+s.mounted = nil
+G.key("ESCAPE")
+
 -- ── an error: the conversation handed to Blizzard's window ───────────────────
 RIBS.broken = true
 G.forget()
@@ -268,6 +358,32 @@ local G3 = dofile("addon/test/game.lua")
 G3.login({ DialogueUI = true })
 check(QuestFrame:IsEventRegistered("QUEST_DETAIL"), "DialogueUI loaded: Blizzard's windows left as they are")
 check(G3.state.printed[1] and G3.state.printed[1]:find("DialogueUI", 1, true), "and said once")
+
+-- a crash mid-conversation: nothing restored then, the next login does it
+-- (what a conversation's camera changes, on a fresh game)
+local G5 = dofile("addon/test/game.lua")
+PalaverSettings = nil -- (a new player's saved file)
+G5.login()
+SlashCmdList.PALAVER("camera")
+G5.state.npc, G5.state.quest, G5.state.talking, G5.state.npcHeight = RAGNAR, RIBS, true, 1.7
+G5.fire("GOSSIP_SHOW")
+local keep = {}
+for k, v in pairs(PalaverSettings.cameraBackup.cvars) do
+  keep[k] = v
+end
+local changed = G5.state.cvars.test_cameraOverShoulder
+local G4 = dofile("addon/test/game.lua")
+for k in pairs(keep) do
+  G4.state.cvars[k] = k == "test_cameraOverShoulder" and changed or "9"
+end
+PalaverSettings = { camera = true, cameraBackup = { cvars = keep, zoom = 3, pitch = true } }
+G4.login()
+local back = true
+for k, v in pairs(keep) do
+  if G4.state.cvars[k] ~= v then back = false end
+end
+check(back and PalaverSettings.cameraBackup == nil, "the next login puts back what a crash left changed")
+check(G4.state.zoom == 15, "but not the old session's zoom, which was the session's own")
 
 io.write(
   ("Palaver: %d checks passed (%s, %s).\n"):format(

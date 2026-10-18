@@ -24,6 +24,7 @@ modifier held, the keys stay the game's. Drag the panel to move it.
 /palaver scale 1.1       its size, 0.7 to 1.5
 /palaver font 16         its text, 12 to 22
 /palaver keys            the keys on or off
+/palaver camera          the view moves in on whoever speaks (off at first)
 /palaver reset           back in its place, at its size
 /palaver errors          the last error, if one ever stopped a page
 ```

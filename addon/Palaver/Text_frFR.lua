@@ -3,9 +3,11 @@ local _, ns = ...
 ns.translate({
   plural = "fr",
   words = {
-    ["/palaver on or off, scale 0.7 to 1.5, font 12 to 22, keys, reset, errors."] = "/palaver on ou off, scale 0.7 à 1.5, font 12 à 22, keys, reset, errors.",
+    ["/palaver on or off, scale 0.7 to 1.5, font 12 to 22, keys, camera, reset, errors."] = "/palaver on ou off, scale 0.7 à 1.5, font 12 à 22, keys, camera, reset, errors.",
     ["%s already shows your conversations, so Palaver stays out of its way. Turn one of them off to choose."] = "%s affiche déjà vos conversations, Palaver ne s'en mêle donc pas. Désactivez l'un des deux pour choisir.",
     ["an error stopped this page, so the game's own window takes over until you reload. /palaver errors shows what went wrong."] = "une erreur a interrompu cette page, la fenêtre du jeu prend donc le relais jusqu'au prochain rechargement. /palaver errors montre ce qui s'est passé.",
+    ["camera off: the view stays as you set it."] = "caméra désactivée : la vue reste comme vous l'avez réglée.",
+    ["camera on: the view moves in on whoever speaks."] = "caméra activée : la vue se rapproche de celui qui parle.",
     ["Choose a reward, then complete the quest."] = "Choisissez une récompense, puis terminez la quête.",
     ["Esc"] = "Échap",
     ["keys off: only the mouse answers."] = "touches désactivées : seule la souris répond.",

@@ -19,4 +19,6 @@ Locale.lua
 Text_[TextLocale].lua
 Game.lua
 Panel.lua
+Camera.xml
+Camera.lua
 Core.lua

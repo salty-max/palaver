@@ -3,6 +3,26 @@
 base: lua51
 name: wow
 globals:
+  PalaverMeasureActorMixin:
+    any: true
+  C_CVar:
+    any: true
+  CameraZoomIn:
+    any: true
+  CameraZoomOut:
+    any: true
+  ConsoleExec:
+    any: true
+  GetCVar:
+    any: true
+  GetCameraZoom:
+    any: true
+  IsMounted:
+    any: true
+  SetCVar:
+    any: true
+  UnitIsUnit:
+    any: true
   AcceptQuest:
     any: true
   C_AddOns:

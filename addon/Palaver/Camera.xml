@@ -1,0 +1,9 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/">
+  <!-- An unseen actor the camera loads the NPC into, to measure how tall it
+       stands (Camera.lua): its model loaded, its bounding box read. -->
+  <Actor name="PalaverMeasureActorTemplate" mixin="PalaverMeasureActorMixin" virtual="true">
+    <Scripts>
+      <OnModelLoaded method="OnModelLoaded"/>
+    </Scripts>
+  </Actor>
+</Ui>

@@ -139,13 +139,32 @@ G.methods = {
     self.propagate = on
   end,
   GetName = function(self) return self.name end,
+  -- a ModelScene's actor: the NPC's model loaded at once, as tall as state.npcHeight
+  CreateActor = function(self, _, template)
+    local a = obj("Actor")
+    a.template = template
+    for k, v in pairs(PalaverMeasureActorMixin or {}) do
+      a[k] = v
+    end
+    function a:SetModelByUnit(unit)
+      call("SetModelByUnit", unit)
+      if state.npcHeight then self:OnModelLoaded() end
+    end
+    function a:GetActiveBoundingBox()
+      if not state.npcHeight then return nil end
+      return -0.5, -0.5, 0, 0.5, 0.5, state.npcHeight
+    end
+    return a
+  end,
   SetScale = function(self, v) self.scale = v end,
   GetScale = function(self) return self.scale or 1 end,
   GetParent = function(self) return self.parent end,
 }
 
+local frames = {}
 function CreateFrame(kind, name, parent, template)
   local f = obj(kind, name)
+  table.insert(frames, f)
   f.parent = parent
   f.template = template
   if name then _G[name] = f end
@@ -154,6 +173,7 @@ end
 UIParent = obj("Frame", "UIParent")
 UIParent.shown = true
 UIParent.w, UIParent.h = 1365, 768
+UIParent.events.EXPERIMENTAL_CVAR_CONFIRMATION_NEEDED = true
 GameTooltip = obj("Frame", "GameTooltip")
 WorldFrame = obj("Frame", "WorldFrame")
 
@@ -183,6 +203,16 @@ C_Timer = {
 }
 function G.advance(seconds)
   local stop = state.time + seconds
+  -- (frames' OnUpdate, a tenth of a second at a time, before the timers due)
+  local t = state.time
+  while t < stop - 1e-9 do
+    local step = math.min(0.1, stop - t)
+    t = t + step
+    for _, f in ipairs(frames) do
+      local u = f.scripts.OnUpdate
+      if u then u(f, step) end
+    end
+  end
   while true do
     table.sort(state.timers, function(a, b) return a.at < b.at end)
     local t = state.timers[1]
@@ -230,6 +260,44 @@ Enum =
   { PlayerInteractionType = { Gossip = 3, QuestGiver = 4 }, QuestFrequency = { Default = 0, Daily = 1, Weekly = 2 } }
 C_PlayerInteractionManager = { IsInteractingWithNpcOfType = function() return state.talking end }
 function SetPortraitTexture(tex, unit) tex.portrait = unit end
+
+-- the camera: its settings (Forever has the two newer ones), zoom, pitch
+state.cvars = {
+  test_cameraOverShoulder = "0",
+  test_cameraTargetFocusInteractEnable = "0",
+  test_cameraTargetFocusInteractStrengthPitch = "0.5",
+  test_cameraTargetFocusInteractStrengthYaw = "1",
+  test_cameraHeadMovementStrength = "0.3",
+}
+if FOREVER then
+  state.cvars.CameraKeepCharacterCentered = "1"
+  state.cvars.CameraReduceUnexpectedMovement = "1"
+end
+G.cvarsAtStart = {}
+for k, v in pairs(state.cvars) do
+  G.cvarsAtStart[k] = v
+end
+C_CVar = {
+  GetCVar = function(name) return state.cvars[name] end,
+  SetCVar = function(name, value)
+    if state.cvars[name] == nil then error("no such setting " .. name) end
+    state.cvars[name] = tostring(value)
+  end,
+}
+state.zoom, state.pitchlimit = 15, 88
+function GetCameraZoom() return state.zoom end
+function CameraZoomIn(d) state.zoom = math.max(0, state.zoom - d) end
+function CameraZoomOut(d) state.zoom = state.zoom + d end
+function ConsoleExec(cmd)
+  local v = cmd:match("^pitchlimit (%d+)$")
+  if v then state.pitchlimit = tonumber(v) end
+  call("ConsoleExec", cmd)
+end
+function UnitIsUnit(a, b) return a == "npc" and b == "player" and state.npcIsPlayer == true end
+function IsMounted() return state.mounted == true end
+if FOREVER then
+  function issecretvalue() return false end
+end
 
 -- the game's own words, in the client's language
 local WORDS = {
@@ -432,7 +500,15 @@ end
 local DIR = "addon/Palaver/"
 local ns = {}
 G.ns = ns
-for _, file in ipairs({ "Kit.lua", "Locale.lua", "Text_" .. LOCALE .. ".lua", "Game.lua", "Panel.lua", "Core.lua" }) do
+for _, file in ipairs({
+  "Kit.lua",
+  "Locale.lua",
+  "Text_" .. LOCALE .. ".lua",
+  "Game.lua",
+  "Panel.lua",
+  "Camera.lua",
+  "Core.lua",
+}) do
   assert(loadfile(DIR .. file))("Palaver", ns)
 end
 function G.login(loaded)

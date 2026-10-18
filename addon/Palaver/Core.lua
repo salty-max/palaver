@@ -23,7 +23,7 @@ local C = {}
 ns.core = C
 
 local PREFIX = K.hex(K.T.accent) .. "Palaver|r: "
-local DEFAULTS = { enabled = true, scale = 1, font = 15, keys = true }
+local DEFAULTS = { enabled = true, scale = 1, font = 15, keys = true, camera = false }
 local RIVALS = { "DialogueUI", "Immersion", "Storyline", "Conversations" } -- (the last: the prototype Palaver replaces)
 
 local function say(text) print(PREFIX .. text) end
@@ -112,6 +112,7 @@ function C.hide()
   C.kind = nil
   continuing = false
   if keys then keys.off() end
+  ns.camera.stop()
 end
 
 -- A close the game sent: acted on a moment later, if no page came since and
@@ -139,6 +140,7 @@ local function failed(err, event, ...)
     table.remove(log)
   end
   handedOver = true
+  pcall(ns.camera.stop)
   pcall(P.hide)
   if keys then pcall(keys.off) end
   C.unmute()
@@ -160,6 +162,7 @@ local function show(event, read, ...)
   continuing = false
   if not was then sound("IG_QUEST_LIST_OPEN") end
   if keys then keys.on() end
+  ns.camera.start()
 end
 
 -- Blizzard's own handlers, fed the event Palaver could not show.
@@ -257,6 +260,7 @@ end
 
 function ON.PLAYER_REGEN_DISABLED()
   if keys then keys.off() end
+  ns.camera.stop()
 end
 function ON.PLAYER_REGEN_ENABLED()
   if keys and P.shown() then keys.on() end
@@ -282,8 +286,11 @@ E:SetScript("OnEvent", function(_, event, ...)
       if PalaverSettings[k] == nil then PalaverSettings[k] = v end
     end
     ns.settings = PalaverSettings
+    ns.camera.recover()
     return
   end
+  -- (the camera put back whatever happens: Palaver on or off)
+  if event == "PLAYER_LOGOUT" then return ns.camera.stop() end
   if event == "PLAYER_LOGIN" then return C.start() end
   if handedOver or not C.muted() then return end
   local fn = ON[event]
@@ -291,6 +298,7 @@ E:SetScript("OnEvent", function(_, event, ...)
 end)
 E:RegisterEvent("ADDON_LOADED")
 E:RegisterEvent("PLAYER_LOGIN")
+E:RegisterEvent("PLAYER_LOGOUT")
 for event in pairs(ON) do
   pcall(E.RegisterEvent, E, event) -- (an event one game lacks)
 end
@@ -447,6 +455,13 @@ SlashCmdList.PALAVER = function(msg)
   elseif cmd == "keys" then
     s.keys = not s.keys
     say(s.keys and L["keys on: Space, Escape and 1 to 9 answer."] or L["keys off: only the mouse answers."])
+  elseif cmd == "camera" then
+    s.camera = not s.camera
+    if not s.camera then ns.camera.stop() end
+    say(
+      s.camera and L["camera on: the view moves in on whoever speaks."]
+        or L["camera off: the view stays as you set it."]
+    )
   elseif cmd == "reset" then
     s.point, s.scale, s.font = nil, DEFAULTS.scale, DEFAULTS.font
     P.reposition()
@@ -455,6 +470,6 @@ SlashCmdList.PALAVER = function(msg)
     local last = PalaverErrors and PalaverErrors[1]
     say(last and (last.event .. ": " .. last.err) or L["no error so far."])
   else
-    say(L["/palaver on or off, scale 0.7 to 1.5, font 12 to 22, keys, reset, errors."])
+    say(L["/palaver on or off, scale 0.7 to 1.5, font 12 to 22, keys, camera, reset, errors."])
   end
 end
