@@ -26,6 +26,7 @@ ns.core = C
 
 local PREFIX = K.hex(K.T.accent) .. "Palaver|r: "
 local DEFAULTS = { enabled = true, scale = 1, font = 15, keys = true, camera = false, value = true, upgrades = true }
+ns.DEFAULTS = DEFAULTS -- (the Options page's defaults: Settings.lua)
 local RIVALS = { "DialogueUI", "Immersion", "Storyline", "Conversations" } -- (the last: the prototype Palaver replaces)
 
 local function say(text) print(PREFIX .. text) end
@@ -307,7 +308,10 @@ E:SetScript("OnEvent", function(_, event, ...)
   end
   -- (the camera put back whatever happens: Palaver on or off)
   if event == "PLAYER_LOGOUT" then return ns.camera.stop() end
-  if event == "PLAYER_LOGIN" then return C.start() end
+  if event == "PLAYER_LOGIN" then
+    ns.createSettingsPanel()
+    return C.start()
+  end
   if handedOver or not C.muted() then return end
   local fn = ON[event]
   if fn then fn(...) end
@@ -449,57 +453,74 @@ end
 local function clamp(v, lo, hi) return math.max(lo, math.min(hi, v)) end
 
 SLASH_PALAVER1 = "/palaver"
-SlashCmdList.PALAVER = function(msg)
-  local cmd, arg = (msg or ""):lower():match("^%s*(%S*)%s*(.-)%s*$")
+-- A setting changed, from /palaver or the game's Options page (Settings.lua),
+-- and what it changes at once: Palaver on or off, the panel's size, the
+-- camera put back, the rewards' marks worked out again.
+function C.set(key, value)
   local s = ns.settings
-  if cmd == "on" or cmd == "off" then
-    s.enabled = cmd == "on"
-    if s.enabled and not rival() then
+  s[key] = value
+  if key == "enabled" then
+    if value and not rival() then
       C.mute()
     else
       if P.shown() then C.close() end
       C.unmute()
     end
+  elseif key == "scale" then
+    P.reposition()
+  elseif key == "camera" then
+    if not value then ns.camera.stop() end
+  elseif key == "value" or key == "upgrades" then
+    if P.shown() then P.remark() end
+  end
+end
+
+SlashCmdList.PALAVER = function(msg)
+  local cmd, arg = (msg or ""):lower():match("^%s*(%S*)%s*(.-)%s*$")
+  local s = ns.settings
+  if cmd == "on" or cmd == "off" then
+    C.set("enabled", cmd == "on")
     say(s.enabled and L["on: your conversations are shown here."] or L["off: the game's own windows are back."])
   elseif cmd == "scale" and tonumber(arg) then
-    s.scale = clamp(tonumber(arg), 0.7, 1.5)
-    P.reposition()
+    C.set("scale", clamp(tonumber(arg), 0.7, 1.5))
     say(L["scale %s."]:format(s.scale))
   elseif cmd == "font" and tonumber(arg) then
-    s.font = clamp(math.floor(tonumber(arg)), 12, 22)
+    C.set("font", clamp(math.floor(tonumber(arg)), 12, 22))
     say(L["text size %d."]:format(s.font))
   elseif cmd == "keys" then
-    s.keys = not s.keys
+    C.set("keys", not s.keys)
     say(s.keys and L["keys on: Space, Escape and 1 to 9 answer."] or L["keys off: only the mouse answers."])
   elseif cmd == "camera" then
-    s.camera = not s.camera
-    if not s.camera then ns.camera.stop() end
+    C.set("camera", not s.camera)
     say(
       s.camera and L["camera on: the view moves in on whoever speaks."]
         or L["camera off: the view stays as you set it."]
     )
   elseif cmd == "value" then
-    s.value = not s.value
-    if P.shown() then P.remark() end
+    C.set("value", not s.value)
     say(
       s.value and L["best value on: a coin marks the reward that sells for most."]
         or L["best value off: no coin on the rewards."]
     )
   elseif cmd == "upgrades" then
-    s.upgrades = not s.upgrades
-    if P.shown() then P.remark() end
+    C.set("upgrades", not s.upgrades)
     say(
       s.upgrades and L["upgrades on: an arrow marks the reward best for you, by the stats your class wants."]
         or L["upgrades off: no arrow on the rewards."]
     )
   elseif cmd == "reset" then
-    s.point, s.scale, s.font = nil, DEFAULTS.scale, DEFAULTS.font
-    P.reposition()
+    s.point = nil
+    C.set("scale", DEFAULTS.scale)
+    C.set("font", DEFAULTS.font)
     say(L["the panel is back in its place, at its size."])
   elseif cmd == "errors" then
     local last = PalaverErrors and PalaverErrors[1]
     say(last and (last.event .. ": " .. last.err) or L["no error so far."])
+  elseif cmd == "settings" or cmd == "options" then
+    if not ns.openSettings() then say(L["no settings page in this client."]) end
   else
-    say(L["/palaver on or off, scale 0.7 to 1.5, font 12 to 22, keys, camera, value, upgrades, reset, errors."])
+    say(
+      L["/palaver on or off, scale 0.7 to 1.5, font 12 to 22, keys, camera, value, upgrades, reset, errors, settings."]
+    )
   end
 end

@@ -52,6 +52,22 @@ check(not QuestFrame:IsEventRegistered("QUEST_DETAIL"), "QuestFrame no longer op
 local gossipOwner = G.FOREVER and CustomGossipFrameManager or GossipFrame
 check(not gossipOwner:IsEventRegistered("GOSSIP_SHOW"), "the game's gossip window no longer opens")
 
+-- ── the game's Options page: every setting, changed as /palaver changes it ──
+local O = G.options
+check(O.registered and O.name == "Palaver", "Palaver's page in the game's Options")
+for _, key in ipairs({ "enabled", "keys", "camera", "value", "upgrades", "scale", "font" }) do
+  local setting = O.settings["PALAVER_" .. key:upper()]
+  check(setting and setting.get() == ns.settings[key], "the page shows " .. key)
+end
+O.settings.PALAVER_ENABLED.set(false)
+check(QuestFrame:IsEventRegistered("QUEST_DETAIL"), "off on the page: the game's windows back, as /palaver off")
+O.settings.PALAVER_ENABLED.set(true)
+check(not QuestFrame:IsEventRegistered("QUEST_DETAIL"), "on again: muted again")
+local scales = O.settings.PALAVER_SCALE.options()
+check(#scales == 9 and scales[1].label == ns.kit.L["%d%%"]:format(70), "the panel's sizes, 70% to 150%")
+SlashCmdList.PALAVER("settings")
+check(O.opened == 42, "/palaver settings opens the page")
+
 -- ── a gossip: the NPC's words, a quest and an option as lines ────────────────
 s.npc, s.quest, s.talking = RAGNAR, RIBS, true
 fire("GOSSIP_SHOW")
@@ -334,6 +350,10 @@ check(not ns.settings.upgrades and marks() == "||", "/palaver upgrades: the arro
 SlashCmdList.PALAVER("value")
 SlashCmdList.PALAVER("upgrades")
 check(marks() == "||^$", "both on again")
+O.settings.PALAVER_VALUE.set(false)
+check(marks() == "||^", "the coin off from the Options page, at once")
+O.settings.PALAVER_VALUE.set(true)
+check(marks() == "||^$", "and back")
 
 -- a rogue's second hand: an empty off hand only where it fights with two
 items["item:dagger"] =

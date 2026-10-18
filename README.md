@@ -25,6 +25,8 @@ that sells for most. Hover a marked reward to see why. The arrow weighs the
 stats your class wants against what you wear, and Palaver needs no other
 addon for it. The marks never choose for you.
 
+Every setting is also on Palaver's page in the game's Options, under AddOns.
+
 ```text
 /palaver on | off        Palaver's panel, or the game's own windows
 /palaver scale 1.1       its size, 0.7 to 1.5
@@ -35,6 +37,7 @@ addon for it. The marks never choose for you.
 /palaver upgrades        the arrow on the reward best for you
 /palaver reset           back in its place, at its size
 /palaver errors          the last error, if one ever stopped a page
+/palaver settings        Palaver's page in the game's Options
 ```
 
 If DialogueUI, Immersion or Storyline is installed, Palaver stays out of its

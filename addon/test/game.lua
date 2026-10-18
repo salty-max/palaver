@@ -350,6 +350,33 @@ else
   GetCoinTextureString = coins
 end
 
+-- the game's Options page: what the addon registers, kept (G.options)
+local options = { settings = {} }
+G.options = options
+Settings = {
+  VarType = { Boolean = "boolean", Number = "number", String = "string" },
+  RegisterVerticalLayoutCategory = function(name)
+    options.name = name
+    return { GetID = function() return 42 end }
+  end,
+  RegisterProxySetting = function(_, variable, _, name, default, get, set)
+    local setting = { variable = variable, name = name, default = default, get = get, set = set }
+    options.settings[variable] = setting
+    return setting
+  end,
+  CreateCheckbox = function() end,
+  CreateDropdown = function(_, setting, list) setting.options = list end,
+  CreateControlTextContainer = function()
+    local data = {}
+    return {
+      Add = function(_, value, label) table.insert(data, { value = value, label = label }) end,
+      GetData = function() return data end,
+    }
+  end,
+  RegisterAddOnCategory = function() options.registered = true end,
+  OpenToCategory = function(id) options.opened = id end,
+}
+
 -- ── Blizzard's windows, as the client registers them ─────────────────────────
 QuestFrame = CreateFrame("Frame", "QuestFrame")
 for _, e in ipairs({
@@ -551,6 +578,7 @@ for _, file in ipairs({
   "Panel.lua",
   "Camera.lua",
   "Core.lua",
+  "Settings.lua",
 }) do
   assert(loadfile(DIR .. file))("Palaver", ns)
 end

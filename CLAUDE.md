@@ -17,7 +17,8 @@ Local only so far: no GitHub repository, no store page.
   Era, 11509; `_TBC.toc`: TBC Anniversary, 20506; `_Camelot.toc`: Forever,
   16001), the same but for the interface. Loads `Kit.lua` (the kit's copy,
   `bun run kit:sync`; never edit it), `Locale.lua`, `Text_[TextLocale].lua`,
-  `Game.lua`, `Rewards.lua`, `Panel.lua`, `Camera.xml`, `Camera.lua`, `Core.lua`.
+  `Game.lua`, `Rewards.lua`, `Panel.lua`, `Camera.xml`, `Camera.lua`, `Core.lua`,
+  `Settings.lua`.
 - `Game.lua`: what the game says, read into plain pages (gossip, greeting,
   detail, progress, complete), and the answers, through the same calls
   Blizzard's windows make (Blizzard_UIPanels_Game's GossipFrameShared.lua,
@@ -68,6 +69,11 @@ Local only so far: no GitHub repository, no store page.
   PalaverErrors, the conversation replayed to Blizzard's handler, the rest
   of the session Blizzard's, said once in chat. Another conversation addon
   loaded (DialogueUI, Immersion, Storyline): Palaver stays out, says so.
+- `Settings.lua`: the page in the game's Options (AddOns tab), as the
+  siblings have theirs (Second Wind's): every setting /palaver changes,
+  through the same `ns.core.set` (what each changes at once: Palaver muted or
+  not, the size, the camera put back, the marks again). Account-wide, no
+  profiles: a reading panel's settings. `/palaver settings` opens it.
 - `Camera.lua` (and `Camera.xml`, the unseen actor that measures the NPC):
   DialogueUI's "zoom to the NPC", read from its Camera.lua. Off by default
   (`/palaver camera`, until the user has tried it in the game). While a
@@ -98,9 +104,7 @@ Local only so far: no GitHub repository, no store page.
 
 - The HUD hidden while talking (DialogueUI's option): the panel would need a
   parent other than UIParent first.
-- Settings beyond `/palaver` (scale, font, keys, camera, value, upgrades,
-  reset, on, off, errors),
-  a minimap button, a welcome page: the kit has them when wanted.
+- A minimap button, a welcome page: the kit has them when wanted.
 - Releases: a GitHub repository, `.pkgmeta`, the release workflow, store
   pages: when the user decides.
 
