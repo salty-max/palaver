@@ -18,6 +18,7 @@ Kit.lua
 Locale.lua
 Text_[TextLocale].lua
 Game.lua
+Rewards.lua
 Panel.lua
 Camera.xml
 Camera.lua

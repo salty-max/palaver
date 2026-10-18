@@ -275,8 +275,20 @@ local function card(item, x, chooseIndex)
     f.chosen:SetBlendMode("ADD")
     f.chosen:SetPoint("TOPLEFT", -10, 8)
     f.chosen:SetPoint("BOTTOMRIGHT", 14, -8)
+    -- the marks (Rewards.lua): the game's green arrow, pointing up, over the
+    -- slot's corner for the best for the character, its gold coin in the
+    -- card's corner for the one that sells for most
+    f.best = f:CreateTexture(nil, "OVERLAY", nil, 7)
+    f.best:SetTexture("Interface\\Buttons\\UI-MicroStream-Green")
+    f.best:SetTexCoord(0, 1, 1, 0)
+    f.best:SetSize(18, 18)
+    f.best:SetPoint("TOPLEFT", -2, 3)
+    f.value = f:CreateTexture(nil, "OVERLAY", nil, 7)
+    f.value:SetTexture("Interface\\MoneyFrame\\UI-GoldIcon")
+    f.value:SetSize(13, 13)
+    f.value:SetPoint("TOPRIGHT", -4, -4)
     f:SetHighlightTexture(K.HIGHLIGHT, "ADD")
-    f:SetScript("OnEnter", function(self) ns.game.itemTooltip(self, self.item) end)
+    f:SetScript("OnEnter", function(self) ns.game.itemTooltip(self, self.item, self.notes) end)
     f:SetScript("OnLeave", function() GameTooltip:Hide() end)
     f:SetScript("OnClick", function(self)
       if self.chooseIndex then ns.core.choose(self.chooseIndex) end
@@ -287,6 +299,12 @@ local function card(item, x, chooseIndex)
   c:SetSize(w, 40)
   c:SetBackdropColor(0, 0, 0, 0.35)
   K.setSlot(c.slot, item.icon, item.count, item.quality)
+  -- (one the character can't use: red, as the game's own window shows it)
+  if item.usable == false then c.slot.icon:SetVertexColor(0.9, 0, 0) end
+  c.best:Hide()
+  c.value:Hide()
+  c.notes = nil
+  c.name:SetPoint("RIGHT", -6, 0)
   local name = item.name or ""
   c.name:SetText(name)
   local q = item.quality and item.quality >= 2 and ITEM_QUALITY_COLORS and ITEM_QUALITY_COLORS[item.quality]
@@ -355,6 +373,65 @@ local function rewards(r, choose)
   P.choosing = choose
 end
 
+-- ── the marks ────────────────────────────────────────────────────────────────
+-- Among two rewards or more to choose from: the best for the character (an
+-- arrow) and the one that sells for most (a coin), each saying why on the
+-- card's tooltip (Rewards.lua). Asked again when the game tells an item it
+-- had yet to (P.waiting: Core.lua's GET_ITEM_INFO_RECEIVED).
+local UPGRADE = { 0.1, 1, 0.1 }
+P.waiting = false
+function P.mark()
+  P.waiting = false
+  for _, c in pairs(P.cards) do
+    c.best:Hide()
+    c.value:Hide()
+    c.notes = nil
+    c.name:SetPoint("RIGHT", -6, 0)
+  end
+  local r = P.page and P.page.rewards
+  local choice = r and r.choice
+  if not (choice and #choice > 1) then return end
+  local s = ns.settings or {}
+  local function note(c, text, color)
+    c.notes = c.notes or {}
+    table.insert(c.notes, { text, color })
+  end
+  if s.upgrades ~= false then
+    local best, wait = ns.rewards.bestForYou(choice)
+    if wait then P.waiting = true end
+    local c = best and P.cards[best.index]
+    if c then
+      c.best:Show()
+      note(c, best.why, UPGRADE)
+    end
+  end
+  if s.value ~= false then
+    local best, wait = ns.rewards.bestValue(choice)
+    if wait then P.waiting = true end
+    local c = best and P.cards[best.index]
+    if c then
+      c.value:Show()
+      c.name:SetPoint("RIGHT", -20, 0)
+      note(c, L["Sells for the most of these: %s."]:format(ns.game.coins(best.price)), T.gold)
+    end
+  end
+end
+
+-- The marks worked out again (a page shown, an item told, something worn
+-- changed). One that fails is no reason to lose the page: the error kept for
+-- /palaver errors, the marks left off.
+function P.remark()
+  local ok, err = pcall(P.mark)
+  if ok then return end
+  for _, c in pairs(P.cards) do
+    c.best:Hide()
+    c.value:Hide()
+    c.notes = nil
+  end
+  P.waiting = false
+  ns.core.keep(err, "marks")
+end
+
 -- ── a page ───────────────────────────────────────────────────────────────────
 local function footer(page)
   local a = page.actions or {}
@@ -421,6 +498,7 @@ function P.show(page)
     end
   end
   rewards(page.rewards, page.choose)
+  P.remark()
 
   child:SetHeight(math.max(1, y))
   footer(page)

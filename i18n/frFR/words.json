@@ -1,10 +1,17 @@
 {
   "%s already shows your conversations, so Palaver stays out of its way. Turn one of them off to choose.": "%s affiche déjà vos conversations, Palaver ne s'en mêle donc pas. Désactivez l'un des deux pour choisir.",
-  "/palaver on or off, scale 0.7 to 1.5, font 12 to 22, keys, camera, reset, errors.": "/palaver on ou off, scale 0.7 à 1.5, font 12 à 22, keys, camera, reset, errors.",
+  "/palaver on or off, scale 0.7 to 1.5, font 12 to 22, keys, camera, value, upgrades, reset, errors.": "/palaver on ou off, scale 0.7 à 1.5, font 12 à 22, keys, camera, value, upgrades, reset, errors.",
+  "Better for you than an empty slot, by the stats your class wants.": "Meilleur pour vous qu'un emplacement vide, selon les caractéristiques que demande votre classe.",
+  "Better for you than your %s, by the stats your class wants.": "Meilleur pour vous que votre %s, selon les caractéristiques que demande votre classe.",
   "Choose a reward, then complete the quest.": "Choisissez une récompense, puis terminez la quête.",
   "Esc": "Échap",
+  "Pawn: %d%% better for %s.": "Pawn : %d %% de mieux pour %s.",
+  "Pawn: a clear upgrade for %s.": "Pawn : une nette amélioration pour %s.",
+  "Sells for the most of these: %s.": "Se vend le plus cher de ces récompenses : %s.",
   "Space": "Espace",
   "an error stopped this page, so the game's own window takes over until you reload. /palaver errors shows what went wrong.": "une erreur a interrompu cette page, la fenêtre du jeu prend donc le relais jusqu'au prochain rechargement. /palaver errors montre ce qui s'est passé.",
+  "best value off: no coin on the rewards.": "meilleur prix désactivé : aucune pièce sur les récompenses.",
+  "best value on: a coin marks the reward that sells for most.": "meilleur prix activé : une pièce marque la récompense qui se vend le plus cher.",
   "camera off: the view stays as you set it.": "caméra désactivée : la vue reste comme vous l'avez réglée.",
   "camera on: the view moves in on whoever speaks.": "caméra activée : la vue se rapproche de celui qui parle.",
   "keys off: only the mouse answers.": "touches désactivées : seule la souris répond.",
@@ -14,5 +21,7 @@
   "on: your conversations are shown here.": "activé : vos conversations s'affichent ici.",
   "scale %s.": "échelle %s.",
   "text size %d.": "taille du texte %d.",
-  "the panel is back in its place, at its size.": "le panneau retrouve sa place et sa taille."
+  "the panel is back in its place, at its size.": "le panneau retrouve sa place et sa taille.",
+  "upgrades off: no arrow on the rewards.": "améliorations désactivées : aucune flèche sur les récompenses.",
+  "upgrades on: an arrow marks the reward best for you, by Pawn if you have it.": "améliorations activées : une flèche marque la récompense la meilleure pour vous, selon Pawn si vous l'avez."
 }

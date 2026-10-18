@@ -155,12 +155,23 @@ end
 function G.closeQuest() CloseQuest() end
 
 -- ── rewards and what a quest asks to bring ───────────────────────────────────
+-- (an item's link, for its price and stats, and whether the character can
+-- use it: the game's red icon in its own window)
 local function items(type, count)
   local out = {}
   for i = 1, count do
-    local name, texture, numItems, quality = GetQuestItemInfo(type, i)
+    local name, texture, numItems, quality, isUsable = GetQuestItemInfo(type, i)
     if name or texture then
-      table.insert(out, { type = type, index = i, name = name, icon = texture, count = numItems, quality = quality })
+      table.insert(out, {
+        type = type,
+        index = i,
+        name = name,
+        icon = texture,
+        count = numItems,
+        quality = quality,
+        usable = isUsable,
+        link = GetQuestItemLink and GetQuestItemLink(type, i) or nil,
+      })
     end
   end
   return out
@@ -271,13 +282,18 @@ function G.turnIn(choice)
   return true
 end
 
--- An item a quest asks for or gives, in the game's tooltip.
-function G.itemTooltip(owner, item)
+-- An item a quest asks for or gives, in the game's tooltip, and Palaver's
+-- word on it below (notes: { text, color }, why a reward is marked).
+function G.itemTooltip(owner, item, notes)
   GameTooltip:SetOwner(owner, "ANCHOR_RIGHT")
   if item.spell then
     if type(item.spell) == "number" and GameTooltip.SetSpellByID then GameTooltip:SetSpellByID(item.spell) end
   else
     GameTooltip:SetQuestItem(item.type, item.index)
+  end
+  for i, note in ipairs(notes or {}) do
+    if i == 1 then GameTooltip:AddLine(" ") end
+    GameTooltip:AddLine(note[1], note[2][1], note[2][2], note[2][3], true)
   end
   GameTooltip:Show()
 end

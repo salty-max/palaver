@@ -17,7 +17,7 @@ Local only so far: no GitHub repository, no store page.
   Era, 11509; `_TBC.toc`: TBC Anniversary, 20506; `_Camelot.toc`: Forever,
   16001), the same but for the interface. Loads `Kit.lua` (the kit's copy,
   `bun run kit:sync`; never edit it), `Locale.lua`, `Text_[TextLocale].lua`,
-  `Game.lua`, `Panel.lua`, `Camera.xml`, `Camera.lua`, `Core.lua`.
+  `Game.lua`, `Rewards.lua`, `Panel.lua`, `Camera.xml`, `Camera.lua`, `Core.lua`.
 - `Game.lua`: what the game says, read into plain pages (gossip, greeting,
   detail, progress, complete), and the answers, through the same calls
   Blizzard's windows make (Blizzard_UIPanels_Game's GossipFrameShared.lua,
@@ -32,6 +32,22 @@ Local only so far: no GitHub repository, no store page.
   interface units: it follows the UI scale as the game's windows do; a
   long text scrolls). Not in UISpecialFrames (the game hides those at moments of
   its own, which cut trainer conversations short in the prototype).
+- `Rewards.lua`: the marks on a choice of two rewards or more (the user's
+  pick from DialogueUI's options, 18 October 2026), on the offer and the
+  hand-in. A gold coin (UI-GoldIcon) on the one that sells for most (a stack
+  at its count, none on a tie), a green arrow (UI-MicroStream-Green, flipped)
+  on the best for the character: Pawn's verdict when Pawn is ready
+  (PawnIsReady, PawnIsItemAnUpgrade's largest upgrade among the usable
+  choices, as its quest advisor; Pawn's 10,000% for an empty slot never
+  printed), else Palaver's rough rule (class weights, a hybrid by the tree
+  holding ten points and more than half, as Hearthtale's Life.lua reads it,
+  else the tree it levels in; GetItemStats against what is worn, a two-hand
+  weapon against both hands, an off hand only for one who dual wields;
+  trinkets never). An upgrade only: no arrow when nothing beats what is worn.
+  Each says why on the card's tooltip. Worked out again when the game tells
+  an item late (GET_ITEM_INFO_RECEIVED) or the gear changes; a mark that
+  fails drops the marks and keeps the page (PalaverErrors). Unusable rewards
+  red, as the game's window. The mock: `../ideas/palaver/D-reward-marks.png`.
 - `Core.lua`: the conversation. Blizzard's windows muted once at login, as
   DialogueUI does (QuestFrame's events, GossipFrame's, Forever's
   CustomGossipFrameManager's; only those that were registered, restored
@@ -83,7 +99,8 @@ Local only so far: no GitHub repository, no store page.
 
 - The HUD hidden while talking (DialogueUI's option): the panel would need a
   parent other than UIParent first.
-- Settings beyond `/palaver` (scale, font, keys, reset, on, off, errors),
+- Settings beyond `/palaver` (scale, font, keys, camera, value, upgrades,
+  reset, on, off, errors),
   a minimap button, a welcome page: the kit has them when wanted.
 - Releases: a GitHub repository, `.pkgmeta`, the release workflow, store
   pages: when the user decides.

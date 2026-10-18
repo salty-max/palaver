@@ -1,5 +1,6 @@
 -- Palaver played through: an NPC's gossip, a quest offered, accepted, brought
--- back, handed in with a reward chosen, a vendor, the keys, Escape, an error
+-- back, handed in with a reward chosen, the rewards' marks (with Pawn and
+-- without), a vendor, the keys, Escape, an error
 -- that hands the conversation to Blizzard, turning Palaver off and on. Each
 -- step as the game sends it (events, keys), each answer checked against the
 -- game's calls. FOREVER=1, TBC=1, LOCALE=frFR: those clients.
@@ -232,6 +233,202 @@ check(PalaverFrame.primary.label:GetText() == words("ACCEPT"), "Accept in the cl
 check(PalaverFrame.primary.badge.text:GetText() == ns.kit.L["Space"], "the key's name in the language")
 if G.LOCALE == "frFR" then check(ns.kit.L["Space"] == "Espace", "French: Espace") end
 G.key("ESCAPE")
+
+-- ── the rewards' marks: the best for the character, the best value ─────────
+local L = ns.kit.L
+local items = s.items
+items["item:mh"] =
+  { name = "Worn Shortsword", price = 7, slot = "INVTYPE_WEAPON", stats = { ITEM_MOD_DAMAGE_PER_SECOND_SHORT = 5 } }
+items["item:legs0"] = {
+  name = "Ragged Leggings",
+  price = 5,
+  slot = "INVTYPE_LEGS",
+  stats = { RESISTANCE0_NAME = 50, ITEM_MOD_STAMINA_SHORT = 1 },
+}
+items["item:trousers"] = {
+  name = "Rancher's Trousers",
+  price = 162,
+  slot = "INVTYPE_LEGS",
+  stats = { RESISTANCE0_NAME = 60, ITEM_MOD_STAMINA_SHORT = 2 },
+}
+items["item:tunic"] = {
+  name = "Soft Leather Tunic",
+  price = 201,
+  slot = "INVTYPE_CHEST",
+  stats = { RESISTANCE0_NAME = 50, ITEM_MOD_AGILITY_SHORT = 1 },
+}
+items["item:hammer"] = {
+  name = "Coldridge Hammer",
+  price = 466,
+  slot = "INVTYPE_2HWEAPON",
+  stats = { ITEM_MOD_DAMAGE_PER_SECOND_SHORT = 8, ITEM_MOD_STRENGTH_SHORT = 2 },
+}
+s.worn = { [16] = "item:mh", [7] = "item:legs0" }
+local HERD = {
+  id = 314,
+  title = "Protecting the Herd",
+  text = "Vagash has been killing our livestock.",
+  objectives = "Kill Vagash and bring his fang to Rudra Amberstill.",
+  reward = "Very well done!",
+  completable = true,
+  choice = {
+    { name = "Rancher's Trousers", icon = 134582, link = "item:trousers" },
+    { name = "Soft Leather Tunic", icon = 132719, link = "item:tunic" },
+    { name = "Coldridge Hammer", icon = 133052, link = "item:hammer" },
+  },
+  xp = 450,
+}
+s.npc, s.quest, s.talking = { name = "Rudra Amberstill" }, HERD, true
+-- (each choice's marks: the arrow, the coin)
+local function marks()
+  local out = {}
+  for i = 1, #P.page.rewards.choice do
+    local c = P.cards[i]
+    out[i] = (c.best.shown and "^" or "") .. (c.value.shown and "$" or "")
+  end
+  return table.concat(out, "|")
+end
+local function tip(i)
+  local c = P.cards[i]
+  c.scripts.OnEnter(c)
+  return table.concat(GameTooltip.lines, "\n")
+end
+fire("QUEST_COMPLETE")
+check(marks() == "||^$", "a warrior: the hammer the best for them, and it sells for most")
+check(not P.choice, "the marks choose nothing: the choice stays the player's")
+check(tip(3):find("Worn Shortsword", 1, true), "the arrow says what it beats")
+check(
+  tip(3):find(L["Sells for the most of these: %s."]:format(ns.game.coins(466)), 1, true),
+  "the coin says what it sells for"
+)
+check(tip(1) == "", "an unmarked reward: the game's tooltip alone")
+fire("QUEST_DETAIL")
+check(marks() == "||^$", "the offer shows the marks too")
+
+HERD.choice[3].usable = false
+fire("QUEST_COMPLETE")
+check(marks() == "|^|$", "a hammer they can't use: the tunic for an empty chest, the coin still on the hammer")
+check(P.cards[3].slot.icon.color[2] == 0, "and the hammer red, as the game's window shows it")
+check(
+  tip(2):find(L["Better for you than an empty slot, by the stats your class wants."], 1, true),
+  "the empty slot said"
+)
+HERD.choice[3].usable = nil
+
+items["item:hammer"].pending = true
+fire("QUEST_COMPLETE")
+check(marks() == "||" and P.waiting, "an item the game has yet to tell: no marks, waiting")
+items["item:hammer"].pending = nil
+fire("GET_ITEM_INFO_RECEIVED", 0)
+check(marks() == "||^$" and not P.waiting, "told at last: the marks come")
+
+items["item:tunic"].price = 466
+fire("QUEST_COMPLETE")
+check(marks() == "||^", "two at the top price: no coin")
+items["item:tunic"].price = 201
+
+SlashCmdList.PALAVER("value")
+check(not ns.settings.value and marks() == "||^", "/palaver value: the coin off at once")
+SlashCmdList.PALAVER("upgrades")
+check(not ns.settings.upgrades and marks() == "||", "/palaver upgrades: the arrow off")
+SlashCmdList.PALAVER("value")
+SlashCmdList.PALAVER("upgrades")
+check(marks() == "||^$", "both on again")
+
+-- a rogue's second hand: an empty off hand only where it fights with two
+items["item:dagger"] =
+  { name = "Rogue's Dagger", price = 9, slot = "INVTYPE_WEAPON", stats = { ITEM_MOD_DAMAGE_PER_SECOND_SHORT = 6 } }
+items["item:dirk"] =
+  { name = "Keen Dirk", price = 50, slot = "INVTYPE_WEAPON", stats = { ITEM_MOD_DAMAGE_PER_SECOND_SHORT = 5 } }
+s.class, s.worn = "ROGUE", { [16] = "item:dagger", [7] = "item:legs0" }
+HERD.choice = { { name = "Keen Dirk", icon = 135641, link = "item:dirk" }, HERD.choice[1] }
+fire("QUEST_COMPLETE")
+check(marks() == "|^$", "one hand: a weaker dagger is no upgrade")
+s.dualWield = true
+fire("PLAYER_EQUIPMENT_CHANGED")
+check(marks() == "^|$", "two hands: the dirk for the empty off hand, worked out again")
+s.dualWield = nil
+
+-- a hybrid by its tree: a paladin levels as Retribution until a tree holds most points
+items["item:intlegs"] = {
+  name = "Acolyte's Pants",
+  price = 30,
+  slot = "INVTYPE_LEGS",
+  stats = { RESISTANCE0_NAME = 20, ITEM_MOD_INTELLECT_SHORT = 4 },
+}
+items["item:strlegs"] = {
+  name = "Militia Leggings",
+  price = 40,
+  slot = "INVTYPE_LEGS",
+  stats = { RESISTANCE0_NAME = 60, ITEM_MOD_STRENGTH_SHORT = 3 },
+}
+s.class, s.worn = "PALADIN", { [7] = "item:legs0" }
+HERD.choice = {
+  { name = "Acolyte's Pants", icon = 134588, link = "item:intlegs" },
+  { name = "Militia Leggings", icon = 134582, link = "item:strlegs" },
+}
+fire("QUEST_COMPLETE")
+check(marks() == "|^$", "a paladin with no tree yet: strength, as Retribution levels")
+s.talents = { 11, 0, 0 }
+fire("QUEST_COMPLETE")
+check(marks() == "^|$", "eleven points in Holy: intellect")
+s.talents = { 5, 3, 4 }
+fire("QUEST_COMPLETE")
+check(marks() == "|^$", "a few points here and there: still Retribution")
+s.talents = { 0, 0, 0 }
+
+-- Pawn: its verdict, the player's own scales, when it is there and ready
+s.class, s.worn = "WARRIOR", { [16] = "item:mh", [7] = "item:legs0" }
+HERD.choice = {
+  { name = "Rancher's Trousers", icon = 134582, link = "item:trousers" },
+  { name = "Soft Leather Tunic", icon = 132719, link = "item:tunic" },
+  { name = "Coldridge Hammer", icon = 133052, link = "item:hammer" },
+}
+local pawnReady, verdicts, pawnBroken = true, {}, false
+PawnBigUpgradeThreshold = 100
+function PawnIsReady() return pawnReady end
+function PawnGetItemData(link)
+  if items[link].pending then return nil end
+  return { Link = link }
+end
+function PawnIsItemAnUpgrade(item)
+  if pawnBroken then error("Pawn broke") end
+  return verdicts[item.Link]
+end
+verdicts["item:tunic"] = { { ScaleName = "a", LocalizedScaleName = "Arms", PercentUpgrade = 0.12 } }
+verdicts["item:trousers"] = { { ScaleName = "a", LocalizedScaleName = "Arms", PercentUpgrade = 0.05 } }
+fire("QUEST_COMPLETE")
+check(marks() == "|^|$", "Pawn: its largest upgrade, not Palaver's rule")
+check(tip(2):find(L["Pawn: %d%% better for %s."]:format(12, "Arms"), 1, true), "Pawn's number on the tooltip")
+verdicts["item:tunic"][1].PercentUpgrade = 100
+fire("QUEST_COMPLETE")
+check(tip(2):find(L["Pawn: a clear upgrade for %s."]:format("Arms"), 1, true), "an empty slot: no 10000%")
+verdicts = {}
+fire("QUEST_COMPLETE")
+check(marks() == "||$", "Pawn sees no upgrade: no arrow, Palaver's rule unasked")
+items["item:tunic"].pending = true
+fire("QUEST_COMPLETE")
+check(P.waiting and not P.cards[2].best.shown, "Pawn without the item yet: waiting")
+items["item:tunic"].pending = nil
+pawnBroken = true
+fire("QUEST_COMPLETE")
+check(P.shown() and marks() == "||$", "Pawn failing: no arrow, the page as it was")
+pawnBroken, pawnReady = false, false
+fire("QUEST_COMPLETE")
+check(marks() == "||^$", "Pawn not ready yet: Palaver's rule")
+PawnIsReady, PawnGetItemData, PawnIsItemAnUpgrade, PawnBigUpgradeThreshold = nil, nil, nil, nil
+
+-- a mark that fails: kept for /palaver errors, the page kept, Palaver kept
+local real = ns.rewards.bestValue
+ns.rewards.bestValue = function() error("a broken price") end
+fire("QUEST_COMPLETE")
+check(P.shown() and P.page.kind == "complete" and marks() == "||", "a failing mark: the page without marks")
+check(PalaverErrors[1].event == "marks", "the error kept")
+check(not QuestFrame:IsEventRegistered("QUEST_DETAIL"), "and Palaver still the one talking")
+ns.rewards.bestValue = real
+PalaverErrors = nil
+G.key("ESCAPE")
+s.worn = {}
 
 -- ── the camera: still by default, DialogueUI's move in when turned on ────────
 s.npc, s.quest, s.talking = RAGNAR, RIBS, true

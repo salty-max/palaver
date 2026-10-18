@@ -19,12 +19,21 @@ A key acts when you let it go, and only on the page you pressed it on: a
 held Space never accepts the next quest. In combat, while typing or with a
 modifier held, the keys stay the game's. Drag the panel to move it.
 
+When a quest offers a choice of rewards, two marks help you pick. A green
+arrow sits on the one best for your character, and a gold coin on the one
+that sells for most. Hover a marked reward to see why. With Pawn installed,
+the arrow follows Pawn's verdict, your own scales. Without it, Palaver
+weighs the stats your class wants against what you wear. The marks never
+choose for you.
+
 ```text
 /palaver on | off        Palaver's panel, or the game's own windows
 /palaver scale 1.1       its size, 0.7 to 1.5
 /palaver font 16         its text, 12 to 22
 /palaver keys            the keys on or off
 /palaver camera          the view moves in on whoever speaks (off at first)
+/palaver value           the coin on the reward that sells for most
+/palaver upgrades        the arrow on the reward best for you
 /palaver reset           back in its place, at its size
 /palaver errors          the last error, if one ever stopped a page
 ```

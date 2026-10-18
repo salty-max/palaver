@@ -12,9 +12,11 @@
 -- one of those windows opening step the panel aside without a word to the
 -- game. Only the player ends a conversation (Goodbye, Decline, Escape).
 --
--- PalaverSettings: { enabled, scale, font, keys, point }. PalaverErrors: the
--- last few errors (a page that failed to draw hands its conversation to
--- Blizzard's window for the rest of the session, said once in chat).
+-- PalaverSettings: { enabled, scale, font, keys, camera, value, upgrades,
+-- point, cameraBackup }. PalaverErrors: the last few errors (a page that
+-- failed to draw hands its conversation to Blizzard's window for the rest of
+-- the session, said once in chat; a reward's mark that failed only drops the
+-- marks).
 local addonName, ns = ...
 local K = ns.kit
 local L = K.L
@@ -23,7 +25,7 @@ local C = {}
 ns.core = C
 
 local PREFIX = K.hex(K.T.accent) .. "Palaver|r: "
-local DEFAULTS = { enabled = true, scale = 1, font = 15, keys = true, camera = false }
+local DEFAULTS = { enabled = true, scale = 1, font = 15, keys = true, camera = false, value = true, upgrades = true }
 local RIVALS = { "DialogueUI", "Immersion", "Storyline", "Conversations" } -- (the last: the prototype Palaver replaces)
 
 local function say(text) print(PREFIX .. text) end
@@ -132,13 +134,18 @@ end
 -- (an error while drawing one: kept, said once, and this conversation, with
 -- the rest of the session's, given back to Blizzard's windows)
 local replay
-local function failed(err, event, ...)
+-- (an error kept for /palaver errors, the last five)
+function C.keep(err, event)
   local log = PalaverErrors or {}
   PalaverErrors = log
-  table.insert(log, 1, { at = time(), event = event, err = tostring(err), stack = debugstack and debugstack(2) or "" })
+  table.insert(log, 1, { at = time(), event = event, err = tostring(err), stack = debugstack and debugstack(3) or "" })
   while #log > 5 do
     table.remove(log)
   end
+end
+
+local function failed(err, event, ...)
+  C.keep(err, event)
   handedOver = true
   pcall(ns.camera.stop)
   pcall(P.hide)
@@ -220,6 +227,15 @@ function ON.QUEST_ITEM_UPDATE()
   local choice = P.choice
   show("QUEST_ITEM_UPDATE", read)
   if choice then P.choose(choice) end
+end
+
+-- (the marks on the rewards: an item the game had yet to tell, or a change
+-- in what the character wears)
+function ON.GET_ITEM_INFO_RECEIVED()
+  if P.waiting and P.shown() then P.remark() end
+end
+function ON.PLAYER_EQUIPMENT_CHANGED()
+  if P.shown() then P.remark() end
 end
 
 function ON.QUEST_LOG_UPDATE()
@@ -462,6 +478,20 @@ SlashCmdList.PALAVER = function(msg)
       s.camera and L["camera on: the view moves in on whoever speaks."]
         or L["camera off: the view stays as you set it."]
     )
+  elseif cmd == "value" then
+    s.value = not s.value
+    if P.shown() then P.remark() end
+    say(
+      s.value and L["best value on: a coin marks the reward that sells for most."]
+        or L["best value off: no coin on the rewards."]
+    )
+  elseif cmd == "upgrades" then
+    s.upgrades = not s.upgrades
+    if P.shown() then P.remark() end
+    say(
+      s.upgrades and L["upgrades on: an arrow marks the reward best for you, by Pawn if you have it."]
+        or L["upgrades off: no arrow on the rewards."]
+    )
   elseif cmd == "reset" then
     s.point, s.scale, s.font = nil, DEFAULTS.scale, DEFAULTS.font
     P.reposition()
@@ -470,6 +500,6 @@ SlashCmdList.PALAVER = function(msg)
     local last = PalaverErrors and PalaverErrors[1]
     say(last and (last.event .. ": " .. last.err) or L["no error so far."])
   else
-    say(L["/palaver on or off, scale 0.7 to 1.5, font 12 to 22, keys, camera, reset, errors."])
+    say(L["/palaver on or off, scale 0.7 to 1.5, font 12 to 22, keys, camera, value, upgrades, reset, errors."])
   end
 end

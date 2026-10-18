@@ -41,10 +41,14 @@ local function obj(kind, name)
     font = 15,
   }
   return setmetatable(o, {
+    -- (a method the test game lacks does nothing, as long as it is a
+    -- method: the game's are capitalized, a field the addon never set is nil)
     __index = function(self, k)
       local m = G.methods[k]
       if m then return m end
-      return function() end
+      if type(k) == "string" and k:match("^%u") then
+        return function() end
+      end
     end,
   })
 end
@@ -156,6 +160,7 @@ G.methods = {
     end
     return a
   end,
+  SetVertexColor = function(self, r, g, b) self.color = { r, g, b } end,
   SetScale = function(self, v) self.scale = v end,
   GetScale = function(self) return self.scale or 1 end,
   GetParent = function(self) return self.parent end,
@@ -175,6 +180,9 @@ UIParent.shown = true
 UIParent.w, UIParent.h = 1365, 768
 UIParent.events.EXPERIMENTAL_CVAR_CONFIRMATION_NEEDED = true
 GameTooltip = obj("Frame", "GameTooltip")
+GameTooltip.lines = {}
+function GameTooltip:SetOwner() wipe(self.lines) end
+function GameTooltip:AddLine(text) table.insert(self.lines, text) end
 WorldFrame = obj("Frame", "WorldFrame")
 
 G.invalidEvents = {}
@@ -468,7 +476,41 @@ function GetNumQuestRewards() return #list("reward") end
 function GetNumQuestItems() return #list("required") end
 function GetQuestItemInfo(kind, i)
   local it = list(kind)[i]
-  return it.name, it.icon, it.count or 1, it.quality or 1, true
+  return it.name, it.icon, it.count or 1, it.quality or 1, it.usable ~= false
+end
+function GetQuestItemLink(kind, i) return list(kind)[i].link end
+
+-- items as the game tells them (state.items[link]: { name, price, slot,
+-- stats }; pending: not told yet), what the character wears (state.worn[slot]:
+-- a link), its class and talents (state.class, state.talents: points a tree)
+state.items, state.worn, state.class, state.talents = {}, {}, "WARRIOR", { 0, 0, 0 }
+local function info(link)
+  local it = link and state.items[link]
+  if not it or it.pending then return end
+  return it.name, link, 1, 10, 1, "Armor", "Misc", 1, it.slot or "", 134400, it.price or 0
+end
+local function stats(link)
+  local it = link and state.items[link]
+  if not it or it.pending then return nil end
+  local out = {}
+  for k, v in pairs(it.stats or {}) do
+    out[k] = v
+  end
+  return out
+end
+if FOREVER then
+  C_Item = { GetItemInfo = info, GetItemStats = stats }
+else
+  GetItemInfo, GetItemStats = info, stats
+end
+function GetInventoryItemLink(unit, slot) return unit == "player" and state.worn[slot] or nil end
+function UnitClass() return "Class", state.class end
+function CanDualWield() return state.dualWield == true end
+function GetNumTalentTabs() return 3 end
+function GetTalentTabInfo(i)
+  -- (Classic Era's: name, icon, points; TBC's and Forever's: id, name, text, icon, points)
+  if FOREVER or TBC then return 100 + i, "Tree" .. i, "", 1, state.talents[i] end
+  return "Tree" .. i, 1, state.talents[i]
 end
 function GetRewardMoney() return quest().money or 0 end
 function GetRewardXP() return quest().xp or 0 end
@@ -505,6 +547,7 @@ for _, file in ipairs({
   "Locale.lua",
   "Text_" .. LOCALE .. ".lua",
   "Game.lua",
+  "Rewards.lua",
   "Panel.lua",
   "Camera.lua",
   "Core.lua",
