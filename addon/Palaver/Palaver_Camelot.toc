@@ -12,6 +12,8 @@
 ## IconTexture: Interface\AddOns\Palaver\Media\Logo
 ## X-Website: https://github.com/salty-max/palaver
 ## X-License: MIT
+## X-Curse-Project-ID: 1754439
+## X-Wago-ID: ZKbqbO61
 
 # Each game loads its own TOC (_Vanilla: Classic Era, _TBC: TBC Anniversary,
 # _Camelot: Forever), the same but for the interface and each game's quest
