@@ -362,11 +362,30 @@ local function card(item, x, chooseIndex)
     f.name:SetPoint("LEFT", f.slot, "RIGHT", 9, 0)
     f.name:SetPoint("RIGHT", -6, 0)
     f.name:SetMaxLines(2)
-    f.chosen = f:CreateTexture(nil, "OVERLAY")
-    f.chosen:SetTexture("Interface\\QuestFrame\\UI-QuestItemHighlight")
-    f.chosen:SetBlendMode("ADD")
-    f.chosen:SetPoint("TOPLEFT", -10, 8)
-    f.chosen:SetPoint("BOTTOMRIGHT", 14, -8)
+    -- the reward chosen: the game's highlight, two boxes in a 256 by 64
+    -- texture made for its own buttons (the icon's, 9 to 43 square, the
+    -- name's, 49 to 151 by 7 to 44), each cut out and laid on the card's own
+    -- parts, the name's in three so its corners keep their shape. Over the
+    -- slot (a frame of its own: the card's textures would sit under it).
+    f.chosen = CreateFrame("Frame", nil, f.slot)
+    f.chosen:SetAllPoints(f)
+    local function lit(l, r, t, b)
+      local tex = f.chosen:CreateTexture(nil, "OVERLAY")
+      tex:SetTexture("Interface\\QuestFrame\\UI-QuestItemHighlight")
+      tex:SetTexCoord(l / 256, r / 256, t / 64, b / 64)
+      tex:SetBlendMode("ADD")
+      return tex
+    end
+    local icon = lit(9, 44, 9, 44)
+    icon:SetPoint("TOPLEFT", f.slot, "TOPLEFT", -1, 1)
+    icon:SetPoint("BOTTOMRIGHT", f.slot, "BOTTOMRIGHT", 1, -1)
+    local left, mid, right = lit(49, 59, 7, 45), lit(59, 141, 7, 45), lit(141, 152, 7, 45)
+    left:SetSize(10, 38)
+    left:SetPoint("TOPLEFT", 40, -1)
+    right:SetSize(11, 38)
+    right:SetPoint("TOPRIGHT", -1, -1)
+    mid:SetPoint("TOPLEFT", left, "TOPRIGHT")
+    mid:SetPoint("BOTTOMRIGHT", right, "BOTTOMLEFT")
     -- the marks (Rewards.lua): the game's green arrow, pointing up, over the
     -- slot's corner for the best for the character, its gold coin in the
     -- card's corner for the one that sells for most. The arrow is the slot's
