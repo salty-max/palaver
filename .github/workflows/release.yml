@@ -1,0 +1,66 @@
+# Pushing a tag vX.Y.Z (scripts/release.sh does it): checks, then the BigWigs
+# packager (.pkgmeta) makes one zip for every game (each loads its own TOC)
+# and publishes it, with the tag's message as its notes: the GitHub release,
+# CurseForge (the TOCs' X-Curse-Project-ID, secret CURSEFORGE_TOKEN) and Wago
+# Addons (the TOCs' X-Wago-ID, secret WAGO_API_TOKEN; none without either).
+#
+# To hold the stores back (a test in the game first), repository variable
+# HOLD_STORES=true (scripts/release.sh --hold sets it): the GitHub release
+# alone. Then run this workflow by hand with the tag (Actions → Release → Run
+# workflow, or gh workflow run release.yml -f tag=vX.Y.Z): CurseForge and Wago
+# alone.
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: A release already on GitHub, for CurseForge and Wago (e.g. v0.7.3)
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    env:
+      TAG: ${{ inputs.tag || github.ref_name }}
+      # (BigWigsMods/packager, pinned: one zip, Palaver-vX.Y.Z.zip, its version in its
+      # name and its label, the tag: a label takes no spaces; Unix line endings, as
+      # the folder has them)
+      PACKAGER_ARGS: -u -n "{package-name}-{project-version}:{project-version}"
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ inputs.tag || github.ref }}
+          fetch-depth: 0
+      # checkout leaves the tag lightweight: fetch it again for its message.
+      - run: git fetch --force --tags
+      - uses: oven-sh/setup-bun@v2
+      - run: sudo apt-get install -y -qq luajit
+      - run: luajit addon/test/sim.lua && FOREVER=1 luajit addon/test/sim.lua && TBC=1 luajit addon/test/sim.lua && LOCALE=frFR luajit addon/test/sim.lua && bun scripts/package.ts --check
+      - name: The notes (the tag's message)
+        run: |
+          git tag -l --format='%(contents)' "$TAG" | sed '/^-----BEGIN PGP SIGNATURE-----/,$d' > .release-notes.md
+          [ -s .release-notes.md ] || { echo "::error::tag $TAG has no message (release notes)"; exit 1; }
+      # Made once without publishing: the package must be the addon's folder,
+      # nothing more or less, before anything goes out.
+      - name: The package, checked
+        uses: BigWigsMods/packager@v2.6.1
+        with:
+          args: -d ${{ env.PACKAGER_ARGS }}
+          pandoc: false
+      - run: diff -r addon/Palaver .release/Palaver
+      - name: Published
+        uses: BigWigsMods/packager@v2.6.1
+        with:
+          args: ${{ env.PACKAGER_ARGS }}
+          pandoc: false
+        env:
+          # A tag: GitHub, and the stores unless held. By hand: the stores.
+          GITHUB_OAUTH: ${{ github.event_name == 'push' && github.token || '' }}
+          CF_API_KEY: ${{ (github.event_name == 'workflow_dispatch' || vars.HOLD_STORES != 'true') && secrets.CURSEFORGE_TOKEN || '' }}
+          WAGO_API_TOKEN: ${{ (github.event_name == 'workflow_dispatch' || vars.HOLD_STORES != 'true') && secrets.WAGO_API_TOKEN || '' }}

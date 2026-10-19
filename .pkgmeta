@@ -1,0 +1,27 @@
+# The BigWigs packager's settings (.github/workflows/release.yml). The addon
+# is addon/Palaver, shipped as it is (one zip for every game: each loads its
+# own TOC); the rest of the repository stays out (the release checks the
+# package is the folder, nothing more). The notes are the tag's message,
+# written to .release-notes.md by the workflow.
+package-as: Palaver
+
+move-folders:
+  Palaver/addon/Palaver: Palaver
+
+manual-changelog:
+  filename: .release-notes.md
+  markup-type: markdown
+
+ignore:
+  - assets
+  - addon/test
+  - addon/CURSEFORGE.md
+  - i18n
+  - scripts
+  - CLAUDE.md
+  - LICENSE
+  - README.md
+  - package.json
+  - selene.toml
+  - stylua.toml
+  - wow.yml

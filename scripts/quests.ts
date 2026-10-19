@@ -5,7 +5,7 @@
  *   addon/Palaver/Quests_Classic.lua, Quests_Forever.lua: each quest's level,
  *     its kind (the client's QuestInfo id: 1 elite, 41 PvP, 62 raid, 81
  *     dungeon...), its place in its chain and the chain's length, packed in
- *     one number by its id (Facts.lua reads it).
+ *     one number by its id (Game.lua's G.facts reads it).
  *   i18n/quest_types.json: the kinds' names in every language the game has,
  *     the client's own (QuestInfo), for scripts/locales.ts to put in each
  *     language's Text file.

@@ -64,6 +64,22 @@ The NPCs' words, the quests and the game's buttons are the game's own, in
 your client's language. Palaver's few words of its own speak English, French,
 German and Spanish (German and Spanish are first translations).
 
+## Thanks
+
+Palaver's way of talking to NPCs follows DialogueUI, by Peterodox and
+Raenore. Quest levels and chains come from QuestieDB (Wowhead for Forever's
+newest quests), the quest kinds' names from the game's own tables.
+
+## Building
+
+```bash
+bun run check     # everything a commit needs
+bun run package   # a test zip in dist/
+```
+
+The quest facts come from [wow-data](https://github.com/salty-max/wow-data),
+beside this folder.
+
 ## License
 
 MIT.

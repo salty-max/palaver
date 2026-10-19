@@ -10,6 +10,7 @@
 ## Version: 0.1.0
 ## SavedVariables: PalaverSettings, PalaverErrors
 ## IconTexture: Interface\GossipFrame\GossipGossipIcon
+## X-Website: https://github.com/salty-max/palaver
 ## X-License: MIT
 
 # Each game loads its own TOC (_Vanilla: Classic Era, _TBC: TBC Anniversary,

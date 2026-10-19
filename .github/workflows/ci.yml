@@ -1,0 +1,50 @@
+# Every push and pull request: the addon's Lua is formatted and linted, the
+# addon passes its simulation on every game and a French client, its TOCs
+# agree, and the release's package (the BigWigs packager, as release.yml
+# makes it) is the addon's folder.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: oven-sh/setup-bun@v2
+      - run: sudo apt-get install -y -qq luajit
+      - name: Lua tools (StyLua, selene)
+        run: |
+          mkdir -p "$HOME/bin" && cd "$HOME/bin"
+          curl -sSLo stylua.zip https://github.com/JohnnyMorganz/StyLua/releases/download/v2.5.2/stylua-linux-x86_64.zip
+          curl -sSLo selene.zip https://github.com/Kampfkarren/selene/releases/download/0.32.0/selene-0.32.0-linux.zip
+          unzip -qo stylua.zip && unzip -qo selene.zip && chmod +x stylua selene
+          echo "$HOME/bin" >> "$GITHUB_PATH"
+      - name: Translations (the language files up to date, every word translated)
+        run: bun scripts/locales.ts --check
+      - name: Addon Lua formatted and linted
+        run: stylua --check addon && selene addon/Palaver
+      - name: Simulation
+        run: luajit addon/test/sim.lua
+      - name: Simulation (Forever)
+        run: FOREVER=1 luajit addon/test/sim.lua
+      - name: Simulation (TBC Anniversary)
+        run: TBC=1 luajit addon/test/sim.lua
+      - name: Simulation (a French client)
+        run: LOCALE=frFR luajit addon/test/sim.lua
+      - name: Package (its TOCs agree)
+        run: bun scripts/package.ts
+      # The release's package (release.yml), made without publishing: the
+      # addon's folder, nothing more or less.
+      - run: echo "(CI)" > .release-notes.md
+      - uses: BigWigsMods/packager@v2.6.1
+        with:
+          args: -d -u
+          pandoc: false
+      - run: diff -r addon/Palaver .release/Palaver

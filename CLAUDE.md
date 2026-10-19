@@ -148,12 +148,27 @@ Local only so far: no GitHub repository, no store page.
   `bun run locales`; French, German and Spanish, the last two flagged), the
   game's words for its buttons and headings, the NPCs' and quests' text the
   game's own in the client's language.
+- Releases (prepared 19 October 2026, as Keyring's): `.pkgmeta` (the BigWigs
+  packager: addon/Palaver alone), `.github/workflows/release.yml` (a tag
+  vX.Y.Z: the sims, the package checked to be the folder, then GitHub,
+  CurseForge and Wago; HOLD_STORES=true holds the stores), `ci.yml` (every
+  push: locales, lint, the four sims, the package), `game-data.yml` (daily),
+  `scripts/release.sh [--version X.Y.Z] [--hold] NOTES.md`. The store page
+  `addon/CURSEFORGE.md` (title "Palaver: Quest & NPC Dialogue", the summary
+  the TOCs' Notes, the siblings, Ko-fi, DialogueUI credited), put up by
+  `bun ../addon-kit/store.ts` once the projects exist.
 
 ## Not yet
 
 - A minimap button, a welcome page: the kit has them when wanted.
-- Releases: a GitHub repository, `.pkgmeta`, the release workflow, store
-  pages: when the user decides.
+- The logo: `assets/logo-prompts.json` is the prompt (the siblings' style),
+  for the user to generate; then `assets/` as Keyring's (master, 1024, 512)
+  and `Media/Logo.tga` (256, rounded corners, radius 34) for the TOCs'
+  IconTexture (the game's gossip icon until then).
+- The GitHub repository (salty-max/palaver), the CurseForge and Wago
+  projects (their ids in the TOCs: X-Curse-Project-ID, X-Wago-ID; secrets
+  CURSEFORGE_TOKEN and WAGO_API_TOKEN), then the first release: the user's
+  go for each.
 
 ## Commands
 
@@ -163,6 +178,7 @@ bun run package      # dist/Palaver-<version>.zip for a test in the game
 bun run kit:sync     # after a change to ../addon-kit/Kit.lua
 bun run locales      # after a new L["..."] (then --keys for i18n/words.json)
 bun run quests       # the quest facts again, after wow-data's databases change
+scripts/release.sh [--version X.Y.Z] [--hold] NOTES.md   # tag, push; Actions publish
 ```
 
 ## Conventions
