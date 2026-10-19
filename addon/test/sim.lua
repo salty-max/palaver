@@ -478,10 +478,7 @@ check(
 check(s.zoom == 2, "a dwarf, 1.7 tall: two yards")
 local b = ns.settings.cameraBackup
 check(b and b.cvars.test_cameraOverShoulder == "0" and b.zoom == 15, "what it changes, saved as it changes it")
-check(
-  not UIParent:IsEventRegistered("EXPERIMENTAL_CVAR_CONFIRMATION_NEEDED"),
-  "the game's experimental-settings warning kept quiet"
-)
+check((s.warnings or 0) == 0, "the game's experimental-settings warning kept quiet")
 G.advance(1.2)
 check(
   s.pitchlimit == 88 and s.cvars.test_cameraTargetFocusInteractStrengthPitch == "1",
@@ -497,7 +494,12 @@ check(
   not ns.camera.active() and restored(),
   "the conversation over: every setting, the pitch limit and the zoom as they were"
 )
-check(UIParent:IsEventRegistered("EXPERIMENTAL_CVAR_CONFIRMATION_NEEDED"), "the warning back")
+check((s.warnings or 0) == 0, "nor when every setting goes back")
+if G.FOREVER then
+  check(not G.internal.EXPERIMENTAL_CVAR_CONFIRMATION_NEEDED, "Forever: the warning let go for the session")
+else
+  check(UIParent:IsEventRegistered("EXPERIMENTAL_CVAR_CONFIRMATION_NEEDED"), "the warning heard again")
+end
 
 fire("GOSSIP_SHOW")
 fire("PLAYER_REGEN_DISABLED")
@@ -804,6 +806,7 @@ for k, v in pairs(keep) do
 end
 check(back and PalaverSettings.cameraBackup == nil, "the next login puts back what a crash left changed")
 check(G4.state.zoom == 15, "but not the old session's zoom, which was the session's own")
+check((G4.state.warnings or 0) == 0, "and no experimental-settings warning at that login")
 
 -- settings saved before the interface hid by default: on, once
 local G6 = dofile("addon/test/game.lua")

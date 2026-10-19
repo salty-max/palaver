@@ -196,7 +196,18 @@ end
 UIParent = obj("Frame", "UIParent")
 UIParent.shown = true
 UIParent.w, UIParent.h = 1365, 768
-UIParent.events.EXPERIMENTAL_CVAR_CONFIRMATION_NEEDED = true
+-- (the experimental-settings warning: UIParent's on Classic Era, on
+-- Forever Blizzard_Game's own frame behind GameEvent; a test_ setting changed
+-- while it's heard counts in state.warnings, the popup the player would see)
+if FOREVER then
+  G.internal = { EXPERIMENTAL_CVAR_CONFIRMATION_NEEDED = true }
+  GameEvent = {
+    RegisterInternalEvent = function(e) G.internal[e] = true end,
+    UnregisterInternalEvent = function(e) G.internal[e] = nil end,
+  }
+else
+  UIParent.events.EXPERIMENTAL_CVAR_CONFIRMATION_NEEDED = true
+end
 GameTooltip = obj("Frame", "GameTooltip")
 GameTooltip.lines = {}
 function GameTooltip:SetOwner() wipe(self.lines) end
@@ -307,6 +318,11 @@ C_CVar = {
   GetCVar = function(name) return state.cvars[name] end,
   SetCVar = function(name, value)
     if state.cvars[name] == nil then error("no such setting " .. name) end
+    local heard = FOREVER and G.internal.EXPERIMENTAL_CVAR_CONFIRMATION_NEEDED
+      or not FOREVER and UIParent.events.EXPERIMENTAL_CVAR_CONFIRMATION_NEEDED
+    if heard and name:match("^test_") and state.cvars[name] ~= tostring(value) then
+      state.warnings = (state.warnings or 0) + 1
+    end
     state.cvars[name] = tostring(value)
   end,
 }

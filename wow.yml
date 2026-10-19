@@ -69,6 +69,8 @@ globals:
     any: true
   C_CurrencyInfo:
     any: true
+  GameEvent:
+    any: true
   C_PlayerInteractionManager:
     any: true
   C_QuestInfoSystem:

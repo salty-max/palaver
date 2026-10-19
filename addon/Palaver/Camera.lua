@@ -38,10 +38,33 @@ local function setCVar(name, value)
 end
 local function secret(v) return issecretvalue and issecretvalue(v) end
 
-local active, driver, warned = false, CreateFrame("Frame"), false
+local active, driver, warned, letGo = false, CreateFrame("Frame"), false, false
 local measured = false
 local session = 0 -- (each conversation's own: a late model or timer of an older one ignored)
 local MIDDLING = 4 -- (no size to go by: a model that never loads, or loads without one)
+
+-- The game's warning about experimental settings ("visual discomfort", Accept
+-- or Disable, Disable undoing every one of them): not for a camera put back
+-- when the conversation ends. Classic Era's interface hears it on UIParent:
+-- muted while the camera is changed, then heard again. Forever's (12.1's
+-- Blizzard_Game) on a frame of its own behind GameEvent: let go for the
+-- session the first time, as DialogueUI does. A handler put back by an addon
+-- would be the addon's, and the game's popups would run it (taint).
+local function quiet()
+  if UIParent:IsEventRegistered(WARNING) then
+    UIParent:UnregisterEvent(WARNING)
+    warned = true
+  elseif not letGo and GameEvent and GameEvent.UnregisterInternalEvent then
+    GameEvent.UnregisterInternalEvent(WARNING)
+    letGo = true
+  end
+end
+local function heard()
+  if warned then
+    UIParent:RegisterEvent(WARNING)
+    warned = false
+  end
+end
 
 -- The saved file's copy of what was changed, kept as it changes.
 local function saved()
@@ -137,11 +160,7 @@ function C.start()
   if active or not (ns.settings and ns.settings.camera) then return end
   if InCombatLockdown() or not speaker() then return end
   active = true
-  -- (the game's warning about experimental settings: not for this)
-  if UIParent:IsEventRegistered(WARNING) then
-    UIParent:UnregisterEvent(WARNING)
-    warned = true
-  end
+  quiet()
   for name, value in pairs(FOCUS) do
     change(name, value)
   end
@@ -183,10 +202,7 @@ function C.stop()
   driver:SetScript("OnUpdate", nil)
   restore(saved())
   ns.settings.cameraBackup = nil
-  if warned then
-    UIParent:RegisterEvent(WARNING)
-    warned = false
-  end
+  heard()
 end
 
 -- At login: a conversation the last session never finished left the camera
@@ -195,8 +211,10 @@ function C.recover()
   local b = ns.settings and ns.settings.cameraBackup
   if not b then return end
   b.zoom = nil
+  quiet()
   restore(b)
   ns.settings.cameraBackup = nil
+  heard()
 end
 
 function C.active() return active end

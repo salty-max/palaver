@@ -129,9 +129,13 @@ Local only so far: no GitHub repository, no store page.
   (DialogueUI's bands: under 2 tall, 2 yards; under 2.6, 3...), 4 yards when
   no size comes within half a second. Each setting it changes is written to
   PalaverSettings.cameraBackup as it changes (a crash never restores: the
-  next login does, the zoom aside), the game's experimental-settings warning
-  silenced only while it lasts. Back at once when the conversation ends, in
-  combat and at logout. Not for an item's quest (the player is the "npc").
+  next login does, the zoom aside). The game's experimental-settings warning
+  (Accept or Disable, Disable resetting every test_ setting) kept quiet:
+  Classic Era's on UIParent, muted only while the camera is changed;
+  Forever's on Blizzard_Game's own frame (GameEvent, 12.1), let go for the
+  session at the camera's first use, as DialogueUI does (a handler an addon
+  put back would be the addon's, run by the game's popups). Back at once
+  when the conversation ends, in combat and at logout. Not for an item's quest (the player is the "npc").
   Each conversation numbered: a slow model or timer of an older one ignored.
 - `addon/test/game.lua`: a small game (frames, events, Blizzard's windows
   as each client registers them, the gossip and quest APIs over a scripted
