@@ -11,7 +11,8 @@ by another agent) was rejected: its camera and its interaction controller
 broke in the game. The gold dialog box (mock A) was the first look; the user
 switched to the family's window the same evening (mocks G and I in
 `../ideas/palaver/`).
-Local only so far: no GitHub repository, no store page.
+On GitHub (salty-max/palaver, public, 19 October 2026), not yet released:
+no store page.
 
 ## Layout
 
@@ -170,10 +171,11 @@ enamel and three gold conversation dots. NPC portraits stay the NPCs'.
 ## Not yet
 
 - A minimap button, a welcome page: the kit has them when wanted.
-- The GitHub repository (salty-max/palaver), the CurseForge and Wago
-  projects (their ids in the TOCs: X-Curse-Project-ID, X-Wago-ID; secrets
-  CURSEFORGE_TOKEN and WAGO_API_TOKEN), then the first release: the user's
-  go for each.
+- The CurseForge and Wago projects (their ids in the TOCs: X-Curse-Project-ID, X-Wago-ID; secrets
+  CURSEFORGE_TOKEN and WAGO_API_TOKEN; INBOX_EVENTS_TOKEN too, for the daily
+  data job's word to the phone), then the first release: the user's go for
+  each. Then Palaver in Ravenpost's inbox (`src/digest.ts`, `src/stats.ts`)
+  and in the siblings' store pages.
 
 ## Commands
 
