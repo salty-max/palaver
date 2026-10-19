@@ -369,12 +369,14 @@ local function card(item, x, chooseIndex)
     f.chosen:SetPoint("BOTTOMRIGHT", 14, -8)
     -- the marks (Rewards.lua): the game's green arrow, pointing up, over the
     -- slot's corner for the best for the character, its gold coin in the
-    -- card's corner for the one that sells for most
-    f.best = f:CreateTexture(nil, "OVERLAY", nil, 7)
+    -- card's corner for the one that sells for most. The arrow is the slot's
+    -- own: a frame draws over its parent's textures, whatever their layer,
+    -- so the card's would sit under the item.
+    f.best = f.slot:CreateTexture(nil, "OVERLAY", nil, 7)
     f.best:SetTexture("Interface\\Buttons\\UI-MicroStream-Green")
     f.best:SetTexCoord(0, 1, 1, 0)
     f.best:SetSize(18, 18)
-    f.best:SetPoint("TOPLEFT", -2, 3)
+    f.best:SetPoint("TOPLEFT", -5, 6)
     f.value = f:CreateTexture(nil, "OVERLAY", nil, 7)
     f.value:SetTexture("Interface\\MoneyFrame\\UI-GoldIcon")
     f.value:SetSize(13, 13)
