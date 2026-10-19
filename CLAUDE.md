@@ -11,8 +11,9 @@ by another agent) was rejected: its camera and its interaction controller
 broke in the game. The gold dialog box (mock A) was the first look; the user
 switched to the family's window the same evening (mocks G and I in
 `../ideas/palaver/`).
-On GitHub (salty-max/palaver, public, 19 October 2026), not yet released:
-no store page.
+On GitHub (salty-max/palaver, public, 19 October 2026). v0.1.0 released
+the same day on GitHub alone (HOLD_STORES=true): CurseForge 1754439 and
+Wago ZKbqbO61 wait for the user's test in the game.
 
 ## Layout
 
