@@ -42,7 +42,7 @@ local DEFAULTS = {
   version = 2,
 }
 ns.DEFAULTS = DEFAULTS -- (the Options page's defaults: Settings.lua)
-local RIVALS = { "DialogueUI", "Immersion", "Storyline", "Conversations" } -- (the last: the prototype Palaver replaces)
+local RIVALS = { "DialogueUI", "Immersion", "Storyline" }
 
 local function say(text) print(PREFIX .. text) end
 -- (a sound by its name in the game's list, if this game has it)
