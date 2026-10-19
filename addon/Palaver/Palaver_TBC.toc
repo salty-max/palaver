@@ -9,7 +9,7 @@
 ## Author: salty-max
 ## Version: 0.1.0
 ## SavedVariables: PalaverSettings, PalaverErrors
-## IconTexture: Interface\GossipFrame\GossipGossipIcon
+## IconTexture: Interface\AddOns\Palaver\Media\Logo
 ## X-Website: https://github.com/salty-max/palaver
 ## X-License: MIT
 

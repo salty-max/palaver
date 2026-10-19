@@ -158,13 +158,18 @@ Local only so far: no GitHub repository, no store page.
   the TOCs' Notes, the siblings, Ko-fi, DialogueUI credited), put up by
   `bun ../addon-kit/store.ts` once the projects exist.
 
+## Artwork
+
+`assets/logo-master.png` is the original generated logo, with 1024px and
+512px PNG exports and the exact prompt in `assets/logo-prompts.json`.
+`addon/Palaver/Media/Logo.tga` is the uncompressed 256px game texture,
+rounded as the siblings' (radius 34), used by all three TOCs' IconTexture.
+The mark is a parchment speech bubble with a gilded brass rim, turquoise
+enamel and three gold conversation dots. NPC portraits stay the NPCs'.
+
 ## Not yet
 
 - A minimap button, a welcome page: the kit has them when wanted.
-- The logo: `assets/logo-prompts.json` is the prompt (the siblings' style),
-  for the user to generate; then `assets/` as Keyring's (master, 1024, 512)
-  and `Media/Logo.tga` (256, rounded corners, radius 34) for the TOCs'
-  IconTexture (the game's gossip icon until then).
 - The GitHub repository (salty-max/palaver), the CurseForge and Wago
   projects (their ids in the TOCs: X-Curse-Project-ID, X-Wago-ID; secrets
   CURSEFORGE_TOKEN and WAGO_API_TOKEN), then the first release: the user's
