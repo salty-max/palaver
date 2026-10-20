@@ -46,11 +46,9 @@ echo "release $TAG: addon $current → $VERSION$([ "$HOLD" = 1 ] && echo ", GitH
 [ "$DRY" = 1 ] && { echo "(dry run: nothing changed)"; exit 0; }
 
 perl -pi -e "s/^## Version: .*/## Version: $VERSION/" "${TOCS[@]}"
-luajit addon/test/sim.lua >/dev/null
-FOREVER=1 luajit addon/test/sim.lua >/dev/null
-TBC=1 luajit addon/test/sim.lua >/dev/null
-LOCALE=frFR luajit addon/test/sim.lua >/dev/null
-bun scripts/package.ts --check >/dev/null
+# The whole check on the bumped tree, the one pushed: q stamps it, and the
+# pre-push hook refuses a tree without a stamp.
+bun scripts/root.ts --run addon-kit/q.ts check -- bun run check
 
 git add -A
 # Nothing to commit when the TOC already had this version (the first release).

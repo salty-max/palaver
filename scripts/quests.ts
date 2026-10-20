@@ -21,7 +21,11 @@
  */
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
-import { openDb } from "../../wow-data/src/db";
+import type * as WowDb from "../../wow-data/src/db";
+import { familyPath } from "./root";
+
+// through the family folder, from a worktree too (scripts/root.ts)
+const { openDb } = (await import(familyPath("wow-data", "src", "db.ts"))) as typeof WowDb;
 
 const ROOT = join(import.meta.dir, "..");
 const ADDON = join(ROOT, "addon", "Palaver");

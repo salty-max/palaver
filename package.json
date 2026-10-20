@@ -4,8 +4,8 @@
   "description": "A World of Warcraft addon: quests and NPC conversations in a panel of the family's look, read and answered from the keyboard",
   "license": "MIT",
   "scripts": {
-    "kit:sync": "bun ../addon-kit/sync.ts addon/Palaver",
-    "kit:check": "bun ../addon-kit/sync.ts --check addon/Palaver",
+    "kit:sync": "bun scripts/root.ts --run addon-kit/sync.ts addon/Palaver",
+    "kit:check": "bun scripts/root.ts --run addon-kit/sync.ts --check addon/Palaver",
     "locales": "bun scripts/locales.ts",
     "lint:lua": "stylua --check addon && selene addon/Palaver",
     "format:lua": "stylua addon",
