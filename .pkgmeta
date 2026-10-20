@@ -16,6 +16,7 @@ ignore:
   - assets
   - addon/test
   - addon/CURSEFORGE.md
+  - docs
   - i18n
   - scripts
   - CLAUDE.md
