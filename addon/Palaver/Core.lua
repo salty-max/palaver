@@ -137,7 +137,8 @@ function C.hide()
   continuing = false
   picked = nil
   if keys then keys.off() end
-  ns.camera.stop()
+  local okay, why = pcall(ns.camera.stop)
+  if not okay then C.keep(why, "camera") end
   ns.hud.show()
 end
 
@@ -194,8 +195,16 @@ local function show(event, read, ...)
   continuing = false
   if not was then sound("IG_QUEST_LIST_OPEN") end
   if keys then keys.on() end
-  if C.kind ~= "book" then ns.camera.start() end
   ns.hud.hide()
+  -- (a camera that fails never costs the conversation its keys or its hidden
+  -- interface: put back, the error kept for /palaver errors)
+  if C.kind ~= "book" then
+    local okay, why = pcall(ns.camera.start)
+    if not okay then
+      C.keep(why, "camera")
+      pcall(ns.camera.stop)
+    end
+  end
 end
 
 -- Blizzard's own handlers, fed the event Palaver could not show.

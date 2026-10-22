@@ -628,6 +628,18 @@ fire("GOSSIP_SHOW")
 fire("PLAYER_CAMPING")
 check(not ns.camera.active() and restored(), "a camp's countdown: the camera back")
 G.key("ESCAPE")
+-- (a camera that fails: the conversation keeps its keys and its hidden interface)
+local start = ns.camera.start
+ns.camera.start = function() error("a broken camera") end
+fire("GOSSIP_SHOW")
+G.advance(0.5)
+check(
+  not UIParent.shown and PalaverErrors[1].event == "camera",
+  "a failing camera: the interface hidden all the same, the error kept"
+)
+check(G.key("ESCAPE") == "palaver" and not P.shown(), "and Escape still ends the conversation")
+ns.camera.start = start
+PalaverErrors = nil
 
 -- ── reading on: Space through a long page before it answers ────────────────
 local LONG = {
