@@ -322,9 +322,9 @@ for _, event in ipairs({ "LOADING_SCREEN_ENABLED", "PLAYER_LEAVING_WORLD" }) do
   ON[event] = function() C.hide() end
 end
 
+-- (the camera stays through a fight, as DialogueUI's does)
 function ON.PLAYER_REGEN_DISABLED()
   if keys then keys.off() end
-  ns.camera.stop()
 end
 function ON.PLAYER_REGEN_ENABLED()
   if keys and P.shown() then keys.on() end
@@ -362,8 +362,9 @@ E:SetScript("OnEvent", function(_, event, ...)
     ns.camera.recover()
     return
   end
-  -- (the camera put back whatever happens: Palaver on or off)
-  if event == "PLAYER_LOGOUT" then return ns.camera.stop() end
+  -- (the camera put back whatever happens: Palaver on or off, at a logout,
+  -- a quit or a camp's countdown, as DialogueUI does)
+  if event == "PLAYER_LOGOUT" or event == "PLAYER_QUITING" or event == "PLAYER_CAMPING" then return ns.camera.stop() end
   if event == "PLAYER_LOGIN" then
     ns.createSettingsPanel()
     return C.start()
@@ -375,6 +376,8 @@ end)
 E:RegisterEvent("ADDON_LOADED")
 E:RegisterEvent("PLAYER_LOGIN")
 E:RegisterEvent("PLAYER_LOGOUT")
+pcall(E.RegisterEvent, E, "PLAYER_QUITING")
+pcall(E.RegisterEvent, E, "PLAYER_CAMPING")
 for event in pairs(ON) do
   pcall(E.RegisterEvent, E, event) -- (an event one game lacks)
 end

@@ -157,6 +157,7 @@ local function build()
     self:StopMovingOrSizing()
     local point, _, relPoint, x, y = self:GetPoint(1)
     if ns.settings then ns.settings.point = { point, relPoint, x, y } end
+    ns.camera.moved()
   end)
   frame:HookScript("OnHide", function()
     if not quietly then ns.core.close() end
@@ -697,7 +698,10 @@ end
 
 function P.frame() return frame end
 function P.reposition()
-  if frame and frame:IsShown() then place() end
+  if frame and frame:IsShown() then
+    place()
+    ns.camera.moved()
+  end
 end
 
 -- (the interface's scale changed: the panel follows, as the game's windows do)

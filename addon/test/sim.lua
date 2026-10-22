@@ -455,7 +455,7 @@ PalaverErrors = nil
 G.key("ESCAPE")
 s.worn = {}
 
--- ── the camera: still by default, DialogueUI's move in when turned on ────────
+-- ── the camera: still by default, DialogueUI's moves when turned on ─────────
 s.npc, s.quest, s.talking = RAGNAR, RIBS, true
 fire("GOSSIP_SHOW")
 check(not ns.camera.active() and s.zoom == 15, "the camera stays still by default")
@@ -468,6 +468,7 @@ local function restored()
   end
   return s.zoom == 15 and s.pitchlimit == 88 and ns.settings.cameraBackup == nil
 end
+local function near(a, b) return math.abs(tonumber(a) - b) < 1e-3 end
 s.npcHeight = 1.7 -- (a dwarf)
 fire("GOSSIP_SHOW")
 check(ns.camera.active(), "a conversation moves the camera")
@@ -478,11 +479,18 @@ check(
 check(s.zoom == 2, "a dwarf, 1.7 tall: two yards")
 local b = ns.settings.cameraBackup
 check(b and b.cvars.test_cameraOverShoulder == "0" and b.zoom == 15, "what it changes, saved as it changes it")
+check(b.cvars.cameraFov == "90", "the field of view kept before the tilt narrows it")
 check((s.warnings or 0) == 0, "the game's experimental-settings warning kept quiet")
-G.advance(1.2)
+G.advance(0.5)
+local k = math.sin(math.pi / 4)
 check(
-  s.pitchlimit == 88 and s.cvars.test_cameraTargetFocusInteractStrengthPitch == "1",
-  "the tilt done, the pitch limit released"
+  near(s.pitchlimit, 88 - 73 * k) and near(s.cvars.cameraFov, 90 - 15 * k),
+  "half way: the pitch limit and the field of view eased, not in whole steps"
+)
+G.advance(0.7)
+check(
+  s.pitchlimit == 88 and s.cvars.test_cameraTargetFocusInteractStrengthPitch == "1" and s.cvars.cameraFov == "75",
+  "the tilt done: the pitch limit released, the field of view at 75"
 )
 G.key("1")
 fire("GOSSIP_CLOSED", false)
@@ -492,7 +500,7 @@ check(ns.camera.active() and s.zoom == 2, "the next page keeps the camera where 
 G.key("ESCAPE")
 check(
   not ns.camera.active() and restored(),
-  "the conversation over: every setting, the pitch limit and the zoom as they were"
+  "the conversation over: every setting, the field of view, the pitch limit and the zoom as they were"
 )
 check((s.warnings or 0) == 0, "nor when every setting goes back")
 if G.FOREVER then
@@ -501,37 +509,62 @@ else
   check(UIParent:IsEventRegistered("EXPERIMENTAL_CVAR_CONFIRMATION_NEEDED"), "the warning heard again")
 end
 
+-- (a fight: the camera stays, as DialogueUI's does)
 fire("GOSSIP_SHOW")
 fire("PLAYER_REGEN_DISABLED")
-check(not ns.camera.active() and restored(), "combat: the camera back at once")
+s.combat = true
+check(ns.camera.active() and s.cvars.test_cameraTargetFocusInteractEnable == "1", "a fight: the camera stays")
+s.combat = false
+fire("PLAYER_REGEN_ENABLED")
+G.key("ESCAPE")
+check(restored(), "and goes back when the conversation ends")
+s.combat = true
+fire("GOSSIP_SHOW")
+check(ns.camera.active(), "a conversation begun in a fight: the camera moves all the same")
+s.combat = false
 fire("PLAYER_REGEN_ENABLED")
 G.key("ESCAPE")
 
+-- (no one to look at: the view slides aside, three yards out)
 s.npcIsPlayer = true
 fire("QUEST_DETAIL")
-check(not ns.camera.active() and s.zoom == 15, "a quest from an item: no one to look at")
+check(ns.camera.active() and s.zoom == 3, "a quest from an item: the camera comes to three yards")
+check(
+  s.cvars.test_cameraTargetFocusInteractEnable == "0" and s.cvars.cameraFov == "90",
+  "no focus and the field of view as it was: no one to look at"
+)
+G.advance(1)
+check(near(s.cvars.test_cameraOverShoulder, 3 * 0.4314 + 0.1057), "the view slid aside by how far out it is")
 G.key("ESCAPE")
+check(not ns.camera.active() and restored(), "and back when it ends")
 s.npcIsPlayer = nil
+local secrets = C_Secrets
+C_Secrets = { ShouldUnitIdentityBeSecret = function() return true end }
+fire("GOSSIP_SHOW")
+check(s.zoom == 4, "an NPC the game won't let be measured: four yards")
+G.key("ESCAPE")
+C_Secrets = secrets
 
+-- (the NPC's model: waited for, however long)
 s.npcHeight = nil
 fire("GOSSIP_SHOW")
+G.advance(2)
 check(s.zoom == 15, "a model slow to load: the camera waits for it")
-G.advance(0.6)
-check(s.zoom == 4, "no size within half a second: a middling four yards")
+s.npcHeight = 2.1
+G.actor:OnModelLoaded()
+check(s.zoom == 3, "however long it takes: a human, 2.1 tall, three yards")
 G.key("ESCAPE")
--- (two conversations in quick succession, both models slow: the first one's
--- half second never moves the second's camera)
+s.npcHeight = nil
 fire("GOSSIP_SHOW")
-G.advance(0.1)
+G.actor:OnModelLoaded()
+check(s.zoom == 15, "a model without a size: the zoom left as it is")
 G.key("ESCAPE")
-G.advance(0.1)
+s.npcHeight = nil
 fire("GOSSIP_SHOW")
-G.advance(0.35)
-check(s.zoom == 15, "an earlier conversation's wait never moves the next one's camera")
-G.advance(0.2)
-check(s.zoom == 4, "the next one's own wait does")
 G.key("ESCAPE")
-s.npcHeight = 7.7 -- (a tall one)
+s.npcHeight = 7.7
+G.actor:OnModelLoaded()
+check(s.zoom == 15, "a model that loads after its conversation: the camera left alone")
 fire("GOSSIP_SHOW")
 check(s.zoom == 10, "an NPC 7.7 tall: ten yards")
 G.key("ESCAPE")
@@ -539,12 +572,58 @@ s.npcHeight, s.zoom = 1.7, 1.5
 fire("GOSSIP_SHOW")
 check(s.zoom == 1.5, "already closer than it would go: the camera never zooms out")
 G.key("ESCAPE")
+
+-- (a mount, a druid's form, the panel's side)
 s.zoom, s.mounted = 15, true
 fire("GOSSIP_SHOW")
-check(s.cvars.test_cameraOverShoulder == "4.8", "mounted: further over the shoulder, the mount between")
+check(near(s.cvars.test_cameraOverShoulder, 7.2), "mounted: the shoulder times 4.8, the mount between")
+if G.FOREVER then
+  check(s.cvars.cameraFov == "90", "Forever on a mount: the field of view left alone")
+else
+  G.advance(1.2)
+  check(s.cvars.cameraFov == "75", "on a mount: the field of view narrows all the same")
+end
+s.mounted = nil
+fire("PLAYER_MOUNT_DISPLAY_CHANGED")
+check(s.cvars.test_cameraOverShoulder == "1.5", "off the mount mid-conversation: back over the shoulder")
 fire("PLAYER_LOGOUT")
 check(restored(), "a logout mid-conversation: the camera back before the game saves its settings")
-s.mounted = nil
+G.key("ESCAPE")
+if G.FOREVER then
+  fire("GOSSIP_SHOW")
+  G.advance(0.5)
+  s.mounted = true
+  fire("PLAYER_MOUNT_DISPLAY_CHANGED")
+  G.advance(1)
+  check(
+    s.cvars.cameraFov == "90" and near(s.cvars.test_cameraOverShoulder, 7.2),
+    "Forever, mounted mid-conversation: the field of view back, the shoulder further"
+  )
+  s.mounted = nil
+  G.key("ESCAPE")
+  check(restored(), "and all back when it ends")
+end
+local class = s.class
+s.class, s.form = "DRUID", 1
+fire("GOSSIP_SHOW")
+check(s.cvars.test_cameraOverShoulder == "1", "a druid in cat form: the cat's shoulder")
+s.form = 5
+fire("UPDATE_SHAPESHIFT_FORM")
+G.advance(0)
+check(s.cvars.test_cameraOverShoulder == "0.9", "into bear form mid-conversation: the bear's")
+G.key("ESCAPE")
+s.class, s.form = class, nil
+PalaverFrame.cx = 300 -- (dragged to the left of the screen)
+fire("GOSSIP_SHOW")
+check(s.cvars.test_cameraOverShoulder == "-1.5", "a panel on the left: over the other shoulder")
+PalaverFrame.cx = 1000
+PalaverFrame:GetScript("OnDragStop")(PalaverFrame)
+check(s.cvars.test_cameraOverShoulder == "1.5", "dragged back to the right mid-conversation: the right shoulder")
+G.key("ESCAPE")
+PalaverFrame.cx, ns.settings.point = nil, nil
+fire("GOSSIP_SHOW")
+fire("PLAYER_CAMPING")
+check(not ns.camera.active() and restored(), "a camp's countdown: the camera back")
 G.key("ESCAPE")
 
 -- ── reading on: Space through a long page before it answers ────────────────

@@ -131,6 +131,11 @@ G.methods = {
   CreateFontString = function() return obj("FontString") end,
   CreateMaskTexture = function() return obj("MaskTexture") end,
   GetPoint = function(self) return "RIGHT", UIParent, "RIGHT", -100, 20 end,
+  -- (the screen's middle, and a frame's where a test put it: cx, cy)
+  GetCenter = function(self)
+    if self == UIParent then return self.w / 2, self.h / 2 end
+    return self.cx, self.cy
+  end,
   SetScrollChild = function(self, c) self.scrollChild = c end,
   GetVerticalScroll = function(self) return self.vscroll or 0 end,
   SetVerticalScroll = function(self, v) self.vscroll = v end,
@@ -157,6 +162,7 @@ G.methods = {
     for k, v in pairs(PalaverMeasureActorMixin or {}) do
       a[k] = v
     end
+    G.actor = a -- (a model slow to load: the test loads it later)
     function a:SetModelByUnit(unit)
       call("SetModelByUnit", unit)
       if state.npcHeight then self:OnModelLoaded() end
@@ -300,6 +306,7 @@ function SetPortraitTexture(tex, unit) tex.portrait = unit end
 
 -- the camera: its settings (Forever has the two newer ones), zoom, pitch
 state.cvars = {
+  cameraFov = "90",
   test_cameraOverShoulder = "0",
   test_cameraTargetFocusInteractEnable = "0",
   test_cameraTargetFocusInteractStrengthPitch = "0.5",
@@ -331,12 +338,13 @@ function GetCameraZoom() return state.zoom end
 function CameraZoomIn(d) state.zoom = math.max(0, state.zoom - d) end
 function CameraZoomOut(d) state.zoom = state.zoom + d end
 function ConsoleExec(cmd)
-  local v = cmd:match("^pitchlimit (%d+)$")
+  local v = cmd:match("^pitchlimit ([%d%.]+)$")
   if v then state.pitchlimit = tonumber(v) end
   call("ConsoleExec", cmd)
 end
 function UnitIsUnit(a, b) return a == "npc" and b == "player" and state.npcIsPlayer == true end
 function IsMounted() return state.mounted == true end
+function GetShapeshiftFormID() return state.form end
 if FOREVER then
   function issecretvalue() return false end
 end

@@ -103,14 +103,25 @@ stays there). The quest facts' data: `docs/data.md`.
   every window open, the vendor's with it, if it comes back after). Never
   touched in combat, and one the player hid (Alt+Z) left alone.
 - `Camera.lua` (and `Camera.xml`, the unseen actor that measures the NPC):
-  DialogueUI's "zoom to the NPC", read from its Camera.lua. Off by default
-  (`/palaver camera`, until the user has tried it in the game). While a
-  conversation lasts: the game's interaction focus on the speaker, the view
-  over the shoulder (1.5, mounted 4.8) so the NPC stands beside the panel,
-  a one-second tilt (the focus's pitch pull 0 to 1, the pitch limit 88 to 15,
-  then released to 88), a zoom in, never out, by the NPC's measured height
-  (DialogueUI's bands: under 2 tall, 2 yards; under 2.6, 3...), 4 yards when
-  no size comes within half a second. Each setting it changes is written to
+  DialogueUI's "zoom in", its default settings played as they are (read
+  line by line from its Code/Camera.lua, Peterodox's YUI-Dialogue on GitHub,
+  22 October 2026). Off by default (`/palaver camera`, until the user has
+  tried it in the game). While a conversation lasts, someone to look at (an
+  NPC): the game's interaction focus on the speaker, the view over the
+  shoulder (1.5, times 4.8 on a mount: 7.2) so the NPC stands beside the
+  panel, a one-second eased tilt (the focus's pitch pull 0 to 1, the pitch
+  limit 88 to 15 unrounded, then released to 88, the field of view from the
+  player's to 75, kept on Forever on a mount or gliding), a zoom in, never
+  out, by the NPC's measured height (DialogueUI's bands: under 2 tall, 2
+  yards; under 2.6, 3...), waited for however long the model takes (a model
+  without a size: no zoom; an NPC the game won't let be measured, C_Secrets:
+  4 yards). No one to look at (an object's quest, an item's, an NPC whose
+  identity is secret): the view slides aside by how far out it is
+  (DialogueUI's line, 0.4314 a yard), the zoom to 3, in or out. Its side
+  the panel's (dragged left: the other shoulder, -1, -0.3 on a mount),
+  followed when the panel moves; a mount and a druid's form (DialogueUI's
+  offsets by GetShapeshiftFormID) followed while it lasts. It stays through a
+  fight, as DialogueUI's does. Each setting it changes is written to
   PalaverSettings.cameraBackup as it changes (a crash never restores: the
   next login does, the zoom aside). The game's experimental-settings warning
   (Accept or Disable, Disable resetting every test_ setting) kept quiet:
@@ -118,8 +129,12 @@ stays there). The quest facts' data: `docs/data.md`.
   Forever's on Blizzard_Game's own frame (GameEvent, 12.1), let go for the
   session at the camera's first use, as DialogueUI does (a handler an addon
   put back would be the addon's, run by the game's popups). Back at once
-  when the conversation ends, in combat and at logout. Not for an item's quest (the player is the "npc").
-  Each conversation numbered: a slow model or timer of an older one ignored.
+  when the conversation ends, at a logout, a quit or a camp's countdown. Not
+  for a book (DialogueUI's book doesn't move it either). Each conversation
+  numbered: a model of an older one ignored. Not taken from DialogueUI: its
+  DynamicCam hand-off (no other addon's API) and its camera options (the
+  zoom multiplier, the field of view off, the mount's offset off, the
+  sideways-only mode, none in instances), not approved.
 
 ## Tests
 

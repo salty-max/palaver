@@ -59,6 +59,10 @@ globals:
     any: true
   IsMounted:
     any: true
+  GetShapeshiftFormID:
+    any: true
+  C_PlayerInfo:
+    any: true
   SetCVar:
     any: true
   UnitIsUnit:

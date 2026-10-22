@@ -1,10 +1,18 @@
--- The camera: DialogueUI's "zoom to the NPC" (its Camera.lua, read as the
--- reference). While a conversation lasts: the game's own interaction focus on
--- the speaker, the view set over the shoulder so the NPC stands beside the
--- panel, a short tilt that brings the view level with them, and a zoom in
--- (never out) to a distance by how tall the NPC stands, measured from its
--- model (a dwarf 1.7, a human 2.1, a gnome 1.1: 2 yards under 2). When the
--- conversation ends, every setting it touched and the old zoom come back.
+-- The camera: DialogueUI's "zoom in" (its Code/Camera.lua, Peterodox's
+-- YUI-Dialogue, read line by line as the reference: the same moves, the same
+-- numbers, as its default settings play them).
+--
+-- Someone to look at (an NPC): the game's own interaction focus on the
+-- speaker, the view set over the shoulder so the NPC stands beside the panel,
+-- a one-second tilt that brings the view level with them and narrows the
+-- field of view to 75, and a zoom in (never out) to a distance by how tall the
+-- NPC stands, measured from its model (a dwarf 1.7, a human 2.1, a gnome 1.1:
+-- 2 yards under 2). No one to look at (an object's quest, an item's, an NPC
+-- whose identity the game hides): the view slides aside, by how far out it
+-- is, and comes to 3 yards. While the conversation lasts the view follows a
+-- mount, a druid's form and the panel's side of the screen, and it stays
+-- through a fight, as DialogueUI's does. When the conversation ends, every
+-- setting it touched and the old zoom come back.
 --
 -- Every setting is written to PalaverSettings.cameraBackup the moment it is
 -- changed: a crash or a lost connection mid-conversation never restores,
@@ -15,8 +23,11 @@ local C = {}
 ns.camera = C
 
 local SHOULDER = 1.5
-local MOUNTED = 4.8 -- (DialogueUI's: the mount stands between)
+local MOUNTED = 4.8 -- (the shoulder's multiplier on a mount, which stands between)
 local DURATION = 1.0
+local FOV = 75
+local OBJECT = 3 -- (no one to look at: how close)
+local UNKNOWN = 3 -- (no size to go by: as tall as this, so 4 yards)
 local FOCUS = {
   test_cameraTargetFocusInteractEnable = 1,
   test_cameraTargetFocusInteractStrengthPitch = 0,
@@ -26,6 +37,13 @@ local FOCUS = {
   CameraKeepCharacterCentered = 0,
   CameraReduceUnexpectedMovement = 0,
 }
+local ASIDE = {
+  CameraKeepCharacterCentered = 0,
+  CameraReduceUnexpectedMovement = 0,
+}
+-- A druid's form, its own distance over the shoulder (GetShapeshiftFormID:
+-- cat, tree, travel, aquatic, bear, swift flight, flight, moonkin).
+local FORMS = { [1] = 1.0, [2] = 1.0, [3] = 1.1, [4] = 0.9, [5] = 0.9, [27] = 0.55, [29] = 0.55, [31] = 1.0 }
 local WARNING = "EXPERIMENTAL_CVAR_CONFIRMATION_NEEDED"
 
 local function getCVar(name)
@@ -37,11 +55,16 @@ local function setCVar(name, value)
   if fn then fn(name, value) end
 end
 local function secret(v) return issecretvalue and issecretvalue(v) end
+local function mountedNow() return IsMounted and IsMounted() or false end
 
-local active, driver, warned, letGo = false, CreateFrame("Frame"), false, false
-local measured = false
+local driver, listener = CreateFrame("Frame"), CreateFrame("Frame")
+local active, warned, letGo = false, false, false
+local mode -- ("npc": someone to look at, "aside": no one)
 local session = 0 -- (each conversation's own: a late model or timer of an older one ignored)
-local MIDDLING = 4 -- (no size to go by: a model that never loads, or loads without one)
+local mounted, left = false, false
+local base, pan = SHOULDER, 1 -- (the shoulder and the slide's multiplier, a druid's form's)
+local fovFrom -- (the field of view the tilt narrows from, nil when it stays)
+local shoulder = 0 -- (where the slide has the view now)
 
 -- The game's warning about experimental settings ("visual discomfort", Accept
 -- or Disable, Disable undoing every one of them): not for a camera put back
@@ -74,12 +97,16 @@ local function saved()
   return s.cameraBackup
 end
 
-local function change(name, value)
+-- A setting kept before anything changes it (false: one this game doesn't have).
+local function keep(name)
   local old = getCVar(name)
-  if old == nil then return end -- (a setting this game doesn't have)
+  if old == nil then return false end
   local b = saved()
   if b.cvars[name] == nil then b.cvars[name] = tostring(old) end
-  setCVar(name, value)
+  return true
+end
+local function change(name, value)
+  if keep(name) then setCVar(name, value) end
 end
 
 local function zoomTo(goal, outToo)
@@ -93,7 +120,7 @@ local function zoomTo(goal, outToo)
   end
 end
 
--- How close for an NPC this tall (DialogueUI's bands).
+-- How close for an NPC this tall (DialogueUI's bands; nil: too big to come close).
 local function distance(height)
   if height < 2 then return 2 end
   if height < 2.6 then return 3 end
@@ -104,14 +131,54 @@ local function distance(height)
   if height + 2 <= 28.5 then return height + 2 end
 end
 
+-- ── where the view stands ────────────────────────────────────────────────────
+-- The panel's side of the screen: over the right shoulder for a panel on the
+-- right, the left one for a panel dragged left (DialogueUI's two sides).
+local function onLeft()
+  local f = ns.panel and ns.panel.frame()
+  local x, mid = f and f:GetCenter(), UIParent:GetCenter()
+  if not (x and mid) then return false end
+  return x * (f:GetEffectiveScale() or 1) < mid * (UIParent:GetEffectiveScale() or 1)
+end
+local function multiplier()
+  if left then return mounted and -0.3 or -1 end
+  return mounted and MOUNTED or 1
+end
+
+local function form()
+  local _, class = UnitClass("player")
+  local id = class == "DRUID" and GetShapeshiftFormID and GetShapeshiftFormID()
+  local offset = id and FORMS[id] or SHOULDER
+  base, pan = offset, offset / SHOULDER
+end
+
+-- How far aside for the zoom the view is at (DialogueUI's line).
+local function aside() return ((GetCameraZoom and GetCameraZoom() or 0) * 0.4314 + 0.1057) * pan end
+
+-- The view where it ends: the shoulder for an NPC, aside for no one.
+local function place()
+  shoulder = multiplier() * (mode == "npc" and base or aside())
+  setCVar("test_cameraOverShoulder", shoulder)
+end
+
+-- Forever's modern interface keeps its field of view on a mount or gliding
+-- (DialogueUI's: the speed's effects would leave it past its maximum).
+local function flying()
+  if not ns.forever then return false end
+  if mountedNow() then return true end
+  local I = C_PlayerInfo
+  if not (I and I.GetGlidingInfo) then return false end
+  local gliding, can = I.GetGlidingInfo()
+  return (gliding or can) and true or false
+end
+
 -- ── measuring the NPC ────────────────────────────────────────────────────────
 PalaverMeasureActorMixin = {}
 function PalaverMeasureActorMixin:OnModelLoaded()
-  local _, _, z1, _, _, z2 = self:GetActiveBoundingBox()
+  local x1, y1, z1, x2, y2, z2 = self:GetActiveBoundingBox()
   self:ClearModel()
-  if not active or measured or self.session ~= session then return end
-  measured = true
-  if not (z1 and z2) then return zoomTo(MIDDLING) end
+  if not (active and mode == "npc" and self.session == session) then return end
+  if not (x1 and y1 and z1 and x2 and y2 and z2) then return end -- (a model without a size)
   local d = distance(z2 - z1)
   if d then zoomTo(d) end
 end
@@ -119,6 +186,9 @@ end
 local scene, actor
 local function measure()
   if not (CreateFrame and UnitExists("npc")) then return false end
+  if C_Secrets and C_Secrets.ShouldUnitIdentityBeSecret and C_Secrets.ShouldUnitIdentityBeSecret("npc") then
+    return false
+  end
   local ok = pcall(function()
     scene = scene or CreateFrame("ModelScene")
     scene:SetSize(1, 1)
@@ -126,26 +196,63 @@ local function measure()
   end)
   if not (ok and actor) then return false end
   actor.session = session
-  return pcall(actor.SetModelByUnit, actor, "npc")
+  return (pcall(actor.SetModelByUnit, actor, "npc"))
 end
 
--- ── the move in ──────────────────────────────────────────────────────────────
--- Over a second: the focus's pull on the pitch from none to full, the pitch
--- limit eased from 88 to 15 (which lowers the view), then the limit
--- released to 88 (the view stays where it came to).
-local function ease(t) return math.sin(math.min(1, t) * math.pi / 2) end
+-- ── the moves ────────────────────────────────────────────────────────────────
+-- Over a second, eased: the focus's pull on the pitch from none to full, the
+-- pitch limit from 88 to 15 (which lowers the view), the field of view to 75,
+-- then the limit released to 88 (the view stays where it came to).
 local function tilt(self, elapsed)
-  self.t = (self.t or 0) + elapsed
-  local k = ease(self.t / DURATION)
-  setCVar("test_cameraTargetFocusInteractStrengthPitch", k)
+  self.t = self.t + elapsed
+  local k = math.sin(math.min(1, self.t / DURATION) * math.pi / 2)
+  local pitch = 88 - 73 * k
   if self.t >= DURATION then
     ConsoleExec("pitchlimit 15")
-    ConsoleExec("pitchlimit 88")
+    pitch, k = 88, 1
     self:SetScript("OnUpdate", nil)
-    return
   end
-  ConsoleExec("pitchlimit " .. math.floor(88 - 73 * k + 0.5))
+  if fovFrom then setCVar("cameraFov", fovFrom + (FOV - fovFrom) * k) end
+  setCVar("test_cameraTargetFocusInteractStrengthPitch", k)
+  ConsoleExec("pitchlimit " .. pitch)
 end
+
+-- No one to look at: the view slides aside as long as the conversation lasts,
+-- following the zoom (a step every few hundredths of a second).
+local function slide(self, elapsed)
+  self.t = self.t + elapsed
+  if self.t <= 0.03 then return end
+  self.t = 0
+  local goal = multiplier() * aside()
+  shoulder = shoulder + (goal - shoulder) * math.min(1, self.blend * elapsed * 60)
+  setCVar("test_cameraOverShoulder", shoulder)
+end
+
+-- A mount, a druid's form or the glide changing while it lasts.
+local function changed(_, event)
+  if event == "UPDATE_SHAPESHIFT_FORM" then
+    -- (the form's id is the new one a frame later)
+    local mine = session
+    return C_Timer.After(0, function()
+      if not active or session ~= mine then return end
+      local was = base
+      form()
+      if base ~= was then place() end
+    end)
+  end
+  local now = mountedNow()
+  if now ~= mounted then
+    mounted = now
+    place()
+  end
+  if fovFrom and flying() then
+    fovFrom = nil
+    local was = saved().cvars.cameraFov
+    if was then setCVar("cameraFov", was) end
+  end
+end
+listener:SetScript("OnEvent", changed)
+local EVENTS = { "PLAYER_MOUNT_DISPLAY_CHANGED", "UPDATE_SHAPESHIFT_FORM", "PLAYER_IS_GLIDING_CHANGED" }
 
 -- Who is spoken to is someone to look at: an NPC, not the player (a quest
 -- from an item), not an object, not one whose identity the game hides.
@@ -158,33 +265,47 @@ end
 
 function C.start()
   if active or not (ns.settings and ns.settings.camera) then return end
-  if InCombatLockdown() or not speaker() then return end
   active = true
+  session = session + 1
+  mode = speaker() and "npc" or "aside"
+  mounted, left = mountedNow(), onLeft()
+  form()
   quiet()
-  for name, value in pairs(FOCUS) do
-    change(name, value)
-  end
   local b = saved()
   b.zoom = GetCameraZoom and GetCameraZoom()
-  b.pitch = true
-  local shoulder = (IsMounted and IsMounted()) and MOUNTED or SHOULDER
-  setCVar("test_cameraOverShoulder", shoulder)
-  measured = false
-  session = session + 1
-  local mine = session
-  if measure() then
-    C_Timer.After(0.5, function()
-      if active and not measured and session == mine then
-        measured = true
-        zoomTo(MIDDLING)
-      end
-    end)
-  else
-    measured = true
-    zoomTo(MIDDLING)
-  end
   driver.t = 0
-  driver:SetScript("OnUpdate", tilt)
+  if mode == "npc" then
+    for name, value in pairs(FOCUS) do
+      change(name, value)
+    end
+    b.pitch = true
+    fovFrom = not flying() and keep("cameraFov") and (tonumber(getCVar("cameraFov")) or 90) or nil
+    place()
+    driver:SetScript("OnUpdate", tilt)
+    if not measure() then zoomTo(distance(UNKNOWN)) end
+  else
+    keep("test_cameraOverShoulder")
+    for name, value in pairs(ASIDE) do
+      change(name, value)
+    end
+    shoulder = tonumber(getCVar("test_cameraOverShoulder")) or 0
+    driver.blend = aside() - shoulder > 8 and 0.06 or 0.1
+    driver:SetScript("OnUpdate", slide)
+    zoomTo(OBJECT, true)
+  end
+  for _, event in ipairs(EVENTS) do
+    pcall(listener.RegisterEvent, listener, event) -- (an event one game lacks)
+  end
+end
+
+-- The panel dragged to the other side of the screen: the other shoulder.
+function C.moved()
+  if not active then return end
+  local now = onLeft()
+  if now ~= left then
+    left = now
+    place()
+  end
 end
 
 -- Everything put back: the settings, the pitch limit, the zoom.
@@ -198,8 +319,9 @@ end
 
 function C.stop()
   if not active then return end
-  active = false
+  active, mode, fovFrom = false, nil, nil
   driver:SetScript("OnUpdate", nil)
+  listener:UnregisterAllEvents()
   restore(saved())
   ns.settings.cameraBackup = nil
   heard()
