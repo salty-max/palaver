@@ -628,17 +628,19 @@ fire("GOSSIP_SHOW")
 fire("PLAYER_CAMPING")
 check(not ns.camera.active() and restored(), "a camp's countdown: the camera back")
 G.key("ESCAPE")
--- (a camera that fails: the conversation keeps its keys and its hidden interface)
-local start = ns.camera.start
-ns.camera.start = function() error("a broken camera") end
+-- (a camera that fails: put back, still for the session, the error kept once;
+-- the conversation keeps its keys and its hidden interface)
+local unitClass = UnitClass
+UnitClass = function() error("a broken call") end
 fire("GOSSIP_SHOW")
 G.advance(0.5)
-check(
-  not UIParent.shown and PalaverErrors[1].event == "camera",
-  "a failing camera: the interface hidden all the same, the error kept"
-)
+check(not ns.camera.active() and restored(), "a failing camera: put back at once")
+check(not UIParent.shown and PalaverErrors[1].event == "camera", "the interface hidden all the same, the error kept")
 check(G.key("ESCAPE") == "palaver" and not P.shown(), "and Escape still ends the conversation")
-ns.camera.start = start
+UnitClass = unitClass
+fire("GOSSIP_SHOW")
+check(not ns.camera.active() and #PalaverErrors == 1, "never tried again this session: one error kept, not one a page")
+G.key("ESCAPE")
 PalaverErrors = nil
 
 -- ── reading on: Space through a long page before it answers ────────────────

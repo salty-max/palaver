@@ -112,7 +112,9 @@ stays there). The quest facts' data: `docs/data.md`.
   shoulder (1.5, times 4.8 on a mount: 7.2) so the NPC stands beside the
   panel, a one-second eased tilt (the focus's pitch pull 0 to 1, the pitch
   limit 88 to 15 unrounded, then released to 88, the field of view from the
-  player's to 75, kept on Forever on a mount or gliding), a zoom in, never
+  player's to 75, kept on Forever on a mount or gliding, and put back there
+  on mounting mid-conversation: DialogueUI means to, but its restore reads
+  the wrong table and never does), a zoom in, never
   out, by the NPC's measured height (DialogueUI's bands: under 2 tall, 2
   yards; under 2.6, 3...), waited for however long the model takes (a model
   without a size: no zoom; an NPC the game won't let be measured, C_Secrets:
@@ -132,7 +134,11 @@ stays there). The quest facts' data: `docs/data.md`.
   put back would be the addon's, run by the game's popups). Back at once
   when the conversation ends, at a logout, a quit or a camp's countdown. Not
   for a book (DialogueUI's book doesn't move it either). Each conversation
-  numbered: a model of an older one ignored. Not taken from DialogueUI: its
+  numbered: a model of an older one ignored. Every way into it guarded (its
+  start, stop, tilt, slide, events, the model's load): an error of its own
+  puts the camera back and leaves it still for the session, kept once for
+  `/palaver errors` with the stack where it was thrown, the conversation
+  going on (the interface hidden before the camera starts). Not taken from DialogueUI: its
   DynamicCam hand-off (no other addon's API) and its camera options (the
   zoom multiplier, the field of view off, the mount's offset off, the
   sideways-only mode, none in instances), not approved.

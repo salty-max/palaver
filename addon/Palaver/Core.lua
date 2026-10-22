@@ -137,8 +137,7 @@ function C.hide()
   continuing = false
   picked = nil
   if keys then keys.off() end
-  local okay, why = pcall(ns.camera.stop)
-  if not okay then C.keep(why, "camera") end
+  ns.camera.stop()
   ns.hud.show()
 end
 
@@ -160,10 +159,12 @@ end
 -- the rest of the session's, given back to Blizzard's windows)
 local replay
 -- (an error kept for /palaver errors, the last five)
-function C.keep(err, event)
+-- (stack: where it was thrown, when the caller caught it with xpcall)
+function C.keep(err, event, stack)
   local log = PalaverErrors or {}
   PalaverErrors = log
-  table.insert(log, 1, { at = time(), event = event, err = tostring(err), stack = debugstack and debugstack(3) or "" })
+  stack = stack or (debugstack and debugstack(3) or "")
+  table.insert(log, 1, { at = time(), event = event, err = tostring(err), stack = stack })
   while #log > 5 do
     table.remove(log)
   end
@@ -195,16 +196,10 @@ local function show(event, read, ...)
   continuing = false
   if not was then sound("IG_QUEST_LIST_OPEN") end
   if keys then keys.on() end
+  -- (the interface hidden before the camera moves: a camera that fails never
+  -- costs the conversation its hidden interface, Camera.lua's guard)
   ns.hud.hide()
-  -- (a camera that fails never costs the conversation its keys or its hidden
-  -- interface: put back, the error kept for /palaver errors)
-  if C.kind ~= "book" then
-    local okay, why = pcall(ns.camera.start)
-    if not okay then
-      C.keep(why, "camera")
-      pcall(ns.camera.stop)
-    end
-  end
+  if C.kind ~= "book" then ns.camera.start() end
 end
 
 -- Blizzard's own handlers, fed the event Palaver could not show.

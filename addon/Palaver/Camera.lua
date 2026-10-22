@@ -67,6 +67,29 @@ local base, pan = SHOULDER, 1 -- (the shoulder and the slide's multiplier, a dru
 local fovFrom -- (the field of view the tilt narrows from, nil when it stays)
 local shoulder = 0 -- (where the slide has the view now)
 
+-- ── when the camera fails ────────────────────────────────────────────────────
+-- An error of the camera's own (a call one client answers differently) never
+-- reaches the conversation: the camera is put back and stays still for the
+-- rest of the session, the error kept once for /palaver errors with the stack
+-- where it was thrown (Core's keep). Every way in goes through guard.
+local broken = false
+local stopNow -- (below)
+local function trace(err) return { err = err, stack = debugstack and debugstack(2) or "" } end
+local function guard(fn)
+  local a, b
+  local function call() return fn(a, b) end
+  return function(x, y)
+    if broken then return end
+    a, b = x, y
+    local ok, e = xpcall(call, trace)
+    a, b = nil, nil
+    if ok then return end
+    broken = true
+    pcall(stopNow)
+    if ns.core and ns.core.keep then ns.core.keep(e.err, "camera", e.stack) end
+  end
+end
+
 -- The game's warning about experimental settings ("visual discomfort", Accept
 -- or Disable, Disable undoing every one of them): not for a camera put back
 -- when the conversation ends. Classic Era's interface hears it on UIParent:
@@ -175,14 +198,14 @@ end
 
 -- ── measuring the NPC ────────────────────────────────────────────────────────
 PalaverMeasureActorMixin = {}
-function PalaverMeasureActorMixin:OnModelLoaded()
+PalaverMeasureActorMixin.OnModelLoaded = guard(function(self)
   local x1, y1, z1, x2, y2, z2 = self:GetActiveBoundingBox()
   self:ClearModel()
   if not (active and mode == "npc" and self.session == session) then return end
   if not (x1 and y1 and z1 and x2 and y2 and z2) then return end -- (a model without a size)
   local d = distance(z2 - z1)
   if d then zoomTo(d) end
-end
+end)
 
 local scene, actor
 local function measure()
@@ -204,7 +227,7 @@ end
 -- Over a second, eased: the focus's pull on the pitch from none to full, the
 -- pitch limit from 88 to 15 (which lowers the view), the field of view to 75,
 -- then the limit released to 88 (the view stays where it came to).
-local function tilt(self, elapsed)
+local tilt = guard(function(self, elapsed)
   self.t = self.t + elapsed
   local k = math.sin(math.min(1, self.t / DURATION) * math.pi / 2)
   local pitch = 88 - 73 * k
@@ -216,30 +239,36 @@ local function tilt(self, elapsed)
   if fovFrom then setCVar("cameraFov", fovFrom + (FOV - fovFrom) * k) end
   setCVar("test_cameraTargetFocusInteractStrengthPitch", k)
   ConsoleExec("pitchlimit " .. pitch)
-end
+end)
 
 -- No one to look at: the view slides aside as long as the conversation lasts,
 -- following the zoom (a step every few hundredths of a second).
-local function slide(self, elapsed)
+local slide = guard(function(self, elapsed)
   self.t = self.t + elapsed
   if self.t <= 0.03 then return end
   self.t = 0
   local goal = multiplier() * aside()
   shoulder = shoulder + (goal - shoulder) * math.min(1, self.blend * elapsed * 60)
   setCVar("test_cameraOverShoulder", shoulder)
-end
+end)
 
--- A mount, a druid's form or the glide changing while it lasts.
+-- A mount, a druid's form or the glide changing while it lasts. (Forever,
+-- mounted or gliding mid-conversation: the field of view put back. DialogueUI
+-- means to, its RestoreCameraFOVIfMounted, but reads the wrong table and
+-- never does: Palaver does what it means.)
 local function changed(_, event)
   if event == "UPDATE_SHAPESHIFT_FORM" then
     -- (the form's id is the new one a frame later)
     local mine = session
-    return C_Timer.After(0, function()
-      if not active or session ~= mine then return end
-      local was = base
-      form()
-      if base ~= was then place() end
-    end)
+    return C_Timer.After(
+      0,
+      guard(function()
+        if not active or session ~= mine then return end
+        local was = base
+        form()
+        if base ~= was then place() end
+      end)
+    )
   end
   local now = mountedNow()
   if now ~= mounted then
@@ -252,7 +281,7 @@ local function changed(_, event)
     if was then setCVar("cameraFov", was) end
   end
 end
-listener:SetScript("OnEvent", changed)
+listener:SetScript("OnEvent", guard(changed))
 local EVENTS = { "PLAYER_MOUNT_DISPLAY_CHANGED", "UPDATE_SHAPESHIFT_FORM", "PLAYER_IS_GLIDING_CHANGED" }
 
 -- Who is spoken to is someone to look at: an NPC, not the player (a quest
@@ -264,7 +293,7 @@ local function speaker()
   return true
 end
 
-function C.start()
+C.start = guard(function()
   if active or not (ns.settings and ns.settings.camera) then return end
   active = true
   session = session + 1
@@ -297,17 +326,17 @@ function C.start()
   for _, event in ipairs(EVENTS) do
     pcall(listener.RegisterEvent, listener, event) -- (an event one game lacks)
   end
-end
+end)
 
 -- The panel dragged to the other side of the screen: the other shoulder.
-function C.moved()
+C.moved = guard(function()
   if not active then return end
   local now = onLeft()
   if now ~= left then
     left = now
     place()
   end
-end
+end)
 
 -- Everything put back: the settings, the pitch limit, the zoom.
 local function restore(b)
@@ -318,7 +347,7 @@ local function restore(b)
   if b.zoom then zoomTo(b.zoom, true) end
 end
 
-function C.stop()
+stopNow = function()
   if not active then return end
   active, mode, fovFrom = false, nil, nil
   driver:SetScript("OnUpdate", nil)
@@ -327,10 +356,11 @@ function C.stop()
   ns.settings.cameraBackup = nil
   heard()
 end
+C.stop = guard(stopNow)
 
 -- At login: a conversation the last session never finished left the camera
 -- changed. Its settings back (the zoom is the session's own: not kept).
-function C.recover()
+C.recover = guard(function()
   local b = ns.settings and ns.settings.cameraBackup
   if not b then return end
   b.zoom = nil
@@ -338,6 +368,6 @@ function C.recover()
   restore(b)
   ns.settings.cameraBackup = nil
   heard()
-end
+end)
 
 function C.active() return active end
