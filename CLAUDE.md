@@ -53,9 +53,11 @@ scripts/release.sh [--version X.Y.Z] [--hold] NOTES.md   # check, tag, push; Act
   checked before use.
 - Never in UISpecialFrames. The interface hidden (Hud) never in combat, back
   at once for a fight, a popup, a cinematic or a failing page.
-- The camera stays off by default until the user has tried it in the game.
-  Every setting it changes is saved as it changes, restored at the next
-  login after a crash.
+- The camera on by default, as DialogueUI's (the user's call, 22 October
+  2026; saved files of before switched on once, `version` 3). Its moves are
+  DialogueUI's, read from its Code/Camera.lua (Peterodox's YUI-Dialogue):
+  a change to them is checked there first. Every setting it changes is
+  saved as it changes, restored at the next login after a crash.
 - The quest facts come from wow-data only (`scripts/quests.ts`, through
   `scripts/root.ts`); `Quests_*.lua` and `i18n/quest_types.json` are
   generated, never edited by hand.

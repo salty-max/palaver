@@ -455,13 +455,16 @@ PalaverErrors = nil
 G.key("ESCAPE")
 s.worn = {}
 
--- ── the camera: still by default, DialogueUI's moves when turned on ─────────
+-- ── the camera: DialogueUI's moves, on by default as DialogueUI's ──────────
 s.npc, s.quest, s.talking = RAGNAR, RIBS, true
+check(ns.settings.camera, "the camera on by default")
+SlashCmdList.PALAVER("camera")
+check(not ns.settings.camera, "/palaver camera turns it off")
 fire("GOSSIP_SHOW")
-check(not ns.camera.active() and s.zoom == 15, "the camera stays still by default")
+check(not ns.camera.active() and s.zoom == 15, "off: the view stays as it was")
 G.key("ESCAPE")
 SlashCmdList.PALAVER("camera")
-check(ns.settings.camera, "/palaver camera turns it on")
+check(ns.settings.camera, "and on again")
 local function restored()
   for k, v in pairs(G.cvarsAtStart) do
     if s.cvars[k] ~= v then return false end
@@ -865,7 +868,6 @@ check(G3.state.printed[1] and G3.state.printed[1]:find("DialogueUI", 1, true), "
 local G5 = dofile("addon/test/game.lua")
 PalaverSettings = nil -- (a new player's saved file)
 G5.login()
-SlashCmdList.PALAVER("camera")
 G5.state.npc, G5.state.quest, G5.state.talking, G5.state.npcHeight = RAGNAR, RIBS, true, 1.7
 G5.fire("GOSSIP_SHOW")
 local keep = {}
@@ -887,18 +889,27 @@ check(back and PalaverSettings.cameraBackup == nil, "the next login puts back wh
 check(G4.state.zoom == 15, "but not the old session's zoom, which was the session's own")
 check((G4.state.warnings or 0) == 0, "and no experimental-settings warning at that login")
 
--- settings saved before the interface hid by default: on, once
+-- settings saved before the interface hid and the camera moved by default:
+-- on, once
 local G6 = dofile("addon/test/game.lua")
 PalaverSettings = { enabled = true, hideUI = false }
 G6.login()
 check(
-  PalaverSettings.hideUI == true and PalaverSettings.version == 2,
-  "an older saved file: the interface hidden, as the new default"
+  PalaverSettings.hideUI == true and PalaverSettings.camera == true and PalaverSettings.version == 3,
+  "an older saved file: the interface hidden and the camera on, as the new defaults"
 )
 local G7 = dofile("addon/test/game.lua")
-PalaverSettings = { enabled = true, hideUI = false, version = 2 }
+PalaverSettings = { enabled = true, hideUI = false, camera = false, version = 2 }
 G7.login()
-check(PalaverSettings.hideUI == false, "turned off since: left off")
+check(PalaverSettings.hideUI == false, "the interface shown since: left shown")
+check(
+  PalaverSettings.camera == true and PalaverSettings.version == 3,
+  "a saved file of before the camera's default: on, once"
+)
+local G8 = dofile("addon/test/game.lua")
+PalaverSettings = { enabled = true, camera = false, version = 3 }
+G8.login()
+check(PalaverSettings.camera == false, "turned off since: left off")
 
 io.write(
   ("Palaver: %d checks passed (%s, %s).\n"):format(

@@ -45,7 +45,7 @@ Books, letters and plaques open in the same panel, in the same large text. Space
 
 While you talk or read, the game's interface fades out, so only Palaver's window and the one you speak to stay on screen. It comes back at once for a fight, a vendor, a trainer or a question from the game. Keep it on screen with `/palaver hud` or in the options.
 
-For a closer look, `/palaver camera` moves the view in on whoever speaks, over your shoulder, sized to the NPC, and puts it back when the conversation ends. It's off until you turn it on.
+For a closer look, the view moves in on whoever speaks, over your shoulder, sized to the NPC, and comes back when the conversation ends. `/palaver camera` keeps it still.
 
 ## Compatibility
 
@@ -65,7 +65,7 @@ Every setting is on Palaver's page under **Options > AddOns > Palaver**, or thro
 - `/palaver keys` turns the keys on or off.
 - `/palaver books` opens books and letters in Palaver or in the game's window.
 - `/palaver hud` hides the game's interface while you talk, or keeps it.
-- `/palaver camera` moves the view in on whoever speaks.
+- `/palaver camera` moves the view in on whoever speaks, or keeps it still.
 - `/palaver value` and `/palaver upgrades` turn the coin and the arrow on or off.
 - `/palaver reset` puts the window back in its place, at its size.
 - `/palaver errors` shows the last error, if one ever stopped a page.

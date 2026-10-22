@@ -105,8 +105,9 @@ stays there). The quest facts' data: `docs/data.md`.
 - `Camera.lua` (and `Camera.xml`, the unseen actor that measures the NPC):
   DialogueUI's "zoom in", its default settings played as they are (read
   line by line from its Code/Camera.lua, Peterodox's YUI-Dialogue on GitHub,
-  22 October 2026). Off by default (`/palaver camera`, until the user has
-  tried it in the game). While a conversation lasts, someone to look at (an
+  22 October 2026). On by default, as DialogueUI's (the user's call the
+  same day; saved files of before switched on once by `version` 3;
+  `/palaver camera` turns it off). While a conversation lasts, someone to look at (an
   NPC): the game's interaction focus on the speaker, the view over the
   shoulder (1.5, times 4.8 on a mount: 7.2) so the NPC stands beside the
   panel, a one-second eased tilt (the focus's pitch pull 0 to 1, the pitch

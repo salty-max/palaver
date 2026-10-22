@@ -17,7 +17,8 @@
 -- Every setting is written to PalaverSettings.cameraBackup the moment it is
 -- changed: a crash or a lost connection mid-conversation never restores,
 -- and the client keeps these settings across sessions, so the next login
--- puts them back (the prototype's lesson). Off by default (/palaver camera).
+-- puts them back (the prototype's lesson). On by default, as DialogueUI's
+-- (the user's call, 22 October 2026). /palaver camera turns it off.
 local _, ns = ...
 local C = {}
 ns.camera = C

@@ -47,7 +47,7 @@ Every setting is also on Palaver's page in the game's Options, under AddOns.
 /palaver keys            the keys on or off
 /palaver books           books and letters in Palaver, or the game's window
 /palaver hud             the game's interface hidden while you talk, or kept
-/palaver camera          the view moves in on whoever speaks (off at first)
+/palaver camera          the view moves in on whoever speaks, or stays still
 /palaver value           the coin on the reward that sells for most
 /palaver upgrades        the arrow on the reward best for you
 /palaver reset           back in its place, at its size

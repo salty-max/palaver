@@ -33,13 +33,13 @@ local DEFAULTS = {
   scale = 1,
   font = 15,
   keys = true,
-  camera = false,
+  camera = true,
   value = true,
   upgrades = true,
   readOn = true,
   books = true,
   hideUI = true,
-  version = 2,
+  version = 3,
 }
 ns.DEFAULTS = DEFAULTS -- (the Options page's defaults: Settings.lua)
 local RIVALS = { "DialogueUI", "Immersion", "Storyline" }
@@ -350,10 +350,13 @@ E:SetScript("OnEvent", function(_, event, ...)
     if ... ~= addonName then return end
     PalaverSettings = PalaverSettings or {}
     -- (settings saved before version 2 held hideUI off by default, not by
-    -- choice: on, as the default became, 18 October 2026)
-    if PalaverSettings.enabled ~= nil and (PalaverSettings.version or 1) < 2 then
-      PalaverSettings.hideUI = true
-      PalaverSettings.version = 2
+    -- choice: on, as the default became, 18 October 2026. Before version 3
+    -- the camera the same: on, as DialogueUI's, 22 October 2026)
+    if PalaverSettings.enabled ~= nil then
+      local version = PalaverSettings.version or 1
+      if version < 2 then PalaverSettings.hideUI = true end
+      if version < 3 then PalaverSettings.camera = true end
+      PalaverSettings.version = math.max(version, 3)
     end
     for k, v in pairs(DEFAULTS) do
       if PalaverSettings[k] == nil then PalaverSettings[k] = v end
