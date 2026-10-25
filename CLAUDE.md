@@ -64,8 +64,10 @@ scripts/release.sh [--version X.Y.Z] [--hold] NOTES.md   # check, tag, push; Act
 - The simulation proves the flow, not the drawing: render the look first
   (the game's textures and fonts) and test in the game before calling a
   visual change done.
-- `Kit.lua` and `scripts/root.ts` are the kit's copies: edit addon-kit, then
-  `bun run kit:sync`.
+- `Kit.lua`, `Media/`, `scripts/root.ts` (and `root.py`), `scripts/locales-lib.ts`,
+  `i18n/kit/` (the kit's words, translated once), `wow.yml` and `stylua.toml`
+  are the kit's copies: edit addon-kit, then `bun run kit:sync`. The addon's
+  own globals for selene are `palaver.yml`.
 - Every word through `L`, no semicolons in what players read, in any
   language.
 - Conventional Commits, lowercase subjects, no AI trailers. Commit locally;

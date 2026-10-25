@@ -1,0 +1,14 @@
+# The addon's own globals: its saved variables and its slash command
+# (selene.toml: std = "wow+palaver"; the game's are the kit's wow.yml).
+name: palaver
+globals:
+  PalaverErrors:
+    any: true
+  PalaverMeasureActorMixin:
+    any: true
+  PalaverSettings:
+    any: true
+  PalaverTooltip:
+    any: true
+  SLASH_PALAVER1:
+    any: true
