@@ -9,7 +9,8 @@
     "locales": "bun scripts/locales.ts",
     "lint:lua": "stylua --check addon && selene addon/Palaver",
     "format:lua": "stylua addon",
-    "check": "bun run kit:check && bun scripts/quests.ts --check && bun scripts/locales.ts --check && bun run lint:lua && luajit addon/test/sim.lua && FOREVER=1 luajit addon/test/sim.lua && TBC=1 luajit addon/test/sim.lua && LOCALE=frFR luajit addon/test/sim.lua && bun scripts/package.ts --check",
+    "check:ci": "bun scripts/locales.ts --check && bun run lint:lua && luajit addon/test/sim.lua && FOREVER=1 luajit addon/test/sim.lua && TBC=1 luajit addon/test/sim.lua && LOCALE=frFR luajit addon/test/sim.lua && bun scripts/package.ts --check",
+    "check": "bun run kit:check && bun scripts/quests.ts --check && bun run check:ci",
     "package": "bun scripts/package.ts",
     "quests": "bun scripts/quests.ts"
   }

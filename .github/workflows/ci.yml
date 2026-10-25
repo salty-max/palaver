@@ -26,20 +26,8 @@ jobs:
           curl -sSLo selene.zip https://github.com/Kampfkarren/selene/releases/download/0.32.0/selene-0.32.0-linux.zip
           unzip -qo stylua.zip && unzip -qo selene.zip && chmod +x stylua selene
           echo "$HOME/bin" >> "$GITHUB_PATH"
-      - name: Translations (the language files up to date, every word translated)
-        run: bun scripts/locales.ts --check
-      - name: Addon Lua formatted and linted
-        run: stylua --check addon && selene addon/Palaver
-      - name: Simulation
-        run: luajit addon/test/sim.lua
-      - name: Simulation (Forever)
-        run: FOREVER=1 luajit addon/test/sim.lua
-      - name: Simulation (TBC Anniversary)
-        run: TBC=1 luajit addon/test/sim.lua
-      - name: Simulation (a French client)
-        run: LOCALE=frFR luajit addon/test/sim.lua
-      - name: Package (its TOCs agree)
-        run: bun scripts/package.ts
+      - name: The checks (bun run check:ci: the release's gate runs the same)
+        run: bun run check:ci
       # The release's package (release.yml), made without publishing: the
       # addon's folder, nothing more or less.
       - run: echo "(CI)" > .release-notes.md

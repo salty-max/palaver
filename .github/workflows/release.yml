@@ -41,7 +41,15 @@ jobs:
       - run: git fetch --force --tags
       - uses: oven-sh/setup-bun@v2
       - run: sudo apt-get install -y -qq luajit
-      - run: luajit addon/test/sim.lua && FOREVER=1 luajit addon/test/sim.lua && TBC=1 luajit addon/test/sim.lua && LOCALE=frFR luajit addon/test/sim.lua && bun scripts/package.ts --check
+      - name: Lua tools (StyLua, selene)
+        run: |
+          mkdir -p "$HOME/bin" && cd "$HOME/bin"
+          curl -sSLo stylua.zip https://github.com/JohnnyMorganz/StyLua/releases/download/v2.5.2/stylua-linux-x86_64.zip
+          curl -sSLo selene.zip https://github.com/Kampfkarren/selene/releases/download/0.32.0/selene-0.32.0-linux.zip
+          unzip -qo stylua.zip && unzip -qo selene.zip && chmod +x stylua selene
+          echo "$HOME/bin" >> "$GITHUB_PATH"
+      - name: The checks (bun run check:ci, as CI runs them)
+        run: bun run check:ci
       - name: The notes (the tag's message)
         run: |
           git tag -l --format='%(contents)' "$TAG" | sed '/^-----BEGIN PGP SIGNATURE-----/,$d' > .release-notes.md
