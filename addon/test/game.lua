@@ -1,207 +1,40 @@
--- A small game for Palaver's tests: frames as the kit and the panel use
--- them, the game's events, Blizzard's own quest and gossip windows (each
--- registered for its events as the client registers them), the gossip and
--- quest APIs over a scripted NPC, timers, keys. FOREVER=1 plays Forever's
--- client (its CustomGossipFrameManager, coins only in C_CurrencyInfo, no
--- GetRewardSpell), TBC=1 TBC Anniversary's (paid turn-ins confirmed),
--- LOCALE=frFR a French client (the game's own words in French).
-local G = {}
-local state = { time = 1000, calls = {}, printed = {}, timers = {}, combat = false, talking = false }
-G.state = state
-local FOREVER = os.getenv("FOREVER") == "1"
+-- A small game for Palaver's tests (the kit's game, wowmock.lua: frames,
+-- events, timers, the character, the map) with Blizzard's own quest and
+-- gossip windows (each registered for its events as the client registers
+-- them), the gossip and quest APIs over a scripted NPC, keys. FOREVER=1 plays
+-- Forever's client (its CustomGossipFrameManager, coins only in
+-- C_CurrencyInfo, no GetRewardSpell), TBC=1 TBC Anniversary's (paid turn-ins
+-- confirmed), LOCALE=frFR a French client (the game's own words in French).
+local G = dofile("addon/test/wowmock.lua")
+local state, FOREVER, LOCALE, obj = G.state, G.FOREVER, G.LOCALE, G.obj
 local TBC = os.getenv("TBC") == "1"
-local LOCALE = os.getenv("LOCALE") or "enUS"
-G.FOREVER, G.TBC, G.LOCALE = FOREVER, TBC, LOCALE
-
+G.TBC = TBC
 local function call(name, ...) table.insert(state.calls, { name, ... }) end
-function G.called(name)
-  local n, last = 0, nil
-  for _, c in ipairs(state.calls) do
-    if c[1] == name then
-      n = n + 1
-      last = c
-    end
-  end
-  return n, last
-end
-function G.forget() state.calls = {} end
 
--- ── frames ───────────────────────────────────────────────────────────────────
-local registry = {} -- event -> frames, in registration order
-local function obj(kind, name)
-  local o = {
-    kind = kind,
-    name = name,
-    shown = kind ~= "Frame" and kind ~= "Button" and kind ~= "ScrollFrame",
-    scripts = {},
-    events = {},
-    text = nil,
-    w = 0,
-    h = 0,
-    font = 15,
-  }
-  return setmetatable(o, {
-    -- (a method the test game lacks does nothing, as long as it is a
-    -- method: the game's are capitalized, a field the addon never set is nil)
-    __index = function(self, k)
-      local m = G.methods[k]
-      if m then return m end
-      if type(k) == "string" and k:match("^%u") then
-        return function() end
-      end
-    end,
-  })
+-- ── what differs from the kit's game ─────────────────────────────────────────
+-- (the screen's middle, and a frame's where a test put it: cx, cy)
+G.methods.GetCenter = function(self)
+  if self == UIParent then return self.w / 2, self.h / 2 end
+  return self.cx, self.cy
 end
-G.methods = {
-  Show = function(self)
-    self.shown = true
-    local s = self.scripts.OnShow
-    if s then s(self) end
-  end,
-  Hide = function(self)
-    local was = self.shown
-    self.shown = false
-    local s = self.scripts.OnHide
-    if was and s then s(self) end
-  end,
-  IsShown = function(self) return self.shown end,
-  IsVisible = function(self) return self.shown end,
-  SetShown = function(self, v)
-    if v then
-      self:Show()
-    else
-      self:Hide()
-    end
-  end,
-  SetText = function(self, t) self.text = t end,
-  GetText = function(self) return self.text end,
-  SetFormattedText = function(self, f, ...) self.text = f:format(...) end,
-  SetScript = function(self, k, f) self.scripts[k] = f end,
-  GetScript = function(self, k) return self.scripts[k] end,
-  HookScript = function(self, k, f)
-    local old = self.scripts[k]
-    self.scripts[k] = function(...)
-      if old then old(...) end
-      f(...)
-    end
-  end,
-  RegisterEvent = function(self, e)
-    if G.invalidEvents[e] then error('Attempt to register unknown event "' .. e .. '"') end
-    if self.events[e] then return end
-    self.events[e] = true
-    registry[e] = registry[e] or {}
-    table.insert(registry[e], self)
-  end,
-  UnregisterEvent = function(self, e)
-    if not self.events[e] then return end
-    self.events[e] = nil
-    for i, f in ipairs(registry[e] or {}) do
-      if f == self then
-        table.remove(registry[e], i)
-        break
-      end
-    end
-  end,
-  UnregisterAllEvents = function(self)
-    for e in pairs(self.events) do
-      G.methods.UnregisterEvent(self, e)
-    end
-  end,
-  IsEventRegistered = function(self, e) return self.events[e] == true end,
-  SetWidth = function(self, w) self.w = w end,
-  SetHeight = function(self, h) self.h = h end,
-  SetSize = function(self, w, h)
-    self.w, self.h = w, h
-  end,
-  GetWidth = function(self) return self.w end,
-  GetHeight = function(self) return self.h end,
-  SetFont = function(self, _, size) self.font = size end,
-  GetStringHeight = function(self)
-    local t = self.text or ""
-    if t == "" then return 0 end
-    local per = math.max(1, math.floor((self.w > 0 and self.w or 300) / (self.font * 0.55)))
-    local lines = 0
-    for para in (t .. "\n"):gmatch("(.-)\n") do
-      lines = lines + math.max(1, math.ceil(#para / per))
-    end
-    return lines * (self.font + 4)
-  end,
-  GetStringWidth = function(self) return #(self.text or "") * self.font * 0.55 end,
-  CreateTexture = function() return obj("Texture") end,
-  CreateFontString = function() return obj("FontString") end,
-  CreateMaskTexture = function() return obj("MaskTexture") end,
-  GetPoint = function(self) return "RIGHT", UIParent, "RIGHT", -100, 20 end,
-  -- (the screen's middle, and a frame's where a test put it: cx, cy)
-  GetCenter = function(self)
-    if self == UIParent then return self.w / 2, self.h / 2 end
-    return self.cx, self.cy
-  end,
-  SetScrollChild = function(self, c) self.scrollChild = c end,
-  GetVerticalScroll = function(self) return self.vscroll or 0 end,
-  SetVerticalScroll = function(self, v) self.vscroll = v end,
-  EnableKeyboard = function(self, on)
-    if state.combat then error("EnableKeyboard is protected in combat") end
-    self.keyboard = on
-  end,
-  SetPropagateKeyboardInput = function(self, on)
-    if state.combat then error("SetPropagateKeyboardInput is protected in combat") end
-    self.propagate = on
-  end,
-  GetName = function(self) return self.name end,
-  SetAlpha = function(self, a) self.alpha = a end,
-  SetParent = function(self, p) self.parent = p end,
-  -- the game's window: its title bar, the face in its corner
-  SetTitle = function(self, t) self.titleText = t end,
-  SetPortraitToUnit = function(self, unit) self.face = unit end,
-  SetPortraitToAsset = function(self, asset) self.face = asset end,
-  GetAlpha = function(self) return self.alpha or 1 end,
-  -- a ModelScene's actor: the NPC's model loaded at once, as tall as state.npcHeight
-  CreateActor = function(self, _, template)
-    local a = obj("Actor")
-    a.template = template
-    for k, v in pairs(PalaverMeasureActorMixin or {}) do
-      a[k] = v
-    end
-    G.actor = a -- (a model slow to load: the test loads it later)
-    function a:SetModelByUnit(unit)
-      call("SetModelByUnit", unit)
-      if state.npcHeight then self:OnModelLoaded() end
-    end
-    function a:GetActiveBoundingBox()
-      if not state.npcHeight then return nil end
-      return -0.5, -0.5, 0, 0.5, 0.5, state.npcHeight
-    end
-    return a
-  end,
-  SetVertexColor = function(self, r, g, b) self.color = { r, g, b } end,
-  SetScale = function(self, v) self.scale = v end,
-  GetScale = function(self) return self.scale or 1 end,
-  GetParent = function(self) return self.parent end,
-}
-
-local frames = {}
-function CreateFrame(kind, name, parent, template)
-  local f = obj(kind, name)
-  table.insert(frames, f)
-  f.parent = parent
-  f.template = template
-  if name then _G[name] = f end
-  -- (the game's window: a close button that hides it, as HideUIPanel does)
-  if template == "ButtonFrameTemplate" then
-    f.CloseButton = CreateFrame("Button", nil, f)
-    f.CloseButton:SetScript("OnClick", function(self) self.parent:Hide() end)
+-- a ModelScene's actor: the NPC's model loaded at once, as tall as state.npcHeight
+G.methods.CreateActor = function(self, _, template)
+  local a = obj("Actor")
+  a.template = template
+  for k, v in pairs(PalaverMeasureActorMixin or {}) do
+    a[k] = v
   end
-  -- (a tooltip of the template: it keeps its lines, as the game's does)
-  if kind == "GameTooltip" then
-    f.lines = {}
-    function f:SetOwner() wipe(self.lines) end
-    function f:AddLine(text) table.insert(self.lines, text) end
+  G.actor = a -- (a model slow to load: the test loads it later)
+  function a:SetModelByUnit(unit)
+    call("SetModelByUnit", unit)
+    if state.npcHeight then self:OnModelLoaded() end
   end
-  return f
+  function a:GetActiveBoundingBox()
+    if not state.npcHeight then return nil end
+    return -0.5, -0.5, 0, 0.5, 0.5, state.npcHeight
+  end
+  return a
 end
-UIParent = obj("Frame", "UIParent")
-UIParent.shown = true
-UIParent.w, UIParent.h = 1365, 768
 -- (the experimental-settings warning: UIParent's on Classic Era, on
 -- Forever Blizzard_Game's own frame behind GameEvent; a test_ setting changed
 -- while it's heard counts in state.warnings, the popup the player would see)
@@ -214,79 +47,15 @@ if FOREVER then
 else
   UIParent.events.EXPERIMENTAL_CVAR_CONFIRMATION_NEEDED = true
 end
-GameTooltip = obj("Frame", "GameTooltip")
-GameTooltip.lines = {}
-function GameTooltip:SetOwner() wipe(self.lines) end
-function GameTooltip:AddLine(text) table.insert(self.lines, text) end
-WorldFrame = obj("Frame", "WorldFrame")
-
-G.invalidEvents = {}
 if FOREVER then
   G.invalidEvents.LEARNED_SPELL_IN_TAB = true
 else
   G.invalidEvents.LEARNED_SPELL_IN_SKILL_LINE = true
 end
 
-function G.fire(e, ...)
-  local list = {}
-  for _, f in ipairs(registry[e] or {}) do
-    table.insert(list, f)
-  end
-  for _, f in ipairs(list) do
-    local s = f.scripts.OnEvent
-    if s and f.events[e] then s(f, e, ...) end
-  end
-end
-
--- ── timers ───────────────────────────────────────────────────────────────────
-function GetTime() return state.time end
-function time() return 1790000000 + math.floor(state.time) end
-C_Timer = {
-  After = function(delay, fn) table.insert(state.timers, { at = state.time + delay, fn = fn }) end,
-}
-function G.advance(seconds)
-  local stop = state.time + seconds
-  -- (frames' OnUpdate, a tenth of a second at a time, before the timers due)
-  local t = state.time
-  while t < stop - 1e-9 do
-    local step = math.min(0.1, stop - t)
-    t = t + step
-    for _, f in ipairs(frames) do
-      local u = f.scripts.OnUpdate
-      if u then u(f, step) end
-    end
-  end
-  while true do
-    table.sort(state.timers, function(a, b) return a.at < b.at end)
-    local t = state.timers[1]
-    if not t or t.at > stop then break end
-    table.remove(state.timers, 1)
-    state.time = t.at
-    t.fn()
-  end
-  state.time = stop
-end
-
 -- ── the game's basics ────────────────────────────────────────────────────────
 local BUILD = FOREVER and 16001 or TBC and 20506 or 11509
 function GetBuildInfo() return "x", "1", "Oct 2026", BUILD end
-function GetLocale() return LOCALE end
-function print(...)
-  local t = {}
-  for i = 1, select("#", ...) do
-    t[#t + 1] = tostring(select(i, ...))
-  end
-  table.insert(state.printed, table.concat(t, " "))
-end
-function wipe(t)
-  for k in pairs(t) do
-    t[k] = nil
-  end
-  return t
-end
-function strtrim(s) return (s:gsub("^%s+", ""):gsub("%s+$", "")) end
-function debugstack() return "stack" end
-function InCombatLockdown() return state.combat end
 function IsModifierKeyDown() return state.modifier == true end
 function GetCurrentKeyBoardFocus() return state.typing end
 SOUNDKIT = { IG_QUEST_LIST_OPEN = 1, IG_QUEST_LIST_CLOSE = 2, IG_QUEST_CANCEL = 3, IG_MAINMENU_OPTION_CHECKBOX_ON = 4 }
@@ -297,12 +66,10 @@ function PlaySound(id)
   return true
 end
 ITEM_QUALITY_COLORS = { [2] = { r = 0.1, g = 1, b = 0.1 }, [3] = { r = 0, g = 0.44, b = 0.87 } }
-SlashCmdList = {}
-STANDARD_TEXT_FONT = "Fonts\\FRIZQT__.TTF"
-UISpecialFrames = {}
 C_AddOns = { IsAddOnLoaded = function(name) return state.loaded and state.loaded[name] or false end }
-Enum =
-  { PlayerInteractionType = { Gossip = 3, QuestGiver = 4 }, QuestFrequency = { Default = 0, Daily = 1, Weekly = 2 } }
+Enum = Enum or {}
+Enum.PlayerInteractionType = { Gossip = 3, QuestGiver = 4 }
+Enum.QuestFrequency = { Default = 0, Daily = 1, Weekly = 2 }
 C_PlayerInteractionManager = { IsInteractingWithNpcOfType = function() return state.talking end }
 function SetPortraitTexture(tex, unit) tex.portrait = unit end
 
@@ -410,7 +177,7 @@ else
   GetCoinTextureString = coins
 end
 
--- the game's Options page: what the addon registers, kept (G.options)
+-- the game's Options page (G.options, not the kit's G.panel): what the addon registers, kept (G.options)
 local options = { settings = {} }
 G.options = options
 Settings = {
@@ -662,6 +429,8 @@ function G.key(key, holdThen)
 end
 
 -- ── the addon ────────────────────────────────────────────────────────────────
+-- (not G.load: the TOC lists Camera.xml, which is no Lua file; the files as
+-- the game loads them, the TBC client reading the Vanilla TOC's list)
 local DIR = "addon/Palaver/"
 local ns = {}
 G.ns = ns

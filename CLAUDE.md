@@ -66,8 +66,8 @@ scripts/release.sh [--version X.Y.Z] [--hold] NOTES.md   # check, tag, push; Act
   (the game's textures and fonts) and test in the game before calling a
   visual change done.
 - `Kit.lua`, `Media/`, `scripts/root.ts` (and `root.py`), `scripts/locales-lib.ts`, `scripts/package-lib.ts`,
-  `i18n/kit/` (the kit's words, translated once), `wow.yml` and `stylua.toml`
-  are the kit's copies: edit addon-kit, then `bun run kit:sync`. The addon's
+  `i18n/kit/` (the kit's words, translated once), `wow.yml`, `stylua.toml` and
+  `addon/test/wowmock.lua` (the tests' game) are the kit's copies: edit addon-kit, then `bun run kit:sync`. The addon's
   own globals for selene are `palaver.yml`.
 - Every word through `L`, no semicolons in what players read, in any
   language.
