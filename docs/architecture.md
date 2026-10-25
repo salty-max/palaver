@@ -145,9 +145,10 @@ stays there). The quest facts' data: `docs/data.md`.
 
 ## Tests
 
-- `addon/test/game.lua`: a small game (frames, events, Blizzard's windows
-  as each client registers them, the gossip and quest APIs over a scripted
-  NPC, timers, keys); `addon/test/sim.lua`: the flows through it, on
+- `addon/test/wowmock.lua` (the kit's copy, `kit:sync`): frames, events,
+  timers, the character, the Options page; `addon/test/game.lua`: Palaver's
+  world on it (Blizzard's windows as each client registers them, the gossip
+  and quest APIs over a scripted NPC, keys, the camera's settings, TBC); `addon/test/sim.lua`: the flows through it, on
   Classic Era, TBC, Forever and a French client (`bun run check` runs all).
   The simulation proves the flow, not the drawing: render the look first
   (`../ideas/palaver/mock.py`, the game's textures and fonts) and test in
