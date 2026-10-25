@@ -6,9 +6,11 @@
 
 - Releases (prepared 19 October 2026, as Keyring's): `.pkgmeta` (the BigWigs
   packager: addon/Palaver alone), `.github/workflows/release.yml` (a tag
-  vX.Y.Z: the sims, the package checked to be the folder, then GitHub,
-  CurseForge and Wago; HOLD_STORES=true holds the stores), `ci.yml` (every
-  push: locales, lint, the four sims, the package), `game-data.yml` (daily),
+  vX.Y.Z: the tag checked as a release's, `bun run check:ci`, the package
+  checked to be the folder, each store's token and the TOCs' ids, then
+  GitHub, CurseForge and Wago; HOLD_STORES=true holds the stores; by hand,
+  `-f stores=curseforge|wago` retries one store alone), `ci.yml` (every
+  push: `bun run check:ci`: locales, lint, the four sims, the package), `game-data.yml` (daily),
   `scripts/release.sh [--version X.Y.Z] [--hold] NOTES.md`. The store page
   `addon/CURSEFORGE.md` (title "Palaver: Quest & NPC Dialogue", the summary
   the TOCs' Notes, the siblings, Ko-fi, DialogueUI credited), put up by

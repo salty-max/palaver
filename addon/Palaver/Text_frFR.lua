@@ -97,7 +97,7 @@ ns.translate({
     ["That isn't a %s settings code (%s export makes one)."] = "Ce n'est pas un code de réglages de %s (%s export en crée un).",
     ["The book by the minimap"] = "Le livre près de la minicarte",
     ["The code's choices are this character's now."] = "Les choix du code sont désormais ceux de ce personnage.",
-    ["the game's achievement alert could not be set up (%s): the book shows its own banner."] = "l'alerte de haut fait du jeu n'a pas pu être préparée (%s) : le livre affiche sa propre bannière.",
+    ["The game's achievement alert could not be set up (%s): the book shows its own banner."] = "L'alerte de haut fait du jeu n'a pas pu être préparée (%s) : le livre affiche sa propre bannière.",
     ["The game's Options have no page for addons here."] = "Les options du jeu n'ont pas de page pour les addons ici.",
     ["The panel is back in its place, at its size."] = "Le panneau retrouve sa place et sa taille.",
     ["The panel's size, on top of the game's interface scale."] = "La taille du panneau, en plus de l'échelle de l'interface du jeu.",
