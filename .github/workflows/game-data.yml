@@ -17,7 +17,8 @@ permissions:
 jobs:
   data:
     uses: salty-max/wow-data/.github/workflows/addon-data.yml@main
-    secrets: inherit
+    secrets:
+      INBOX_EVENTS_TOKEN: ${{ secrets.INBOX_EVENTS_TOKEN }}
     with:
       kit: true
       generate: |

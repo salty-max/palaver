@@ -9,6 +9,8 @@
 # alone. Then run this workflow by hand with the tag (Actions → Release → Run
 # workflow, or gh workflow run release.yml -f tag=vX.Y.Z): CurseForge and Wago
 # alone.
+# One store failed and the other went up: the same, -f stores=curseforge or
+# -f stores=wago, so the one that worked gets no second copy.
 name: Release
 
 on:
@@ -19,9 +21,19 @@ on:
       tag:
         description: A release already on GitHub, for CurseForge and Wago (e.g. v0.7.3)
         required: true
+      stores:
+        description: Which stores (a retry after one of them failed)
+        type: choice
+        options: [both, curseforge, wago]
+        default: both
 
 permissions:
   contents: write
+
+# (one run a tag: a hand run while the tag's own still goes would upload twice)
+concurrency:
+  group: release-${{ inputs.tag || github.ref_name }}
+  cancel-in-progress: false
 
 jobs:
   release:
@@ -33,19 +45,24 @@ jobs:
       # the folder has them)
       PACKAGER_ARGS: -u -n "{package-name}-{project-version}:{project-version}"
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ inputs.tag || github.ref }}
           fetch-depth: 0
       # checkout leaves the tag lightweight: fetch it again for its message.
       - run: git fetch --force --tags
-      - uses: oven-sh/setup-bun@v2
+      - name: The tag, a release's (vX.Y.Z)
+        run: |
+          [[ "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]] || { echo "::error::$TAG isn't a release tag (vX.Y.Z)"; exit 1; }
+          git rev-parse -q --verify "refs/tags/$TAG" >/dev/null || { echo "::error::no tag $TAG"; exit 1; }
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
       - run: sudo apt-get install -y -qq luajit
       - name: Lua tools (StyLua, selene)
         run: |
           mkdir -p "$HOME/bin" && cd "$HOME/bin"
           curl -sSLo stylua.zip https://github.com/JohnnyMorganz/StyLua/releases/download/v2.5.2/stylua-linux-x86_64.zip
           curl -sSLo selene.zip https://github.com/Kampfkarren/selene/releases/download/0.32.0/selene-0.32.0-linux.zip
+          printf '%s  %s\n' bcb0d855e91f102f28a370e850f8566b3b44b79e6274d806ea5246837c0fd5ab stylua.zip d3773393578580074386e69337d35b7acddfbaa9fc38964c07fa3e28436ade9b selene.zip | sha256sum -c --quiet -
           unzip -qo stylua.zip && unzip -qo selene.zip && chmod +x stylua selene
           echo "$HOME/bin" >> "$GITHUB_PATH"
       - name: The checks (bun run check:ci, as CI runs them)
@@ -57,18 +74,33 @@ jobs:
       # Made once without publishing: the package must be the addon's folder,
       # nothing more or less, before anything goes out.
       - name: The package, checked
-        uses: BigWigsMods/packager@v2.6.1
+        uses: BigWigsMods/packager@e50a250f8705041e40f2fa1ddcb280a686d65aa0 # v2.6.1
         with:
           args: -d ${{ env.PACKAGER_ARGS }}
           pandoc: false
       - run: diff -r addon/Palaver .release/Palaver
+      - name: The stores' tokens and ids (a store without either would be skipped in silence)
+        if: github.event_name == 'workflow_dispatch' || vars.HOLD_STORES != 'true'
+        env:
+          STORES: ${{ inputs.stores || 'both' }}
+          HAS_CF: ${{ secrets.CURSEFORGE_TOKEN != '' }}
+          HAS_WAGO: ${{ secrets.WAGO_API_TOKEN != '' }}
+        run: |
+          bad=0
+          for toc in addon/Palaver/*.toc; do
+            if [ "$STORES" != wago ] && ! grep -q '^## X-Curse-Project-ID: *[0-9]' "$toc"; then echo "::error::$toc: no X-Curse-Project-ID"; bad=1; fi
+            if [ "$STORES" != curseforge ] && ! grep -q '^## X-Wago-ID: *[A-Za-z0-9]' "$toc"; then echo "::error::$toc: no X-Wago-ID"; bad=1; fi
+          done
+          if [ "$STORES" != wago ] && [ "$HAS_CF" != true ]; then echo "::error::no CURSEFORGE_TOKEN secret"; bad=1; fi
+          if [ "$STORES" != curseforge ] && [ "$HAS_WAGO" != true ]; then echo "::error::no WAGO_API_TOKEN secret"; bad=1; fi
+          exit $bad
       - name: Published
-        uses: BigWigsMods/packager@v2.6.1
+        uses: BigWigsMods/packager@e50a250f8705041e40f2fa1ddcb280a686d65aa0 # v2.6.1
         with:
           args: ${{ env.PACKAGER_ARGS }}
           pandoc: false
         env:
           # A tag: GitHub, and the stores unless held. By hand: the stores.
           GITHUB_OAUTH: ${{ github.event_name == 'push' && github.token || '' }}
-          CF_API_KEY: ${{ (github.event_name == 'workflow_dispatch' || vars.HOLD_STORES != 'true') && secrets.CURSEFORGE_TOKEN || '' }}
-          WAGO_API_TOKEN: ${{ (github.event_name == 'workflow_dispatch' || vars.HOLD_STORES != 'true') && secrets.WAGO_API_TOKEN || '' }}
+          CF_API_KEY: ${{ (github.event_name == 'workflow_dispatch' || vars.HOLD_STORES != 'true') && inputs.stores != 'wago' && secrets.CURSEFORGE_TOKEN || '' }}
+          WAGO_API_TOKEN: ${{ (github.event_name == 'workflow_dispatch' || vars.HOLD_STORES != 'true') && inputs.stores != 'curseforge' && secrets.WAGO_API_TOKEN || '' }}
