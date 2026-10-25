@@ -1,4 +1,4 @@
-// addon-kit 01a145f: a copy (kit:sync); edit the addon-kit repository's package-lib.ts instead
+// addon-kit 9c55a21: a copy (kit:sync); edit the addon-kit repository's package-lib.ts instead
 /**
  * The family's package, one way for every addon: addon/<Name> as it is, one
  * zip for every game, each game loading its own TOC (<Name>_Vanilla.toc:
@@ -133,7 +133,7 @@ export function run(o: {
     const carried = new Set<string>();
     for (const f of tracked) {
       const parts = f.split("/");
-      if (parts[0].startsWith(".")) continue;
+      if (parts.some((part) => part.startsWith("."))) continue; // (the packager leaves dotfiles out, anywhere)
       const top = parts[0] === "addon" && parts.length > 2 ? `addon/${parts[1]}` : parts[0] === "addon" ? f : parts[0];
       if (top !== "addon" && !shipped.has(top)) carried.add(top);
     }
