@@ -1,4 +1,4 @@
-// addon-kit 3a3c846: a copy (kit:sync); edit the addon-kit repository's locales-lib.ts instead
+// addon-kit 175357e: a copy (kit:sync); edit the addon-kit repository's locales-lib.ts instead
 /**
  * The family's languages, one core: each addon's scripts/locales.ts (its own
  * names, pages, chapters, letters) is built on it. A copy of addon-kit's in
@@ -36,6 +36,7 @@ export const PLURALS = ["one", "fr", "ru", "none"];
 /** A string as Lua writes it. */
 export const q = (s: string) => `"${s.replace(/\\/g, "\\\\").replace(/"/g, '\\"').replace(/\n/g, "\\n")}"`;
 /** A JSON file, or what stands for it when there is none. */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- (a file's JSON is whatever it holds)
 export const json = <T = Record<string, any>>(file: string, empty = {} as T): T => (existsSync(file) ? JSON.parse(readFileSync(file, "utf8")) : empty);
 const unq = (s: string) => s.replace(/\\(["\\n])/g, (_, c) => (c === "n" ? "\n" : c));
 
