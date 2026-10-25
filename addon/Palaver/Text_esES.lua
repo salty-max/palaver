@@ -5,10 +5,12 @@ ns.translate({
   plural = "one",
   words = {
     ["/palaver on or off, scale 0.7 to 1.5, font 12 to 22, keys, books, hud, camera, value, upgrades, reset, errors, settings."] = "/palaver on u off, scale 0.7 a 1.5, font 12 a 22, keys, books, hud, camera, value, upgrades, reset, errors, settings.",
+    ["%d %s"] = "%d %s",
     ["%d %s %d"] = "%d %s %d",
     ["%d of %d"] = "%d de %d",
     ["%d of %d achievements"] = "%d de %d logros",
     ["%d%%"] = "%d %%",
+    ["%s %02d:%02d"] = "%s %02d:%02d",
     ["%s already shows your conversations, so Palaver stays out of its way. Turn one of them off to choose."] = "%s ya muestra tus conversaciones, así que Palaver no interviene. Desactiva uno de los dos para elegir.",
     ["%s's choices are this character's now."] = "Este personaje usa ahora las opciones de %s.",
     ["%s's settings copied."] = "Se han copiado las opciones de %s.",
