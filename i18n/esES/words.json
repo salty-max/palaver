@@ -2,6 +2,7 @@
   "%d%%": "%d %%",
   "%s already shows your conversations, so Palaver stays out of its way. Turn one of them off to choose.": "%s ya muestra tus conversaciones, así que Palaver no interviene. Desactiva uno de los dos para elegir.",
   "/palaver on or off, scale 0.7 to 1.5, font 12 to 22, keys, books, hud, camera, value, upgrades, reset, errors, settings.": "/palaver on u off, scale 0.7 a 1.5, font 12 a 22, keys, books, hud, camera, value, upgrades, reset, errors, settings.",
+  "An error stopped this page, so the game's own window takes over until you reload. /palaver errors shows what went wrong.": "Un error ha detenido esta página, así que la ventana del juego toma el relevo hasta que recargues. /palaver errors muestra qué ha fallado.",
   "Answer with the keyboard": "Responder con el teclado",
   "Best value off: no coin on the rewards.": "Mejor precio desactivado: ninguna moneda en las recompensas.",
   "Best value on: a coin marks the reward that sells for most.": "Mejor precio activado: una moneda marca la recompensa que más vale en el vendedor.",
@@ -48,6 +49,5 @@
   "When a quest offers a choice of rewards, a gold coin on the one that sells for most.": "Cuando una misión ofrece elegir recompensa, una moneda de oro en la que más vale en el vendedor.",
   "When a quest offers a choice of rewards, a green arrow on the one that beats what you wear by most, by the stats your class wants.": "Cuando una misión ofrece elegir recompensa, una flecha verde en la que más supera lo que llevas, según los atributos que pide tu clase.",
   "While you talk or read, the game's interface fades away and only the panel stays. It comes back for a fight, a vendor or a question of the game's.": "Mientras hablas o lees, la interfaz del juego se desvanece y solo queda el panel. Vuelve para un combate, un vendedor o una pregunta del juego.",
-  "While you talk, the view moves in on whoever speaks, and comes back when you are done.": "Mientras hablas, la vista se acerca a quien habla y vuelve cuando terminas.",
-  "an error stopped this page, so the game's own window takes over until you reload. /palaver errors shows what went wrong.": "un error ha detenido esta página, así que la ventana del juego toma el relevo hasta que recargues. /palaver errors muestra qué ha fallado."
+  "While you talk, the view moves in on whoever speaks, and comes back when you are done.": "Mientras hablas, la vista se acerca a quien habla y vuelve cuando terminas."
 }

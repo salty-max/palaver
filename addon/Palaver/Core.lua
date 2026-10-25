@@ -180,7 +180,7 @@ local function failed(err, event, ...)
   C.unmute()
   replay(event, ...)
   say(
-    L["an error stopped this page, so the game's own window takes over until you reload. /palaver errors shows what went wrong."]
+    L["An error stopped this page, so the game's own window takes over until you reload. /palaver errors shows what went wrong."]
   )
 end
 

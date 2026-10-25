@@ -1,4 +1,4 @@
--- addon-kit 175357e: a copy (kit:sync); edit the addon-kit repository's Kit.lua instead
+-- addon-kit 9dcaf51: a copy (kit:sync); edit the addon-kit repository's Kit.lua instead
 -- The kit every addon of the family carries but Keyring (Hearthtale,
 -- Lorekeeper's Codex, Yonder, Second Wind, Palaver, Mealbook, Goodwill, Yours
 -- Truly): which game this is and the addon's events, its words, the books'
@@ -1937,6 +1937,11 @@ end
 --     fallback = function() return a sound id where there's no fanfare end,
 --     banners = an addon's K.banners (none: one made, the alert's stand-in),
 --     changed = function() end,         -- after a check earned some
+--     shown = function(d) end,          -- a gate on every one's being listed (a family not met yet)
+--     earnHidden = true,                -- earned while still unlisted, quietly waiting there
+--     before = function(saved, quiet) end, -- before a check (one withdrawn that a change undid)
+--     show = function(d) end,           -- the addon's own alert instead of the kit's (its own switch)
+--     onEarned = function(d, quiet) end, -- each one earned
 --   })
 --   A:add(group, id, title, text, progress, visible) (progress: done, need;
 --   visible: shown before earned, none: always), A:earned(id), A:visible(d),
@@ -1954,7 +1959,11 @@ function K.deeds(o)
     local t = o.saved()
     return t and t[id]
   end
-  function A:visible(d) return self:earned(d.id) ~= nil or not d.visible or d.visible() end
+  function A:visible(d)
+    if self:earned(d.id) ~= nil then return true end
+    if o.shown and not o.shown(d) then return false end
+    return not d.visible or d.visible()
+  end
   function A:count()
     local n, shown = 0, 0
     for _, d in ipairs(self.list) do
@@ -1967,6 +1976,7 @@ function K.deeds(o)
     local link = o.link and o.link(d) or ("|cffffd100[%s]|r"):format(d.title)
     print((o.prefix or "") .. L["Achievement earned: %s."]:format(link))
     K.fanfare(o.fallback and o.fallback())
+    if o.show then return o.show(d) end
     if o.alert and not o.alert() then return end
     alerts = alerts
       or K.achievements({
@@ -1989,14 +1999,16 @@ function K.deeds(o)
   function A:check(quiet)
     local t = o.saved()
     if not t then return false end
+    if o.before then o.before(t, quiet) end
     local earned = false
     for _, d in ipairs(self.list) do
-      if not t[d.id] and self:visible(d) then
+      if not t[d.id] and (o.earnHidden or self:visible(d)) then
         local done, need = d.progress()
         if need and need > 0 and (done or 0) >= need then
           t[d.id] = { at = time(), level = UnitLevel("player"), retro = quiet or nil }
           earned = true
           if not quiet then announce(d) end
+          if o.onEarned then o.onEarned(d, quiet) end
         end
       end
     end
@@ -2015,6 +2027,7 @@ function K.deeds(o)
           text = type(d.text) == "function" and d.text() or d.text, -- (a line the reader's book words)
           earned = self:earned(d.id),
           progress = d.progress,
+          unit = d.unit, -- (a count without an end: "pages")
         })
       end
     end
@@ -2049,6 +2062,8 @@ function K.deedsTab(A, o)
       tab.board, tab.panel = board, panel
     end,
     show = function(n) panel:SetShown(n == o.n) end,
+    -- (the tab chosen by a click: nothing picked out any more)
+    chosen = function() picked = nil end,
     refresh = function()
       local n, all = A:count()
       book.count:SetText(L["%d of %d achievements"]:format(n, all))

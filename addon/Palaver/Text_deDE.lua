@@ -13,7 +13,7 @@ ns.translate({
     ["%s's choices are this character's now."] = "Die Einstellungen von %s gelten jetzt für diesen Charakter.",
     ["%s's settings copied."] = "Einstellungen von %s kopiert.",
     ["Achievement earned: %s."] = "Erfolg errungen: %s.",
-    ["an error stopped this page, so the game's own window takes over until you reload. /palaver errors shows what went wrong."] = "ein Fehler hat diese Seite gestoppt, daher übernimmt das Fenster des Spiels bis zum nächsten Neuladen. /palaver errors zeigt, was schiefging.",
+    ["An error stopped this page, so the game's own window takes over until you reload. /palaver errors shows what went wrong."] = "Ein Fehler hat diese Seite gestoppt, daher übernimmt das Fenster des Spiels bis zum nächsten Neuladen. /palaver errors zeigt, was schiefging.",
     ["Another character's choices, for this one (of this game: Classic and Forever keep their own). From elsewhere: %s export there, then %s import CODE here."] = "Die Einstellungen eines anderen Charakters, für diesen (aus diesem Spiel: Classic und Forever haben jeweils ihre eigenen). Von anderswo: dort %s export, dann hier %s import CODE.",
     ["Answer with the keyboard"] = "Mit der Tastatur antworten",
     ["Apr"] = "Apr.",

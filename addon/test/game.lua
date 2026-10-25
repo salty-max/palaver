@@ -290,9 +290,11 @@ function InCombatLockdown() return state.combat end
 function IsModifierKeyDown() return state.modifier == true end
 function GetCurrentKeyBoardFocus() return state.typing end
 SOUNDKIT = { IG_QUEST_LIST_OPEN = 1, IG_QUEST_LIST_CLOSE = 2, IG_QUEST_CANCEL = 3, IG_MAINMENU_OPTION_CHECKBOX_ON = 4 }
+-- (the game's: whether it will play, as a client with the sound says)
 function PlaySound(id)
   if not id then error("PlaySound: no sound") end
   call("PlaySound", id)
+  return true
 end
 ITEM_QUALITY_COLORS = { [2] = { r = 0.1, g = 1, b = 0.1 }, [3] = { r = 0, g = 0.44, b = 0.87 } }
 SlashCmdList = {}
