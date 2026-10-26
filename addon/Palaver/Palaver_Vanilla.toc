@@ -7,7 +7,7 @@
 ## Notes-esMX: Las misiones y conversaciones con los PNJ en un panel a su lado, para leer y responder con el teclado.
 ## Category: Quests & Leveling
 ## Author: salty-max
-## Version: 0.2.0
+## Version: 0.2.1
 ## SavedVariables: PalaverSettings, PalaverErrors
 ## IconTexture: Interface\AddOns\Palaver\Media\Logo
 ## X-Website: https://github.com/salty-max/palaver
