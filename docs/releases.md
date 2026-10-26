@@ -11,7 +11,7 @@
   GitHub, CurseForge and Wago; HOLD_STORES=true holds the stores; by hand,
   `-f stores=curseforge|wago` retries one store alone), `ci.yml` (every
   push: `bun run check:ci`: locales, lint, the four sims, the package), `game-data.yml` (daily),
-  `scripts/release.sh [--version X.Y.Z] [--hold] NOTES.md`. The store page
+  `scripts/release.sh --version X.Y.Z [--hold] NOTES.md`. The store page
   `addon/CURSEFORGE.md` (title "Palaver: Quest & NPC Dialogue", the summary
   the TOCs' Notes, the siblings, Ko-fi, DialogueUI credited), put up by
   `bun ../addon-kit/store.ts` once the projects exist.

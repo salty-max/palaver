@@ -38,7 +38,7 @@ bun run package      # dist/Palaver-<version>.zip for a test in the game
 bun run kit:sync     # after a change to the kit (Kit.lua, Media, scripts/root.ts)
 bun run locales      # after a new L["..."] (then --keys for i18n/words.json)
 bun run quests       # the quest facts again, after wow-data's databases change
-scripts/release.sh [--version X.Y.Z] [--hold] NOTES.md   # check, tag, push; Actions publish
+scripts/release.sh --version X.Y.Z [--hold] NOTES.md   # check, tag, push; Actions publish
 ```
 
 ## Hard rules

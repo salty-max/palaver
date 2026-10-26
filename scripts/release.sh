@@ -5,11 +5,11 @@
 # (.github/workflows/release.yml): the GitHub release, CurseForge and Wago.
 # A stop before the push puts everything back.
 #
-#   scripts/release.sh [--version X.Y.Z] [--hold] [--dry-run] NOTES.md
+#   scripts/release.sh --version X.Y.Z [--hold] [--dry-run] NOTES.md
 #
 #   NOTES.md         release notes (markdown): the tag's message, then the
 #                    changelog on GitHub, CurseForge and Wago
-#   --version X.Y.Z  default: the TOCs' version, patch + 1
+#   --version X.Y.Z  required, preflight suggests one
 #   --hold           the GitHub release alone (repository variable
 #                    HOLD_STORES); the stores later, by hand:
 #                    gh workflow run release.yml -f tag=vX.Y.Z
