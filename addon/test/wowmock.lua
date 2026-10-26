@@ -1,4 +1,4 @@
--- addon-kit 9c55a21: a copy (kit:sync); edit the addon-kit repository's wowmock.lua instead
+-- addon-kit 712d62e: a copy (kit:sync); edit the addon-kit repository's wowmock.lua instead
 -- A small game for an addon's tests, the family's one (the kit's copy,
 -- kit:sync: edit addon-kit's wowmock.lua): frames, events and timers as the
 -- game runs them, the character (a dwarf warrior of the Alliance, level 12),
