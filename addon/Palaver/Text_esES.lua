@@ -81,7 +81,7 @@ ns.translate({
     ["Quest complete"] = "Misión completada",
     ["Quests and what NPCs say, in Palaver's panel. Off, the game's own windows are back."] = "Las misiones y lo que dicen los PNJ, en el panel de Palaver. Desactivado, vuelven las ventanas del juego.",
     ["Read to the end first"] = "Leer hasta el final primero",
-    ["Ready check"] = "Control de disponibilidad",
+    ["Ready check"] = "¿Listos?",
     ["Scale %s."] = "Escala %s.",
     ["Sells for the most of these: %s."] = "La que más vale al venderla: %s.",
     ["Sep"] = "sep",

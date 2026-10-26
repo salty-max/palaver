@@ -1,4 +1,4 @@
-# addon-kit 712d62e: a copy (kit:sync); edit the addon-kit repository's wow.yml instead
+# addon-kit 54c4b37: a copy (kit:sync); edit the addon-kit repository's wow.yml instead
 # The game's globals the family's addons use, and the kit's own three
 # (SaltyMaxCollector, SaltyMaxWelcomes, AchievementShield_OnLoad): selene's
 # standard library for every addon's Lua, copied into each by kit:sync. An
