@@ -27,7 +27,7 @@ local G, P = ns.game, ns.panel
 local C = {}
 ns.core = C
 
-local PREFIX = K.hex(K.T.accent) .. "Palaver|r: "
+local PREFIX = K.prefix("Palaver")
 local DEFAULTS = {
   enabled = true,
   scale = 1,
@@ -618,7 +618,7 @@ SlashCmdList.PALAVER = function(msg)
     local last = PalaverErrors and PalaverErrors[1]
     say(last and (last.event .. ": " .. last.err) or L["No error so far."])
   elseif cmd == "settings" or cmd == "options" then
-    if not ns.openSettings() then say(L["No settings page in this client."]) end
+    if not ns.openSettings() then say(L["The game's Options have no page for addons here."]) end
   else
     say(
       L["/palaver on or off, scale 0.7 to 1.5, font 12 to 22, keys, books, hud, camera, value, upgrades, reset, errors, settings."]
