@@ -1,4 +1,4 @@
-# addon-kit 8aec6d6: a copy (kit:sync); edit the addon-kit repository's stylua.toml instead
+# addon-kit 48337db: a copy (kit:sync); edit the addon-kit repository's stylua.toml instead
 # The addon's Lua (bun run lint:lua checks it, bun run format:lua writes it).
 syntax = "Lua51"
 column_width = 120
