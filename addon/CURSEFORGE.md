@@ -79,6 +79,8 @@ These share Palaver's look and work independently:
 - **[Yonder](https://www.curseforge.com/wow/addons/yonder)** ([Wago](https://addons.wago.io/addons/ZKbq5y61)) offers exploration riddles, rare hunts, a bestiary, an atlas and records of your fish and herbs.
 - **[Second Wind](https://www.curseforge.com/wow/addons/second-wind)** ([Wago](https://addons.wago.io/addons/XKqEjbKy)) gives you a debrief after a close call or death.
 - **[Mealbook](https://www.curseforge.com/wow/addons/mealbook)** ([Wago](https://addons.wago.io/addons/YK9xja6L)) keeps a chef's cookbook that fills in as you learn to cook, and plans your road to 300.
+- **[Goodwill](https://www.curseforge.com/wow/addons/goodwill)** ([Wago](https://addons.wago.io/addons/ZKbqa961)) shows every faction's road to Exalted from where you stand, with a chapter of its story at each standing.
+- **[Yours Truly](https://www.curseforge.com/wow/addons/yours-truly)** ([Wago](https://addons.wago.io/addons/j6jAx1NR)) brings letters from the people whose quest chains you finished, waiting at your next mailbox.
 
 ## Support
 
