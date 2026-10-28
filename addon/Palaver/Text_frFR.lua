@@ -17,6 +17,7 @@ ns.translate({
     ["%s's choices are this character's now."] = "Les choix de %s sont désormais ceux de ce personnage.",
     ["%s's settings copied."] = "Réglages de %s copiés.",
     ["Achievement earned: %s."] = "Haut fait obtenu : %s.",
+    ["Achievement fanfare"] = "Fanfare des hauts faits",
     ["Achievement sound"] = "Son des hauts faits",
     ["Alert shown for"] = "Durée de l'alerte",
     ["An error stopped this page, so the game's own window takes over until you reload. /palaver errors shows what went wrong."] = "Une erreur a interrompu cette page, la fenêtre du jeu prend donc le relais jusqu'au prochain rechargement. /palaver errors montre ce qui s'est passé.",

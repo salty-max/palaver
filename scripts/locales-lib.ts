@@ -1,4 +1,4 @@
-// addon-kit 452d55b: a copy (kit:sync); edit the addon-kit repository's locales-lib.ts instead
+// addon-kit f5536ee: a copy (kit:sync); edit the addon-kit repository's locales-lib.ts instead
 /**
  * The family's languages, one core: each addon's scripts/locales.ts (its own
  * names, pages, chapters, letters) is built on it. A copy of addon-kit's in
@@ -64,7 +64,7 @@ export function kitKeys(addon: string): string[] {
   if (!existsSync(file)) return [];
   const src = readFileSync(file, "utf8");
   const found = wordsIn(src, new Set(MONTHS));
-  for (const m of src.matchAll(/\{ -?\d+, "([^"]+)" \}/g)) found.add(m[1]);
+  for (const m of src.matchAll(/\{ (?:-?\d+|[A-Z_]+), "([^"]+)" \}/g)) found.add(m[1]);
   return [...found].sort();
 }
 /** The kit's translations a language has (i18n/kit/<locale>.json; a borrowing language its lender's). */
