@@ -19,8 +19,8 @@ stays there). The quest facts' data: `docs/data.md`.
 - `Game.lua`: what the game says, read into plain pages (gossip, greeting,
   detail, progress, complete), and the answers, through the same calls
   Blizzard's windows make (Blizzard_UIPanels_Game's GossipFrameShared.lua,
-  QuestFrame.lua, QuestInfo.lua: read them before changing a call, Gethe's
-  wow-ui-source, classic_era and the Forever commit). A function one game
+  QuestFrame.lua, QuestInfo.lua: read them before changing a call, in the pinned
+  wow-ui-source: `bun wow-data/bin/ui.ts find|frame`). A function one game
   lacks is checked before use (Forever: coins only in C_CurrencyInfo, spells
   through C_QuestInfoSystem; Classic: GetRewardSpell). Buttons and headings
   use the game's own interface strings (`G.word`: ACCEPT, REWARDS...), so

@@ -25,7 +25,7 @@ CLAUDE.md (`../CLAUDE.md`) first.
 | The quest facts from wow-data (`scripts/quests.ts`: level, kind, chain) | `docs/data.md` |
 | The release pipeline, artwork, what isn't done yet | `docs/releases.md` |
 | The mocks and the renderer of the look | `../ideas/palaver/` (`mock.py`) |
-| Blizzard's windows, read before changing a call | Gethe's wow-ui-source (classic_era, the Forever commit): GossipFrameShared.lua, QuestFrame.lua, QuestInfo.lua, ItemTextFrame.lua |
+| Blizzard's windows, read before changing a call | the pinned wow-ui-source through `bun wow-data/bin/ui.ts frame|find` (`wow-data/docs/ui-source.md`): GossipFrameShared.lua, QuestFrame.lua, QuestInfo.lua, ItemTextFrame.lua |
 | The store page | `addon/CURSEFORGE.md` |
 
 ## Commands
