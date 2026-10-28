@@ -1,4 +1,4 @@
--- addon-kit a2b926a: a copy (kit:sync); edit the addon-kit repository's Kit.lua instead
+-- addon-kit 452d55b: a copy (kit:sync); edit the addon-kit repository's Kit.lua instead
 -- The kit every addon of the family carries but Keyring (Hearthtale,
 -- Lorekeeper's Codex, Yonder, Second Wind, Palaver, Mealbook, Goodwill, Yours
 -- Truly): which game this is and the addon's events, its words, the books'
@@ -954,7 +954,8 @@ end
 -- load, for the tests); filtered: under the select of a tab with one; name:
 -- the scroll area's global name, if wanted.
 --   l = K.list(parent, style, rows, filtered, name)
---   l:begin(), l:add(kind, text, count) (a row), l:grow(row, by), l:gap(by),
+--   l:begin(), l:add(kind, text, count, under) (a row: under, an entry's
+--   second line), l:grow(row, by), l:gap(by),
 --   l:pick(row) (the one the page shows), l:finish(scroll) (scroll false:
 --   the picked row left where it is, out of view or not: a fold clicked)
 K.ROW_WIDTH = 204
@@ -962,9 +963,24 @@ local List = {}
 
 -- The kinds every book's list shares: "section" (a heading in the display
 -- face, the accent), "overview" (a row at the left edge, in the accent),
--- "note" (a quiet line: nothing found), any other a row set in under its
--- section, its count on the right.
+-- "note" (a quiet line: nothing found), "entry" (a row of two lines: its
+-- name, and under it a quieter line, row.under: where, when; a journal's
+-- entries, a debrief), any other a row set in under its section, its count
+-- on the right.
 function K.listStyle(row, kind)
+  if kind == "entry" then
+    -- (each line's edges at its own top: a RIGHT anchor would hold its
+    -- middle at the row's, and the line drift down)
+    row.count:SetPoint("TOPRIGHT", -4, -6)
+    row.count:SetTextColor(unpack(T.soft))
+    row.text:SetPoint("TOPLEFT", 4, -4)
+    row.text:SetPoint("TOPRIGHT", row.count, "TOPLEFT", -4, 2)
+    row.text:SetFont(K.BODY_FONT, 13, "")
+    row.text:SetTextColor(unpack(T.text))
+    row.under:SetPoint("TOPLEFT", 4, -21)
+    row.under:SetPoint("TOPRIGHT", -4, -21)
+    return 36
+  end
   if kind == "section" then
     row.text:SetPoint("LEFT", 4, 0)
     row.text:SetPoint("RIGHT", -4, 0)
@@ -1004,6 +1020,8 @@ function List:row(i)
   r.text = K.label(r, K.BODY_FONT, 12, T.text)
   r.text:SetWordWrap(false)
   r.count = K.label(r, K.BODY_FONT, 10, T.soft)
+  r.under = K.label(r, K.BODY_FONT, 11, T.soft)
+  r.under:SetWordWrap(false)
   r.fold = r:CreateTexture(nil, "ARTWORK")
   r.fold:SetSize(12, 12)
   r.bar = false -- (a progress bar, made by the tab that wants one)
@@ -1019,8 +1037,9 @@ function List:begin()
   self.n, self.y, self.selectedY = 0, 0, false
 end
 
--- A row of a kind, its text and count, under the last.
-function List:add(kind, text, count)
+-- A row of a kind, its text and count (and an entry's line under it), under
+-- the last.
+function List:add(kind, text, count, under)
   self.n = self.n + 1
   local r = self:row(self.n)
   r:ClearAllPoints()
@@ -1030,6 +1049,9 @@ function List:add(kind, text, count)
   r.text:SetText(text)
   r.count:ClearAllPoints()
   r.count:SetText(count and tostring(count) or "")
+  r.under:ClearAllPoints()
+  r.under:SetText(under or "")
+  r.under:SetShown(under ~= nil)
   r.fold:ClearAllPoints()
   r.fold:Hide()
   if r.bar then r.bar:Hide() end
@@ -1087,7 +1109,8 @@ end
 --   p = K.page(parent, name, { width = 440, labelWidth = 110, pairs = pool })
 --   p:start(title, sub, setPicture, seal) (no picture: the title to the left)
 --   p:text(paragraphs), p:section(title), p:row(label, value),
---   p:card(name, facts, setPicture, click, seal), p:paragraph(text, colour),
+--   p:card(name, facts, setPicture, click, seal), p:placeCard(row, height) (a
+--   card row of the tab's own), p:paragraph(text, colour),
 --   p:stats({ { value, label } }), p:model(display, shape), p:items(list),
 --   p:chips(list), p:buttons(list), p:place(block, height) (a block of the
 --   tab's own), p:finish(keep)
@@ -1489,14 +1512,20 @@ function Page:card(name, facts, setPicture, click, seal, ring)
   setPicture(c.portrait)
   K.setBadge(c.badge, seal)
   K.ringColour(c.portrait, ring and ring[1], ring and ring[2])
-  -- (the card before it no longer the last: its rule back; none under this one
-  -- till another comes)
+  self:placeCard(c, K.CARD_H)
+  return c
+end
+
+-- A card's row at the page's next place, so tall (a tab's own, K.cardRow's:
+-- Second Wind's foes and blows), in a list with the page's cards: the card
+-- before it no longer the last, its rule back; none under this one till
+-- another comes.
+function Page:placeCard(c, height)
   local before = rawget(self, "lastCard")
   if before then before.line:Show() end
   c.line:Hide()
-  self:place(c, K.CARD_H + 4)
+  self:place(c, height + 4)
   self.lastCard = c
-  return c
 end
 
 -- A paragraph of its own under a section (the head's note is the page's).
@@ -1928,6 +1957,46 @@ end
 --   B.frames (named name1, name2), f.joined: in the game's alerts (for the tests)
 local BANNER_W, BANNER_H, BANNERS_SHOWN, BANNERS_WAITING = 380, 66, 2, 6
 K.BANNER_SECONDS = 10
+
+-- The banners' card, on the screen (a global name): its backing (K.backing),
+-- its round picture and medal (f.picture, f.medal), a short line (f.kicker)
+-- over a name in the title face (f.title), its cross (f.close: the caller's
+-- click), the game's highlight under the mouse; so wide and tall, else a
+-- banner's. A taller one is a banner's head (K.BANNER_H) and what its caller
+-- lays under it (f.body): a riddle pinned to the screen (Yonder's).
+K.BANNER_H = BANNER_H
+function K.bannerCard(name, width, height)
+  local f = CreateFrame("Button", name, UIParent, "BackdropTemplate")
+  f:SetSize(width or BANNER_W, height or BANNER_H)
+  f:SetClampedToScreen(true)
+  K.backing(f)
+  local body = CreateFrame("Frame", nil, f)
+  body:SetAllPoints()
+  body:SetFrameLevel(f:GetFrameLevel() + 4)
+  f.body = body
+  local top = (BANNER_H - 42) / 2
+  f.picture = K.roundIcon(body, 42, true)
+  f.picture:SetPoint("TOPLEFT", 14, -top)
+  f.medal = K.badge(f.picture, 18)
+  -- (the lines' right edges at their own top, the head's: on a taller card a
+  -- RIGHT anchor would hold their middle at the card's)
+  f.kicker = K.label(body, K.BODY_FONT, 11, T.soft)
+  f.kicker:SetPoint("TOPLEFT", f.picture, "TOPRIGHT", 14, -2)
+  f.kicker:SetPoint("TOPRIGHT", body, "TOPRIGHT", -30, -(top + 2))
+  f.kicker:SetWordWrap(false)
+  f.title = K.label(body, K.TITLE_FONT, 18, T.gold)
+  f.title:SetPoint("TOPLEFT", f.kicker, "BOTTOMLEFT", 0, -4)
+  f.title:SetPoint("TOPRIGHT", f.kicker, "BOTTOMRIGHT", 0, -4)
+  f.title:SetWordWrap(false)
+  f.close = CreateFrame("Button", nil, body, "UIPanelCloseButton")
+  f.close:SetSize(24, 24)
+  f.close:SetPoint("TOPRIGHT", -3, -3)
+  f.close:SetScript("OnClick", function() f:Hide() end) -- (the card, not its body)
+  f:SetHighlightTexture(K.HIGHLIGHT, "ADD")
+  local hover = f:GetHighlightTexture()
+  if hover and hover.SetAlpha then hover:SetAlpha(0.25) end
+  return f
+end
 function K.banners(o)
   local B = { frames = {}, waiting = {} }
 
@@ -1990,35 +2059,12 @@ function K.banners(o)
   end
 
   local function card(i)
-    local f = CreateFrame("Button", o.name .. i, UIParent, "BackdropTemplate")
+    local f = K.bannerCard(o.name .. i)
     -- (every field set: none read before it is)
     f.joined, f.kitContainer, f.timer, f.click, f.tip, f.shows = false, false, false, false, false, false
-    f:SetSize(BANNER_W, BANNER_H)
     f:SetFrameStrata("DIALOG")
-    f:SetClampedToScreen(true)
     f:RegisterForClicks("LeftButtonUp", "RightButtonUp")
-    K.backing(f)
-    local body = CreateFrame("Frame", nil, f)
-    body:SetAllPoints()
-    body:SetFrameLevel(f:GetFrameLevel() + 4)
-    f.picture = K.roundIcon(body, 42, true)
-    f.picture:SetPoint("LEFT", 14, 0)
-    f.medal = K.badge(f.picture, 18)
-    f.kicker = K.label(body, K.BODY_FONT, 11, T.soft)
-    f.kicker:SetPoint("TOPLEFT", f.picture, "TOPRIGHT", 14, -2)
-    f.kicker:SetPoint("RIGHT", -30, 0)
-    f.kicker:SetWordWrap(false)
-    f.title = K.label(body, K.TITLE_FONT, 18, T.gold)
-    f.title:SetPoint("TOPLEFT", f.kicker, "BOTTOMLEFT", 0, -4)
-    f.title:SetPoint("RIGHT", -30, 0)
-    f.title:SetWordWrap(false)
-    f.close = CreateFrame("Button", nil, body, "UIPanelCloseButton")
-    f.close:SetSize(24, 24)
-    f.close:SetPoint("TOPRIGHT", -3, -3)
     f.close:SetScript("OnClick", function() dismiss(f) end)
-    f:SetHighlightTexture(K.HIGHLIGHT, "ADD")
-    local hover = f:GetHighlightTexture()
-    if hover and hover.SetAlpha then hover:SetAlpha(0.25) end
     f:SetScript("OnEnter", function(self)
       if not self.tip then return end
       GameTooltip:SetOwner(self, "ANCHOR_BOTTOM")
@@ -3280,6 +3326,7 @@ function K.book(o)
     f.search:SetPoint("TOPLEFT", f.left, "TOPLEFT", 18, -10)
     f.search:SetPoint("TOPRIGHT", f.left, "TOPRIGHT", o.searchRight or -12, -10)
     f.search:HookScript("OnTextChanged", function() B:refresh() end)
+    f.filter = false -- (every field set: none read before it is)
     if o.filter then
       f.filter = K.select(f.left, 220, "")
       f.filter:SetPoint("TOPLEFT", f.left, "TOPLEFT", 12, -38)
