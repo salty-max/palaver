@@ -2,12 +2,15 @@
 # addon passes its simulation on every game and a French client, its TOCs
 # agree, and the release's package (the BigWigs packager, as release.yml
 # makes it) is the addon's folder.
+# By hand too: the daily Game data job asks for it on its pull request's
+# branch and merges only once it passes.
 name: CI
 
 on:
   push:
     branches: [main]
   pull_request:
+  workflow_dispatch:
 
 permissions:
   contents: read
