@@ -1,4 +1,4 @@
-# addon-kit f5536ee: a copy (kit:sync); edit the addon-kit repository's wow.yml instead
+# addon-kit acb230d: a copy (kit:sync); edit the addon-kit repository's wow.yml instead
 # The game's globals the family's addons use, and the kit's own three
 # (SaltyMaxCollector, SaltyMaxWelcomes, AchievementShield_OnLoad): selene's
 # standard library for every addon's Lua, copied into each by kit:sync. An
@@ -392,6 +392,8 @@ globals:
     any: true
   HasFullControl:
     any: true
+  HasNewMail:
+    any: true
   hooksecurefunc:
     any: true
   InboxFrame:
@@ -504,6 +506,10 @@ globals:
     any: true
   MinimapBackdrop:
     any: true
+  MinimapCluster:
+    any: true
+  MiniMapMailFrame:
+    any: true
   mixed:
     any: true
   MoneyFrame_Update:
@@ -524,6 +530,9 @@ globals:
     any: true
   PlayAutoAcceptQuestSound:
     any: true
+  PlayMusic:
+    args:
+      - type: any
   PlaySound:
     any: true
   QUEST_MONSTERS_KILLED:
@@ -570,6 +579,8 @@ globals:
     any: true
   StaticPopupDialogs:
     any: true
+  StopMusic:
+    args: []
   strsplit:
     any: true
   strtrim:
@@ -641,6 +652,8 @@ globals:
   UnitHealth:
     any: true
   UnitHealthMax:
+    any: true
+  UnitIsConnected:
     any: true
   UnitIsDead:
     any: true

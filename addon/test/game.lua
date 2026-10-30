@@ -3,12 +3,9 @@
 -- gossip windows (each registered for its events as the client registers
 -- them), the gossip and quest APIs over a scripted NPC, keys. FOREVER=1 plays
 -- Forever's client (its CustomGossipFrameManager, coins only in
--- C_CurrencyInfo, no GetRewardSpell), TBC=1 TBC Anniversary's (paid turn-ins
--- confirmed), LOCALE=frFR a French client (the game's own words in French).
+-- C_CurrencyInfo, no GetRewardSpell, paid turn-ins confirmed), LOCALE=frFR a French client (the game's own words in French).
 local G = dofile("addon/test/wowmock.lua")
 local state, FOREVER, LOCALE, obj = G.state, G.FOREVER, G.LOCALE, G.obj
-local TBC = os.getenv("TBC") == "1"
-G.TBC = TBC
 local function call(name, ...) table.insert(state.calls, { name, ... }) end
 
 -- ── what differs from the kit's game ─────────────────────────────────────────
@@ -54,7 +51,7 @@ else
 end
 
 -- ── the game's basics ────────────────────────────────────────────────────────
-local BUILD = FOREVER and 16001 or TBC and 20506 or 11509
+local BUILD = FOREVER and 16001 or 11509
 function GetBuildInfo() return "x", "1", "Oct 2026", BUILD end
 function IsModifierKeyDown() return state.modifier == true end
 function GetCurrentKeyBoardFocus() return state.typing end
@@ -328,7 +325,7 @@ function GetNumActiveQuests() return #state.npc.greeting.active end
 function GetActiveTitle(i) return state.npc.greeting.active[i].title, state.npc.greeting.active[i].isComplete end
 function GetNumAvailableQuests() return #state.npc.greeting.available end
 function GetAvailableTitle(i) return state.npc.greeting.available[i].title end
-if TBC or FOREVER then
+if FOREVER then
   function GetAvailableQuestInfo(i) return state.npc.greeting.available[i].isTrivial, false, false, false end
 end
 function SelectActiveQuest(i) call("SelectActiveQuest#", i) end
@@ -374,8 +371,8 @@ function UnitClass() return "Class", state.class end
 function CanDualWield() return state.dualWield == true end
 function GetNumTalentTabs() return 3 end
 function GetTalentTabInfo(i)
-  -- (Classic Era's: name, icon, points; TBC's and Forever's: id, name, text, icon, points)
-  if FOREVER or TBC then return 100 + i, "Tree" .. i, "", 1, state.talents[i] end
+  -- (Classic Era's: name, icon, points; Forever's: id, name, text, icon, points)
+  if FOREVER then return 100 + i, "Tree" .. i, "", 1, state.talents[i] end
   return "Tree" .. i, 1, state.talents[i]
 end
 function GetRewardMoney() return quest().money or 0 end
@@ -406,7 +403,7 @@ end
 
 -- ── the addon ────────────────────────────────────────────────────────────────
 -- (not G.load: the TOC lists Camera.xml, which is no Lua file; the files as
--- the game loads them, the TBC client reading the Vanilla TOC's list)
+-- the game loads them)
 local DIR = "addon/Palaver/"
 local ns = {}
 G.ns = ns

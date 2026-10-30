@@ -30,7 +30,7 @@ family's CLAUDE.md (`../CLAUDE.md`) first.
 ## Commands
 
 ```bash
-bun run check        # kit, quests, languages, lint, the simulation on four clients, TOCs
+bun run check        # kit, quests, languages, lint, the simulation on three clients, TOCs
 bun run check:ci     # what CI and the release gate run: no family folder (the kit, the saved ids and the generators' checks aside)
 bun scripts/root.ts --run addon-kit/q.ts check -- bun run check   # the same, quiet, stamping the tree for the push
 bun run package      # dist/Palaver-<version>.zip for a test in the game

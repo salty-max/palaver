@@ -1,4 +1,4 @@
-// addon-kit f5536ee: a copy (kit:sync); edit the addon-kit repository's locales-lib.ts instead
+// addon-kit acb230d: a copy (kit:sync); edit the addon-kit repository's locales-lib.ts instead
 /**
  * The family's languages, one core: each addon's scripts/locales.ts (its own
  * names, pages, chapters, letters) is built on it. A copy of addon-kit's in
@@ -27,7 +27,7 @@
 import { existsSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join, relative } from "node:path";
 
-export const LOCALES = ["enUS", "enGB", "deDE", "frFR", "esES", "esMX", "ruRU", "ptBR", "itIT", "koKR", "zhCN", "zhTW"];
+export const LOCALES = ["enUS", "enGB", "deDE", "frFR", "esES", "esMX", "ruRU", "ptBR", "koKR", "zhCN", "zhTW"];
 export const ENGLISH = new Set(["enUS", "enGB"]);
 export const BORROWS: Record<string, string> = { esMX: "esES" };
 export const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];

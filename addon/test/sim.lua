@@ -3,7 +3,7 @@
 -- keys, Escape, an error that hands the conversation to Blizzard, turning
 -- Palaver off and on. Each
 -- step as the game sends it (events, keys), each answer checked against the
--- game's calls. FOREVER=1, TBC=1, LOCALE=frFR: those clients.
+-- game's calls. FOREVER=1, LOCALE=frFR: those clients.
 local G = dofile("addon/test/game.lua")
 local s, fire, ns = G.state, G.fire, G.ns
 local P = ns.panel
@@ -154,7 +154,7 @@ yes()
 check(G.called("GetQuestReward") == 0, "no reward chosen, no hand-in")
 check(G.key("2") == "palaver" and P.choice == 2 and not PalaverFrame.hint.shown, "2 chooses the second reward")
 yes()
-local paid = G.TBC or G.FOREVER
+local paid = G.FOREVER
 n, c = G.called("GetQuestReward")
 check(n == 1 and c[2] == 2, "Space hands it in with the reward chosen")
 
@@ -925,10 +925,4 @@ PalaverSettings = { enabled = true, camera = false, version = 3 }
 G8.login()
 check(PalaverSettings.camera == false, "turned off since: left off")
 
-io.write(
-  ("Palaver: %d checks passed (%s, %s).\n"):format(
-    count,
-    G.LOCALE,
-    G.FOREVER and "Forever" or G.TBC and "TBC" or "Classic Era"
-  )
-)
+io.write(("Palaver: %d checks passed (%s, %s).\n"):format(count, G.LOCALE, G.FOREVER and "Forever" or "Classic Era"))

@@ -19,7 +19,7 @@ local P = {}
 ns.panel = P
 
 local WIDTH = 400
-local HEIGHT = 424 -- every page the same height: Blizzard's quest window's (TBC on, interface units)
+local HEIGHT = 424 -- every page the same height: Blizzard's quest window's (interface units)
 local EDGE = 8 -- the panel's and the buttons' distance from the window's sides
 local TOP = 62 -- the panel's top, under the window's corner face (Yonder's: 58)
 local INNER = 12 -- the text's distance from the panel's sides

@@ -18,4 +18,4 @@ function ns.names(t)
   end
 end
 
--- (the game this is, ns.forever and ns.tbc: the kit says it)
+-- (the game this is, ns.forever: the kit says it)

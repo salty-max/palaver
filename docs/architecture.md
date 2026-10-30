@@ -6,8 +6,7 @@ stays there). The quest facts' data: `docs/data.md`.
 ## The package
 
 - `addon/Palaver`: one package for every game (`Palaver_Vanilla.toc`: Classic
-  Era, 11509; `_Camelot.toc`: Forever, 16001; a `_TBC.toc` is left over from
-  the dropped TBC Anniversary and goes after the launch), the same but for
+  Era, 11509; `_Camelot.toc`: Forever, 16001), the same but for
   the interface and each game's quest facts (`Quests_Classic.lua`,
   `Quests_Forever.lua`). Loads
   `Kit.lua` (the kit's copy, `bun run kit:sync`; never edit it),

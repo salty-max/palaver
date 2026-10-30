@@ -31,9 +31,10 @@ const ROOT = join(import.meta.dir, "..");
 const ADDON = join(ROOT, "addon", "Palaver");
 type Game = "classic" | "forever";
 
+import { LOCALES } from "./locales-lib";
+
 // the kinds shown (the client's QuestInfo ids; 21, "Life", is none a player sees)
 export const KINDS = [1, 41, 62, 81, 82, 83];
-const LOCALES = ["enUS", "enGB", "deDE", "frFR", "esES", "esMX", "ruRU", "ptBR", "itIT", "koKR", "zhCN", "zhTW"];
 // (a language the database names nothing in: another's, the client's own)
 const NAMES_OF: Record<string, string> = { enGB: "enUS" };
 

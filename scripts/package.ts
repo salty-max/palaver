@@ -10,5 +10,5 @@
 import { join } from "node:path";
 import { run } from "./package-lib";
 
-// (each game's own files: the quests' facts: each game's own, TBC Anniversary reading Classic Era's)
-run({ root: join(import.meta.dir, ".."), name: "Palaver", games: { classic: ["Quests_Classic.lua"], tbc: ["Quests_Classic.lua"], forever: ["Quests_Forever.lua"] } });
+// (each game's own files: the quests' facts)
+run({ root: join(import.meta.dir, ".."), name: "Palaver", games: { classic: ["Quests_Classic.lua"], forever: ["Quests_Forever.lua"] } });

@@ -1,8 +1,8 @@
 -- What the game says, read into plain tables for the panel, and what the
 -- player answers, said back to it: the same calls Blizzard's own gossip and
 -- quest windows make (Blizzard_UIPanels_Game: GossipFrameShared.lua,
--- QuestFrame.lua, QuestInfo.lua), in every game: Classic Era, TBC
--- Anniversary, Forever. A function one game lacks is checked before use.
+-- QuestFrame.lua, QuestInfo.lua), in every game: Classic Era,
+-- Forever. A function one game lacks is checked before use.
 --
 -- A page: { kind, unit, name, title, text, rows, sections, rewards,
 -- required, money, actions }. kind: gossip, greeting, detail, progress,
@@ -283,15 +283,14 @@ function G.complete()
 end
 
 -- The turn-in, with the reward chosen (choice: its index; one choice is the
--- choice). A turn-in that costs money asks first where the game asks (TBC
--- and later, Blizzard's QuestRewardCompleteButton_OnClick): its own
+-- choice). A turn-in that costs money asks first where the game asks (Forever, Blizzard's QuestRewardCompleteButton_OnClick): its own
 -- confirmation, which takes the choice from QuestInfoFrame.
 function G.turnIn(choice)
   local n = GetNumQuestChoices()
   if n == 1 then choice = 1 end
   if n > 1 and not choice then return false end
   local cost = GetQuestMoneyToGet and GetQuestMoneyToGet() or 0
-  if cost > 0 and (ns.tbc or ns.forever) and StaticPopup_Show then
+  if cost > 0 and ns.forever and StaticPopup_Show then
     if QuestInfoFrame then QuestInfoFrame.itemChoice = choice or 0 end
     local dialog = StaticPopup_Show("CONFIRM_COMPLETE_EXPENSIVE_QUEST")
     local moneyFrame = dialog and (dialog.MoneyFrame or dialog.moneyFrame)

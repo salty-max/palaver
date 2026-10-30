@@ -1,4 +1,4 @@
-// addon-kit f5536ee: a copy (kit:sync); edit the addon-kit repository's root.ts instead
+// addon-kit acb230d: a copy (kit:sync); edit the addon-kit repository's root.ts instead
 /**
  * The family folder (~/code/wow-addons, the one holding addon-kit/ and
  * wow-data/), found from anywhere, a worktree outside it included:
