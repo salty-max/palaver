@@ -6,9 +6,10 @@ stays there). The quest facts' data: `docs/data.md`.
 ## The package
 
 - `addon/Palaver`: one package for every game (`Palaver_Vanilla.toc`: Classic
-  Era, 11509; `_TBC.toc`: TBC Anniversary, 20506; `_Camelot.toc`: Forever,
-  16001), the same but for the interface and each game's quest facts
-  (`Quests_Classic.lua`, TBC Anniversary's too, `Quests_Forever.lua`). Loads
+  Era, 11509; `_Camelot.toc`: Forever, 16001; a `_TBC.toc` is left over from
+  the dropped TBC Anniversary and goes after the launch), the same but for
+  the interface and each game's quest facts (`Quests_Classic.lua`,
+  `Quests_Forever.lua`). Loads
   `Kit.lua` (the kit's copy, `bun run kit:sync`; never edit it),
   `Locale.lua`, `Text_[TextLocale].lua`, `Quests_<game>.lua`, `Game.lua`,
   `Rewards.lua`, `Panel.lua`, `Hud.lua`, `Camera.xml`, `Camera.lua`,
@@ -79,8 +80,7 @@ stays there). The quest facts' data: `docs/data.md`.
   CloseGossip, as Blizzard's windows when closed), Goodbye or Decline (their
   buttons' calls). Mirrors Blizzard: a lone option the game would skip is
   skipped, a quest from an item is closed (the game accepts it), one reward
-  is the choice, a paid turn-in asks the game's own confirmation (TBC and
-  Forever) with QuestInfoFrame.itemChoice set. Keys on release and only on
+  is the choice, a paid turn-in asks the game's own confirmation (Forever) with QuestInfoFrame.itemChoice set. Keys on release and only on
   the page they were pressed on (a held Space never accepts the next quest),
   never in combat, while typing or with a modifier, Escape left to a game
   popup when one is open. A page that fails to draw: the error kept in
@@ -148,8 +148,8 @@ stays there). The quest facts' data: `docs/data.md`.
 - `addon/test/wowmock.lua` (the kit's copy, `kit:sync`): frames, events,
   timers, the character, the Options page; `addon/test/game.lua`: Palaver's
   world on it (Blizzard's windows as each client registers them, the gossip
-  and quest APIs over a scripted NPC, keys, the camera's settings, TBC); `addon/test/sim.lua`: the flows through it, on
-  Classic Era, TBC, Forever and a French client (`bun run check` runs all).
+  and quest APIs over a scripted NPC, keys, the camera's settings); `addon/test/sim.lua`: the flows through it, on
+  Classic Era, Forever and a French client (`bun run check` runs all).
   The simulation proves the flow, not the drawing: render the look first
   (`../ideas/palaver/mock.py`, the game's textures and fonts) and test in
   the game before calling a visual change done.

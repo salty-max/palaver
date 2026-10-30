@@ -11,11 +11,10 @@ by another agent) was rejected: its camera and its interaction controller
 broke in the game. The gold dialog box (mock A) was the first look; the user
 switched to the family's window the same evening (mocks G and I in
 `../ideas/palaver/`).
-On GitHub (salty-max/palaver, public, 19 October 2026). v0.1.0 released
-the same day on GitHub alone (HOLD_STORES=true): CurseForge 1754439 and
-Wago ZKbqbO61 wait for the user's test in the game. Classic Era (11509), TBC
-Anniversary (20506) and Forever (16001), one package. Read the family's
-CLAUDE.md (`../CLAUDE.md`) first.
+On GitHub (salty-max/palaver, public, 19 October 2026). Released on GitHub,
+CurseForge (1754439) and Wago (ZKbqbO61) since 21 October, v0.2.2 the
+latest. Classic Era (11509) and Forever (16001), one package. Read the
+family's CLAUDE.md (`../CLAUDE.md`) first.
 
 ## Where things are
 

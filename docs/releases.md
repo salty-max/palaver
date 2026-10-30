@@ -14,7 +14,7 @@
   `scripts/release.sh --version X.Y.Z [--hold] NOTES.md`. The store page
   `addon/CURSEFORGE.md` (title "Palaver: Quest & NPC Dialogue", the summary
   the TOCs' Notes, the siblings, Ko-fi, DialogueUI credited), put up by
-  `bun ../addon-kit/store.ts` once the projects exist.
+  `bun ../addon-kit/store.ts`.
 
 ## Artwork
 
@@ -28,8 +28,3 @@ enamel and three gold conversation dots. NPC portraits stay the NPCs'.
 ## Not yet
 
 - A minimap button, a welcome page: the kit has them when wanted.
-- The CurseForge and Wago projects (their ids in the TOCs: X-Curse-Project-ID, X-Wago-ID; secrets
-  CURSEFORGE_TOKEN and WAGO_API_TOKEN; INBOX_EVENTS_TOKEN too, for the daily
-  data job's word to the phone), then the first release: the user's go for
-  each. Then Palaver in Ravenpost's inbox (`src/digest.ts`, `src/stats.ts`)
-  and in the siblings' store pages.

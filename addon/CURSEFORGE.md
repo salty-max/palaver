@@ -9,7 +9,7 @@ Quests and conversations with NPCs in a panel beside them, read and answered fro
 
 Palaver replaces the game's quest and gossip windows with a large, readable panel beside the NPC you're talking to. Their words, their quests and your answers sit in one window, the NPC's face in its corner and the NPC still in view. Read at your own pace, then answer with a key.
 
-For Classic Era (including Hardcore and Season of Discovery), TBC Anniversary and World of Warcraft: Forever, in one download.
+For Classic Era (including Hardcore and Season of Discovery) and World of Warcraft: Forever, in one download.
 
 ## Talking to NPCs
 
@@ -49,7 +49,7 @@ For a closer look, the view moves in on whoever speaks, over your shoulder, size
 
 ## Compatibility
 
-One download covers Classic Era, Hardcore, Season of Discovery, TBC Anniversary and World of Warcraft: Forever.
+One download covers Classic Era, Hardcore, Season of Discovery and World of Warcraft: Forever.
 
 The game's own windows are muted while Palaver runs and restored exactly with `/palaver off`. If DialogueUI, Immersion or Storyline is installed, Palaver stays out of its way and says so in chat.
 

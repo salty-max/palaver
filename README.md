@@ -4,7 +4,7 @@ Quests and conversations with NPCs in a panel beside them, read and answered
 from the keyboard, in the look of Hearthtale, Lorekeeper's Codex, Yonder and
 Second Wind.
 
-One download for Classic Era, TBC Anniversary and World of Warcraft: Forever.
+One download for Classic Era and World of Warcraft: Forever.
 
 ## Using it
 
