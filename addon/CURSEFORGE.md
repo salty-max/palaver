@@ -7,7 +7,7 @@ addon's own name stays Palaver). -->
 <!-- Summary (the project's summary on CurseForge and Wago, and the TOCs' Notes):
 Quests and conversations with NPCs in a panel beside them, read and answered from the keyboard. -->
 
-Palaver replaces the game's quest and gossip windows with a large, readable panel beside the NPC you're talking to. Their words, their quests and your answers sit in one window, the NPC's face in its corner and the NPC still in view. Read at your own pace, then answer with a key.
+Palaver replaces the game's quest and gossip windows with a large, readable panel beside the NPC you're talking to. Their words, their quests and your answers sit together in it, the NPC's face in its corner and the NPC still in view. Read at your own pace, then answer with a key.
 
 ## Talking to NPCs
 
@@ -15,7 +15,7 @@ Palaver replaces the game's quest and gossip windows with a large, readable pane
 - **Escape** says goodbye, with the keys on or off.
 - **1 to 9** pick a line, or the reward to take when a quest offers a choice.
 
-A key acts when you let it go, and only on the page you pressed it on, so a held Space never accepts the next quest by accident. On a page longer than the panel, Space or Enter scrolls down first, so you never accept a quest with its rewards unseen. In combat, while typing or with a modifier held, the keys stay the game's. A click on any answer works too, and you can drag the window wherever you like.
+A key acts when you let it go, and only on the page you pressed it on, so a held Space never accepts the next quest by accident. On a page longer than the panel, Space or Enter scrolls down first, so you never accept a quest with its rewards unseen. In combat, while typing or with a modifier held, the keys stay the game's. A click on any answer works too, and you can drag the panel wherever you like.
 
 ## What the quest window keeps quiet
 
@@ -41,7 +41,7 @@ Books, letters and plaques open in the same panel, in the same large text. Space
 
 ## The interface out of the way
 
-While you talk or read, the game's interface fades out, so only Palaver's window and the one you speak to stay on screen. It comes back at once for a fight, a vendor, a trainer or a question from the game. Keep it on screen with `/palaver hud` or on Palaver's page in the game's Options.
+While you talk or read, the game's interface fades out, so only Palaver's panel and the one you speak to stay on screen. It comes back at once for a fight, a vendor, a trainer or a question from the game. Keep it on screen with `/palaver hud` or on Palaver's page in the game's Options.
 
 For a closer look, the view moves in on whoever speaks, over your shoulder, sized to the NPC, and comes back when the conversation ends. `/palaver camera` keeps it still.
 
@@ -49,7 +49,7 @@ For a closer look, the view moves in on whoever speaks, over your shoulder, size
 
 One download covers Classic Era, Hardcore, Season of Discovery and World of Warcraft: Forever.
 
-The game's own windows are muted while Palaver runs and restored exactly with `/palaver off`. If DialogueUI, Immersion or Storyline is installed, Palaver stays out of its way and says so in chat.
+The game's own windows step aside while Palaver runs and come back exactly as they were with `/palaver off`. If DialogueUI, Immersion or Storyline is installed, Palaver stays out of its way and says so in chat.
 
 The NPCs' words, the quests and the game's buttons are the game's own, in your client's language. Palaver's own few words are in English, French, German and Spanish. German and Spanish are first translations: corrections are welcome on GitHub. Other clients get English for those few words.
 
@@ -58,14 +58,14 @@ The NPCs' words, the quests and the game's buttons are the game's own, in your c
 Every setting is on Palaver's page under **Options > AddOns > Palaver**, or through `/palaver settings`. Settings are shared by all your characters.
 
 - `/palaver on` or `/palaver off` switches between Palaver and the game's own windows.
-- `/palaver scale 1.1` sets the panel size, from 0.7 to 1.5 (110%).
+- `/palaver scale 1.1` sets the panel size to 110%, from 0.7 (70%) to 1.5 (150%).
 - `/palaver font 16` sets the text size, from 12 to 22.
 - `/palaver keys` turns the keys on or off.
 - `/palaver books` opens books and letters in Palaver or in the game's window.
 - `/palaver hud` hides the game's interface while you talk, or keeps it.
 - `/palaver camera` moves the view in on whoever speaks, or keeps it still.
 - `/palaver value` and `/palaver upgrades` turn the best-value coin and the best-upgrade arrow on or off.
-- `/palaver reset` puts the window back in its place, at its original size and text size.
+- `/palaver reset` puts the panel back in its place, at its original size and text size.
 - `/palaver errors` shows the last error, if one ever stopped a page.
 
 ## Other addons

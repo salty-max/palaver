@@ -8,7 +8,7 @@ One download for Classic Era and World of Warcraft: Forever.
 ## Using it
 
 Talk to an NPC: their words, their quests and their options open in a
-window in the look of its siblings, the NPC's face in its corner and the NPC
+panel in the look of its siblings, the NPC's face in its corner and the NPC
 still in view.
 
 - **Space** (or Enter) answers yes: Accept, Continue, Complete Quest.
@@ -17,22 +17,22 @@ still in view.
 
 A key acts when you let it go, and only on the page you pressed it on: a
 held Space never accepts the next quest. On a page longer than the panel,
-Space or Enter first scrolls down, so you never accept a quest with its rewards
-unseen. In combat, while typing or with a modifier held, the keys stay the
-game's. Drag the panel to move it.
+Space or Enter first scrolls down, so you never accept a quest with its
+rewards unseen. In combat, while typing or with a modifier held, the keys stay
+the game's. Drag the panel to move it.
 
 A quest's offer shows what the game's own window keeps quiet: its level in
-the colour of how hard it is for you, whether it's elite, a dungeon, a raid or PvP,
-where it sits in its chain, like part 2 of 7, and the group size the game
-suggests.
+the colour of how hard it is for you, whether it's elite, a dungeon, a raid
+or PvP, where it sits in its chain, like part 2 of 7, and the group size the
+game suggests.
 
 Books, letters and plaques open in the same panel. Space turns the page,
 Backspace turns back.
 
-While you talk or read, the game's interface fades away, so only the window
-and the one you speak to stay on screen. It comes back for a fight, a vendor
-or a question from the game. Keep it on screen with /palaver hud or the
-game's Options.
+While you talk or read, the game's interface fades away, so only the panel and
+the one you speak to stay on screen. It comes back for a fight, a vendor, a
+trainer or a question from the game. Keep it on screen with /palaver hud or
+the game's Options.
 
 When a quest offers a choice of rewards, two marks help you pick. A green
 arrow sits on the best upgrade for your character, and a gold coin on the
@@ -44,7 +44,7 @@ Every setting is also on Palaver's page in the game's Options, under AddOns.
 
 ```text
 /palaver on | off        Palaver's panel, or the game's own windows
-/palaver scale 1.1       the panel size, 0.7 to 1.5 (110%)
+/palaver scale 1.1       the panel size: 1.1 is 110%, from 0.7 to 1.5
 /palaver font 16         its text, 12 to 22
 /palaver keys            the keys on or off
 /palaver books           books and letters in Palaver, or the game's window
