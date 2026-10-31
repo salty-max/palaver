@@ -25,7 +25,7 @@ function ns.createSettingsPanel()
   O:check(
     "enabled",
     L["Conversations in Palaver"],
-    L["Quests and what NPCs say, in Palaver's panel. When it is off, the game's own windows are back."]
+    L["Palaver shows quests and what NPCs say in its panel. When it is off, the game's own windows are back."]
   )
   O:check(
     "keys",
@@ -74,10 +74,15 @@ function ns.createSettingsPanel()
   O:choice(
     "scale",
     L["Panel size"],
-    L["The panel's size, on top of the game's interface scale."],
+    L["Sets the panel's size, on top of the game's interface scale."],
     values(SCALES, function(v) return L["%d%%"]:format(math.floor(v * 100 + 0.5)) end)
   )
-  O:choice("font", L["Text size"], L["The size of the text and of the lines you pick."], values(FONTS, tostring))
+  O:choice(
+    "font",
+    L["Text size"],
+    L["Sets the size of the text and of the lines you pick from."],
+    values(FONTS, tostring)
+  )
   O:done()
 end
 

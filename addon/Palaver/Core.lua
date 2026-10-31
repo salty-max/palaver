@@ -622,8 +622,8 @@ SlashCmdList.PALAVER = function(msg)
   elseif cmd == "upgrades" then
     C.set("upgrades", not s.upgrades)
     say(
-      s.upgrades and L["Upgrades on: an arrow marks the best upgrade, by the stats your class wants."]
-        or L["Upgrades off: no arrow on the rewards."]
+      s.upgrades and L["Best upgrade on: an arrow marks the best upgrade, by the stats your class wants."]
+        or L["Best upgrade off: no arrow on the rewards."]
     )
   elseif cmd == "reset" then
     s.point = nil

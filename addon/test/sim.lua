@@ -365,8 +365,8 @@ items["item:oh"] = { name = "Worn Buckler", price = 3, slot = "INVTYPE_SHIELD", 
 s.worn[17] = "item:oh"
 fire("QUEST_COMPLETE")
 check(
-  tip(3):find(L["An upgrade over what you hold, by the stats your class wants."], 1, true),
-  "a hammer for both hands: what you hold, no one item named"
+  tip(3):find(L["An upgrade over what you wear in both hands, by the stats your class wants."], 1, true),
+  "a hammer for both hands: what you wear in both, no one item named"
 )
 s.worn[17] = nil
 fire("QUEST_COMPLETE")

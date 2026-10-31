@@ -17,7 +17,7 @@ still in view.
 
 A key acts when you let it go, and only on the page you pressed it on: a
 held Space never accepts the next quest. On a page longer than the panel,
-Space first scrolls down, so you never accept a quest with its rewards
+Space or Enter first scrolls down, so you never accept a quest with its rewards
 unseen. In combat, while typing or with a modifier held, the keys stay the
 game's. Drag the panel to move it.
 
@@ -32,7 +32,7 @@ Backspace turns back.
 While you talk or read, the game's interface fades away, so only the window
 and the one you speak to stay on screen. It comes back for a fight, a vendor
 or a question from the game. Keep it on screen with /palaver hud or the
-Options.
+game's Options.
 
 When a quest offers a choice of rewards, two marks help you pick. A green
 arrow sits on the best upgrade for your character, and a gold coin on the

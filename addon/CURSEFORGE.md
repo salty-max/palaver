@@ -15,7 +15,7 @@ Palaver replaces the game's quest and gossip windows with a large, readable pane
 - **Escape** says goodbye, with the keys on or off.
 - **1 to 9** pick a line, or the reward to take when a quest offers a choice.
 
-A key acts when you let it go, and only on the page you pressed it on, so a held Space never accepts the next quest by accident. On a page longer than the panel, Space scrolls down first, so you never accept a quest with its rewards unseen. In combat, while typing or with a modifier held, the keys stay the game's. A click on any answer works too, and you can drag the window wherever you like.
+A key acts when you let it go, and only on the page you pressed it on, so a held Space never accepts the next quest by accident. On a page longer than the panel, Space or Enter scrolls down first, so you never accept a quest with its rewards unseen. In combat, while typing or with a modifier held, the keys stay the game's. A click on any answer works too, and you can drag the window wherever you like.
 
 ## What the quest window keeps quiet
 

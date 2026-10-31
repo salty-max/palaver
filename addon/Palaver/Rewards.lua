@@ -202,7 +202,7 @@ local function own(it, w)
   if s <= now then return nil end
   local name = nowLink and itemInfo(nowLink)
   local why = name and L["An upgrade over your %s, by the stats your class wants."]:format(name)
-    or both and L["An upgrade over what you hold, by the stats your class wants."]
+    or both and L["An upgrade over what you wear in both hands, by the stats your class wants."]
     or L["An upgrade over an empty slot, by the stats your class wants."]
   return s - now, false, why
 end
