@@ -25,6 +25,7 @@ family's CLAUDE.md (`../CLAUDE.md`) first.
 | The release pipeline, artwork, what isn't done yet | `docs/releases.md` |
 | The mocks and the renderer of the look | `../ideas/palaver/` (`mock.py`) |
 | Blizzard's windows, read before changing a call | the pinned wow-ui-source through `bun wow-data/bin/ui.ts frame|find` (`wow-data/docs/ui-source.md`): GossipFrameShared.lua, QuestFrame.lua, QuestInfo.lua, ItemTextFrame.lua |
+| Palaver's own words: the voice, one name per thing, the line shapes | `docs/voices.md` |
 | The store page | `addon/CURSEFORGE.md` |
 
 ## Commands

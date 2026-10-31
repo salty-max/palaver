@@ -53,7 +53,7 @@ stays there). The quest facts' data: `docs/data.md`.
   its own, which cut trainer conversations short in the prototype).
 - `Rewards.lua`: the marks on a choice of two rewards or more (the user's
   pick from DialogueUI's options, 18 October 2026), on the offer and the
-  hand-in. A gold coin (UI-GoldIcon) on the one that sells for most (a stack
+  hand-in. A gold coin (UI-GoldIcon) on the one that sells for the most (a stack
   at its count, none on a tie), a green arrow (UI-MicroStream-Green, flipped)
   on the best for the character, by Palaver's own rule: no other addon
   asked, Pawn included (the user's call, 18 October 2026: no dependency on
