@@ -164,7 +164,8 @@ local SLOTS = {
 -- two-hand weapon both hands, a one-hand weapon the weaker hand where the
 -- character fights with two, the main hand where it can't; an off hand, or a
 -- one-hand weapon, against a two-hand weapon it would take the place of.
--- (nil: the game has yet to tell what is worn)
+-- (nil: the game has yet to tell what is worn; a third value when a two-hand
+-- weapon would take both hands' items: none to name)
 local function worn(equipLoc, w)
   local main = GetInventoryItemLink("player", 16)
   local twoHanded = main and select(9, itemInfo(main)) == "INVTYPE_2HWEAPON"
@@ -172,7 +173,10 @@ local function worn(equipLoc, w)
   if equipLoc == "INVTYPE_2HWEAPON" then
     local a, b = score(main, w), score(GetInventoryItemLink("player", 17), w)
     if a == nil or b == nil then return nil end
-    return a + b, main or GetInventoryItemLink("player", 17)
+    -- (both hands held: no one item to name)
+    local off = GetInventoryItemLink("player", 17)
+    if main and off then return a + b, nil, true end
+    return a + b, main or off
   end
   if twoHanded and (slots[1] == 16 or slots[1] == 17) then return score(main, w), main end
   if equipLoc == "INVTYPE_WEAPON" and not (CanDualWield and CanDualWield()) then slots = { 16 } end
@@ -193,12 +197,13 @@ local function own(it, w)
   if equipLoc == nil then return nil, true end
   if not SLOTS[equipLoc] then return nil end -- (not worn, or a trinket: its worth is its effect)
   local s = score(it.link, w)
-  local now, nowLink = worn(equipLoc, w)
+  local now, nowLink, both = worn(equipLoc, w)
   if s == nil or now == nil then return nil, true end
   if s <= now then return nil end
   local name = nowLink and itemInfo(nowLink)
-  local why = name and L["Better for you than your %s, by the stats your class wants."]:format(name)
-    or L["Better for you than an empty slot, by the stats your class wants."]
+  local why = name and L["An upgrade over your %s, by the stats your class wants."]:format(name)
+    or both and L["An upgrade over what you hold, by the stats your class wants."]
+    or L["An upgrade over an empty slot, by the stats your class wants."]
   return s - now, false, why
 end
 

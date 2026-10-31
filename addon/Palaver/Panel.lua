@@ -278,7 +278,7 @@ local function facts(f)
   if not f then return end
   local bits = {}
   if (f.level or 0) > 0 then
-    local text = ns.game.word("LEVEL", "Level") .. " " .. f.level
+    local text = ns.game.word("UNIT_LEVEL_TEMPLATE", "Level %d"):format(f.level)
     local c = GetQuestDifficultyColor and GetQuestDifficultyColor(f.level)
     if c and c.r then text = ("|cff%02x%02x%02x%s|r"):format(c.r * 255, c.g * 255, c.b * 255, text) end
     table.insert(bits, text)
@@ -444,26 +444,44 @@ local function cards(list, chooseFrom)
   end
 end
 
--- A label and its value, side by side: Experience 625, Money 1s 75c.
+-- A label and its value, side by side: Experience 625, Money 1s 75c. A long
+-- label (the title reward's "You shall be granted the title") is a line of its
+-- own, the value after the label: pair[3].
 local function lines(pairsList)
   local w = math.floor((inner - 10) / 2)
-  for i, pair in ipairs(pairsList) do
+  local col = 0
+  for _, pair in ipairs(pairsList) do
     local l = take("line", function()
       local f = CreateFrame("Frame", nil, child)
       f:SetHeight(18)
       f.label = K.label(f, K.BODY_FONT, 13, T.soft)
       f.label:SetPoint("LEFT")
       f.value = K.label(f, K.BODY_FONT, 13, TEXT)
-      f.value:SetPoint("LEFT", 90, 0)
       return f
     end)
-    l:SetWidth(w)
+    local wide = pair[3]
+    if wide and col == 1 then
+      col = 0
+      y = y + 22
+    end
+    l:SetWidth(wide and inner or w)
     l.label:SetText(pair[1])
+    l.value:ClearAllPoints()
+    if wide then
+      l.value:SetPoint("LEFT", l.label, "RIGHT", 6, 0)
+    else
+      l.value:SetPoint("LEFT", 90, 0)
+    end
     l.value:SetText(pair[2])
-    local col = (i - 1) % 2
     l:SetPoint("TOPLEFT", child, "TOPLEFT", col * (w + 10), -y)
-    if col == 1 or i == #pairsList then y = y + 22 end
+    if wide or col == 1 then
+      col = 0
+      y = y + 22
+    else
+      col = 1
+    end
   end
+  if col == 1 then y = y + 22 end
 end
 
 local function rewards(r, choose)
@@ -482,7 +500,7 @@ local function rewards(r, choose)
   if r.xp > 0 then table.insert(l, { ns.game.word("EXPERIENCE_COLON", "Experience"), tostring(r.xp) }) end
   if r.money > 0 then table.insert(l, { ns.game.word("MONEY", "Money"), ns.game.coins(r.money) }) end
   if r.honor > 0 then table.insert(l, { ns.game.word("HONOR", "Honor"), tostring(r.honor) }) end
-  if r.title then table.insert(l, { ns.game.word("REWARD_TITLE", "Title"), r.title }) end
+  if r.title then table.insert(l, { ns.game.word("REWARD_TITLE", "Title"), r.title, true }) end
   lines(l)
   P.choosing = choose
 end
@@ -526,7 +544,7 @@ function P.mark()
     if c then
       c.value:Show()
       c.name:SetPoint("RIGHT", -20, 0)
-      note(c, L["Sells for the most of these: %s."]:format(ns.game.coins(best.price)), T.gold)
+      note(c, L["Sells for the most of these rewards: %s."]:format(ns.game.coins(best.price)), T.gold)
     end
   end
 end

@@ -400,14 +400,18 @@ local function rival()
   end
 end
 
+local function sayRival(other)
+  say(
+    L["%s already shows your conversations, so Palaver stays out of its way. To use Palaver instead, turn that addon off."]:format(
+      other
+    )
+  )
+end
+
 function C.start()
   local other = rival()
   if other then
-    say(
-      L["%s already shows your conversations, so Palaver stays out of its way. Turn one of them off to choose."]:format(
-        other
-      )
-    )
+    sayRival(other)
     return
   end
   if ns.settings.enabled then C.mute() end
@@ -569,20 +573,32 @@ SlashCmdList.PALAVER = function(msg)
   local s = ns.settings
   if cmd == "on" or cmd == "off" then
     C.set("enabled", cmd == "on")
-    say(s.enabled and L["On: your conversations are shown here."] or L["Off: the game's own windows are back."])
+    -- (on with a rival loaded saves the setting, but Palaver stays out: say what is true)
+    local other = s.enabled and rival()
+    if other then
+      sayRival(other)
+    else
+      say(
+        s.enabled and L["On: your conversations are shown in Palaver's panel."]
+          or L["Off: the game's own windows are back."]
+      )
+    end
   elseif cmd == "scale" and tonumber(arg) then
     C.set("scale", clamp(tonumber(arg), 0.7, 1.5))
-    say(L["Scale %s."]:format(s.scale))
+    say(L["Panel size %d%%."]:format(math.floor(s.scale * 100 + 0.5)))
   elseif cmd == "font" and tonumber(arg) then
     C.set("font", clamp(math.floor(tonumber(arg)), 12, 22))
     say(L["Text size %d."]:format(s.font))
   elseif cmd == "keys" then
     C.set("keys", not s.keys)
-    say(s.keys and L["Keys on: Space, Escape and 1 to 9 answer."] or L["Keys off: only the mouse answers."])
+    say(
+      s.keys and L["Keys on: Space or Enter, Backspace and 1 to 9 answer, and Escape says goodbye."]
+        or L["Keys off: only the mouse answers, and Escape still says goodbye."]
+    )
   elseif cmd == "books" then
     C.set("books", not s.books)
     say(
-      s.books and L["Books on: books, letters and plaques open here."]
+      s.books and L["Books on: books, letters and plaques open in Palaver's panel."]
         or L["Books off: the game's own book window is back."]
     )
   elseif cmd == "hud" then
@@ -600,20 +616,20 @@ SlashCmdList.PALAVER = function(msg)
   elseif cmd == "value" then
     C.set("value", not s.value)
     say(
-      s.value and L["Best value on: a coin marks the reward that sells for most."]
+      s.value and L["Best value on: a coin marks the reward that sells for the most."]
         or L["Best value off: no coin on the rewards."]
     )
   elseif cmd == "upgrades" then
     C.set("upgrades", not s.upgrades)
     say(
-      s.upgrades and L["Upgrades on: an arrow marks the reward best for you, by the stats your class wants."]
+      s.upgrades and L["Upgrades on: an arrow marks the best upgrade, by the stats your class wants."]
         or L["Upgrades off: no arrow on the rewards."]
     )
   elseif cmd == "reset" then
     s.point = nil
     C.set("scale", DEFAULTS.scale)
     C.set("font", DEFAULTS.font)
-    say(L["The panel is back in its place, at its size."])
+    say(L["The panel is back in its place, at its original size and text size."])
   elseif cmd == "errors" then
     local last = PalaverErrors and PalaverErrors[1]
     say(last and (last.event .. ": " .. last.err) or L["No error so far."])

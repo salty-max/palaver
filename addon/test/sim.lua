@@ -78,6 +78,16 @@ O.settings.PALAVER_ENABLED.set(true)
 check(not QuestFrame:IsEventRegistered("QUEST_DETAIL"), "on again: muted again")
 local scales = O.settings.PALAVER_SCALE.options()
 check(#scales == 9 and scales[1].label == ns.kit.L["%d%%"]:format(70), "the panel's sizes, 70% to 150%")
+SlashCmdList.PALAVER("scale 1.1")
+check(
+  s.printed[#s.printed]:find(ns.kit.L["Panel size %d%%."]:format(110), 1, true),
+  "/palaver scale: the size in percent, as the page shows it"
+)
+SlashCmdList.PALAVER("scale 1")
+check(
+  s.printed[#s.printed]:find(ns.kit.L["Panel size %d%%."]:format(100), 1, true),
+  "and a size without a decimal point on any client"
+)
 SlashCmdList.PALAVER("settings")
 check(O.opened == 42, "/palaver settings opens the page")
 
@@ -336,7 +346,7 @@ check(marks() == "||^$", "a warrior: the hammer the best for them, and it sells 
 check(not P.choice, "the marks choose nothing: the choice stays the player's")
 check(tip(3):find("Worn Shortsword", 1, true), "the arrow says what it beats")
 check(
-  tip(3):find(L["Sells for the most of these: %s."]:format(ns.game.coins(466)), 1, true),
+  tip(3):find(L["Sells for the most of these rewards: %s."]:format(ns.game.coins(466)), 1, true),
   "the coin says what it sells for"
 )
 check(tip(1) == "", "an unmarked reward: the game's tooltip alone")
@@ -347,11 +357,26 @@ HERD.choice[3].usable = false
 fire("QUEST_COMPLETE")
 check(marks() == "|^|$", "a hammer they can't use: the tunic for an empty chest, the coin still on the hammer")
 check(P.cards[3].slot.icon.color[2] == 0, "and the hammer red, as the game's window shows it")
-check(
-  tip(2):find(L["Better for you than an empty slot, by the stats your class wants."], 1, true),
-  "the empty slot said"
-)
+check(tip(2):find(L["An upgrade over an empty slot, by the stats your class wants."], 1, true), "the empty slot said")
 HERD.choice[3].usable = nil
+
+-- a two-hand weapon against both hands held: no one item to name
+items["item:oh"] = { name = "Worn Buckler", price = 3, slot = "INVTYPE_SHIELD", stats = { ITEM_MOD_STAMINA_SHORT = 1 } }
+s.worn[17] = "item:oh"
+fire("QUEST_COMPLETE")
+check(
+  tip(3):find(L["An upgrade over what you hold, by the stats your class wants."], 1, true),
+  "a hammer for both hands: what you hold, no one item named"
+)
+s.worn[17] = nil
+fire("QUEST_COMPLETE")
+
+-- a title among the rewards: it reaches the page, the game's label after it
+GetRewardTitle = function() return "the Brave" end
+fire("QUEST_COMPLETE")
+check(P.page.rewards.title == "the Brave", "a title reward is on the page")
+GetRewardTitle = nil
+fire("QUEST_COMPLETE")
 
 items["item:hammer"].pending = true
 fire("QUEST_COMPLETE")
@@ -676,7 +701,7 @@ local function fact(id, group)
   fire("QUEST_DETAIL")
   return P.factsLine or ""
 end
-local level = function(n) return ns.game.word("LEVEL", "Level") .. " " .. n end
+local level = function(n) return ns.game.word("UNIT_LEVEL_TEMPLATE", "Level %d"):format(n) end
 local line = fact(132)
 check(line:find(level(18), 1, true), "the Defias Brotherhood's second part: level 18")
 check(line:find(L["Part %d of %d"]:format(2, 7), 1, true), "and part 2 of 7, by the game's own chain")
@@ -876,6 +901,17 @@ local G3 = dofile("addon/test/game.lua")
 G3.login({ DialogueUI = true })
 check(QuestFrame:IsEventRegistered("QUEST_DETAIL"), "DialogueUI loaded: Blizzard's windows left as they are")
 check(G3.state.printed[1] and G3.state.printed[1]:find("DialogueUI", 1, true), "and said once")
+local printed = #G3.state.printed
+SlashCmdList.PALAVER("on")
+check(
+  G3.state.printed[printed + 1] and G3.state.printed[printed + 1]:find("DialogueUI", 1, true),
+  "/palaver on with DialogueUI loaded: the line says Palaver stays out"
+)
+check(
+  not G3.state.printed[printed + 1]:find(L["On: your conversations are shown in Palaver's panel."], 1, true),
+  "and never says On"
+)
+check(QuestFrame:IsEventRegistered("QUEST_DETAIL"), "and the game's windows stay as they are")
 
 -- a crash mid-conversation: nothing restored then, the next login does it
 -- (what a conversation's camera changes, on a fresh game)
