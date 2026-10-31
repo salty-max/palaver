@@ -346,7 +346,7 @@ check(marks() == "||^$", "a warrior: the hammer the best for them, and it sells 
 check(not P.choice, "the marks choose nothing: the choice stays the player's")
 check(tip(3):find("Worn Shortsword", 1, true), "the arrow says what it beats")
 check(
-  tip(3):find(L["Sells for the most of these rewards: %s."]:format(ns.game.coins(466)), 1, true),
+  tip(3):find(L["Best value: it sells for %s, more than the other rewards."]:format(ns.game.coins(466)), 1, true),
   "the coin says what it sells for"
 )
 check(tip(1) == "", "an unmarked reward: the game's tooltip alone")
@@ -365,8 +365,8 @@ items["item:oh"] = { name = "Worn Buckler", price = 3, slot = "INVTYPE_SHIELD", 
 s.worn[17] = "item:oh"
 fire("QUEST_COMPLETE")
 check(
-  tip(3):find(L["An upgrade over what you wear in both hands, by the stats your class wants."], 1, true),
-  "a hammer for both hands: what you wear in both, no one item named"
+  tip(3):find(L["An upgrade over the two items in your hands, by the stats your class wants."], 1, true),
+  "a hammer for both hands: the two items in your hands, no one item named"
 )
 s.worn[17] = nil
 fire("QUEST_COMPLETE")

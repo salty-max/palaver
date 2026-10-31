@@ -30,12 +30,12 @@ function ns.createSettingsPanel()
   O:check(
     "keys",
     L["Answer with the keyboard"],
-    L["Space or Enter answers yes, 1 to 9 pick a line or a reward. Escape says goodbye with this off too. No key acts in combat, while you type or with a modifier held."]
+    L["Space or Enter answers yes, 1 to 9 pick a line or a reward, and Backspace goes back a page in a book. Escape says goodbye even with this off. No key acts in combat, while you type or with a modifier held."]
   )
   O:check(
     "readOn",
     L["Read to the end first"],
-    L["On a page longer than the panel, Space and Enter scroll down first, and answer once you have seen it all."]
+    L["On a page longer than the panel, Space or Enter scrolls down first and answers once you have seen it all."]
   )
   O:check(
     "books",
@@ -45,7 +45,7 @@ function ns.createSettingsPanel()
   O:check(
     "hideUI",
     L["Hide the interface while you talk or read"],
-    L["While you talk or read, the game's interface fades away and only the panel stays. The interface comes back for a fight, a vendor or a question from the game."]
+    L["While you talk or read, the game's interface fades away and only the panel stays. The interface comes back for a fight, a vendor, a trainer or a question from the game."]
   )
   O:check(
     "camera",

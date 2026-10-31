@@ -544,7 +544,7 @@ function P.mark()
     if c then
       c.value:Show()
       c.name:SetPoint("RIGHT", -20, 0)
-      note(c, L["Sells for the most of these rewards: %s."]:format(ns.game.coins(best.price)), T.gold)
+      note(c, L["Best value: it sells for %s, more than the other rewards."]:format(ns.game.coins(best.price)), T.gold)
     end
   end
 end

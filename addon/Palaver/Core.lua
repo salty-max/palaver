@@ -592,7 +592,8 @@ SlashCmdList.PALAVER = function(msg)
   elseif cmd == "keys" then
     C.set("keys", not s.keys)
     say(
-      s.keys and L["Keys on: Space or Enter, Backspace and 1 to 9 answer, and Escape says goodbye."]
+      s.keys
+          and L["Keys on: Space or Enter and 1 to 9 answer, Backspace goes back a page in a book, and Escape says goodbye."]
         or L["Keys off: only the mouse answers, and Escape still says goodbye."]
     )
   elseif cmd == "books" then
@@ -622,7 +623,8 @@ SlashCmdList.PALAVER = function(msg)
   elseif cmd == "upgrades" then
     C.set("upgrades", not s.upgrades)
     say(
-      s.upgrades and L["Best upgrade on: an arrow marks the best upgrade, by the stats your class wants."]
+      s.upgrades
+          and L["Best upgrade on: an arrow marks the biggest upgrade over what you wear, by the stats your class wants."]
         or L["Best upgrade off: no arrow on the rewards."]
     )
   elseif cmd == "reset" then
