@@ -701,6 +701,17 @@ local function fact(id, group)
   fire("QUEST_DETAIL")
   return P.factsLine or ""
 end
+-- a game label loses its colon and the spaces before it, whole characters only
+check(ns.game.unlabel("Required items:") == "Required items", "a plain colon goes")
+check(ns.game.unlabel("Experience :  ") == "Experience", "spaces around it go")
+check(ns.game.unlabel("Expérience\194\160:") == "Expérience", "the French no-break space goes with it")
+check(ns.game.unlabel("退格") == "退格", "a Chinese name keeps all its bytes")
+check(ns.game.unlabel("奖励\239\188\154") == "奖励", "a fullwidth colon goes whole")
+check(ns.game.unlabel("奖励\239\188\154 ") == "奖励", "and its trailing space")
+check(ns.game.unlabel("Expérience\194\160: ") == "Expérience", "a no-break space, the colon and a trailing space")
+check(ns.game.unlabel("Voilà") == "Voilà", "a label ending in a character whose last byte is A0 is whole")
+check(ns.game.unlabel("Joueurs suggérés [%d]") == "Joueurs suggérés [%d]", "a label without a colon is whole")
+
 local level = function(n) return ns.game.word("UNIT_LEVEL_TEMPLATE", "Level %d"):format(n) end
 local line = fact(132)
 check(line:find(level(18), 1, true), "the Defias Brotherhood's second part: level 18")

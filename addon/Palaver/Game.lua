@@ -12,6 +12,28 @@ local _, ns = ...
 local G = {}
 ns.game = G
 
+-- A game label without its trailing colon and spaces: a plain ":", a
+-- fullwidth one (3 bytes in UTF-8, so never a character class) and the
+-- no-break space French puts before it (Lua's %s does not match it).
+function G.unlabel(s)
+  local function trim(t)
+    local before
+    repeat
+      before = t
+      t = t:gsub("%s+$", "")
+      if t:sub(-2) == "\194\160" then t = t:sub(1, -3) end
+    until t == before
+    return t
+  end
+  s = trim(s)
+  if s:sub(-1) == ":" then
+    s = s:sub(1, -2)
+  elseif s:sub(-3) == "\239\188\154" then
+    s = s:sub(1, -4)
+  end
+  return trim(s)
+end
+
 -- The game's own words for what its windows say (Accept, Rewards...), in the
 -- client's language: its interface strings, the English where one is missing.
 -- A heading's trailing colon dropped ("Required items:").
@@ -19,7 +41,7 @@ function G.word(tag, english)
   -- selene: allow(global_usage)
   local s = _G[tag]
   if type(s) ~= "string" or s == "" then s = english end
-  return (s:gsub("%s*[:：]%s*$", ""))
+  return G.unlabel(s)
 end
 local word = G.word
 
