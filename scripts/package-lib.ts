@@ -1,4 +1,4 @@
-// addon-kit c463118: a copy (kit:sync); edit the addon-kit repository's package-lib.ts instead
+// addon-kit 9e6c86c: a copy (kit:sync); edit the addon-kit repository's package-lib.ts instead
 /**
  * The family's package, one way for every addon: addon/<Name> as it is, one
  * zip for every game, each game loading its own TOC (<Name>_Vanilla.toc:
@@ -78,9 +78,9 @@ export function run(o: {
     if (!existsSync(join(SRC, t.toc))) fail(`${t.toc}: none`);
     const toc = readFileSync(join(SRC, t.toc), "utf8");
     if (!toc.startsWith(`## Interface: ${t.interface}\n`)) fail(`${t.toc}: not "## Interface: ${t.interface}" first`);
-    // (the languages held back show no Notes or Title of their own)
+    // (the languages held back show no field of their own: Notes, Title, Category…)
     for (const l of HIDDEN_LOCALES) {
-      const line = toc.match(new RegExp(`^##\\s*((?:Notes|Title)-${l})\\s*:`, "m"));
+      const line = toc.match(new RegExp(`^##\\s*([A-Za-z][\\w-]*-${l})\\s*:`, "m"));
       if (line) fail(`${t.toc} has ${line[1]}, a language held back (locales-lib.ts's HIDDEN_LOCALES)`);
     }
     const files = lines(toc);

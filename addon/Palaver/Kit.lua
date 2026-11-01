@@ -1,4 +1,4 @@
--- addon-kit c463118: a copy (kit:sync); edit the addon-kit repository's Kit.lua instead
+-- addon-kit 9e6c86c: a copy (kit:sync); edit the addon-kit repository's Kit.lua instead
 -- The kit every addon of the family carries but Keyring (Hearthtale,
 -- Lorekeeper's Codex, Yonder, Second Wind, Palaver, Mealbook, Goodwill, Yours
 -- Truly): which game this is and the addon's events, its words, the books'
