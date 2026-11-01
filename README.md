@@ -63,8 +63,7 @@ way and says so.
 ## Languages
 
 The NPCs' words, the quests and the game's buttons are the game's own, in
-your client's language. Palaver's few words of its own are in English, French,
-German and Spanish (German and Spanish are first translations).
+your client's language. Palaver's few words of its own are in English and French.
 
 ## Thanks
 

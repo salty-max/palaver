@@ -3,6 +3,8 @@
 The addon file by file (moved from CLAUDE.md on 20 October 2026; the map
 stays there). The quest facts' data: `docs/data.md`.
 
+German and Spanish (deDE, esES, esMX) are held back from players since 1 November 2026 (`HIDDEN_LOCALES` in addon-kit's `locales-lib.ts`): their language files are stubs with the game's names or English, and their `i18n/` stays. Restoring them starts by emptying that list.
+
 ## The package
 
 - `addon/Palaver`: one package for every game (`Palaver_Vanilla.toc`: Classic

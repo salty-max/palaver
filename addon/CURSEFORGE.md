@@ -51,7 +51,7 @@ One download covers Classic Era, Hardcore, Season of Discovery and World of Warc
 
 The game's own windows step aside while Palaver runs and come back exactly as they were with `/palaver off`. If DialogueUI, Immersion or Storyline is installed, Palaver stays out of its way and says so in chat.
 
-The NPCs' words, the quests and the game's buttons are the game's own, in your client's language. Palaver's own few words are in English, French, German and Spanish. German and Spanish are first translations: corrections are welcome on GitHub. Other clients get English for those few words.
+The NPCs' words, the quests and the game's buttons are the game's own, in your client's language. Palaver's own few words are in English and French. Other clients get English for those few words.
 
 ## Settings and commands
 
