@@ -74,3 +74,15 @@ Escape is not a setting. It says goodbye with the keys off as well
 (Blizzard's windows close on it too), and the keys switch's own lines (its
 tooltip, its chat lines) say so. Like every key it rests in combat, while you type or with a modifier
 held, and a question from the game (a popup) takes it first.
+
+## French
+
+Interface French: vous, nothing agreeing with the reader, a no-break space
+before `: ? ! %`, no semicolons. The names, one per thing: the coin is
+"meilleure revente", the arrow "meilleure amélioration" (the client's word,
+"Amélioration"), the window "le panneau" ("Taille du panneau", "Taille du
+texte": never "échelle", only the command `scale`). Keys use the client's
+words: Espace, Entrée, Effacer (Backspace), Échap. A trainer is "un maître"
+(the client's "Maître de classe"). A tooltip is a sentence with a verb, and
+"When it is off" is "Quand ce réglage est désactivé". The audit:
+`../ideas/audit/language/fr/palaver.md`.

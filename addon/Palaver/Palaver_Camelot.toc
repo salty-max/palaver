@@ -1,7 +1,7 @@
 ## Interface: 16001
 ## Title: Palaver
 ## Notes: Quests and conversations with NPCs in a panel beside them, read and answered from the keyboard.
-## Notes-frFR: Les quêtes et les conversations avec les PNJ dans un panneau à leurs côtés, à lire et à répondre au clavier.
+## Notes-frFR: Les quêtes et les conversations avec les PNJ dans un panneau à leurs côtés, que l'on lit et auxquelles on répond au clavier.
 ## Notes-deDE: Quests und Gespräche mit NPCs in einem Fenster neben ihnen, gelesen und beantwortet mit der Tastatur.
 ## Notes-esES: Las misiones y conversaciones con los PNJ en un panel a su lado, para leer y responder con el teclado.
 ## Notes-esMX: Las misiones y conversaciones con los PNJ en un panel a su lado, para leer y responder con el teclado.
