@@ -61,7 +61,9 @@ local function speaker(kind)
   local unit = kind == "gossip" and "npc" or "questnpc"
   if not UnitExists(unit) then unit = "npc" end
   if not UnitExists(unit) then return nil, nil end
-  return unit, UnitName(unit)
+  local name = UnitName(unit)
+  if issecretvalue and issecretvalue(name) then name = nil end
+  return unit, name
 end
 
 -- ── a gossip ─────────────────────────────────────────────────────────────────

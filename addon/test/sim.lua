@@ -96,6 +96,19 @@ s.npc, s.quest, s.talking = RAGNAR, RIBS, true
 fire("GOSSIP_SHOW")
 check(P.shown() and bar() == "Ragnar Thunderbrew", "a gossip opens the window, the NPC's name in its title bar")
 check(title() == "", "a gossip: no title beside the face, the name is in the bar")
+
+-- a name the game keeps secret (a quest giver inside a Forever dungeon): the window opens, the name left out
+do
+  local hidden, was = {}, issecretvalue
+  issecretvalue = function(v) return v == hidden end
+  s.npc = { name = hidden, gossip = RAGNAR.gossip }
+  local ok = pcall(fire, "GOSSIP_SHOW")
+  check(ok and P.shown() and P.page.name == nil, "a secret name: the window opens, no name kept")
+  issecretvalue = was
+  s.npc = RAGNAR
+  fire("GOSSIP_SHOW")
+  check(bar() == "Ragnar Thunderbrew", "and a plain name still reaches the title bar")
+end
 check(
   PalaverFrame.template == "ButtonFrameTemplate" and PalaverFrame.parent == nil,
   "the family's window, outside the interface"
