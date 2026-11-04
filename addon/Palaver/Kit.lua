@@ -1,7 +1,7 @@
--- addon-kit 9e6c86c: a copy (kit:sync); edit the addon-kit repository's Kit.lua instead
+-- addon-kit 7c47f9b: a copy (kit:sync); edit the addon-kit repository's Kit.lua instead
 -- The kit every addon of the family carries but Keyring (Hearthtale,
 -- Lorekeeper's Codex, Yonder, Second Wind, Palaver, Mealbook, Goodwill, Yours
--- Truly): which game this is and the addon's events, its words, the books'
+-- Truly, Primer): which game this is and the addon's events, its words, the books'
 -- look and the pieces their windows are made of
 -- (the list on the left, the page on the right and every part of a page, a
 -- board of achievements, a strip of figures), the banners that tell of a deed
@@ -2884,9 +2884,9 @@ function K.collect(o)
   local function where()
     local map = C_Map and C_Map.GetBestMapForUnit and C_Map.GetBestMapForUnit("player")
     local pos = map and C_Map.GetPlayerMapPosition and C_Map.GetPlayerMapPosition(map, "player")
-    if not pos then return map end
+    if (issecretvalue and issecretvalue(pos)) or not pos then return map end
     local x, y = pos:GetXY()
-    if not x or (issecretvalue and issecretvalue(x)) then return map end
+    if (issecretvalue and issecretvalue(x)) or not x then return map end
     return map, math.floor(x * 1000 + 0.5) / 10, math.floor(y * 1000 + 0.5) / 10
   end
   local function shelf(kind)
@@ -3409,6 +3409,8 @@ end
 --   M:update() after a change of either setting; M.button
 -- K.MINIMAP_ANGLES: the family's buttons' places, apart (a button is 31
 -- pixels, 25 degrees around the minimap's edge): a new addon takes a free one.
+-- Classic Era's own zoom buttons sit at about 290 to 345 degrees (ui.ts frame
+-- MinimapZoomIn, MinimapZoomOut): never there. Its clock is at 270.
 K.MINIMAP_ANGLES = {
   YoursTruly = 115,
   Goodwill = 140,
@@ -3417,6 +3419,7 @@ K.MINIMAP_ANGLES = {
   Yonder = 225,
   SecondWind = 250,
   LorekeepersCodex = 275,
+  Primer = 90,
 }
 function K.minimapButton(o)
   local M = {}
@@ -3432,6 +3435,8 @@ function K.minimapButton(o)
     local mx, my = Minimap:GetCenter()
     local cx, cy = GetCursorPosition()
     local scale = Minimap:GetEffectiveScale()
+    local secret = issecretvalue
+    if (secret and (secret(mx) or secret(my) or secret(scale))) or not (mx and my and scale) then return end
     o.set("minimapAngle", math.deg(math.atan2(cy / scale - my, cx / scale - mx)))
     place()
   end
