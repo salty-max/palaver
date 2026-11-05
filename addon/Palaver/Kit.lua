@@ -1,4 +1,4 @@
--- addon-kit 7c47f9b: a copy (kit:sync); edit the addon-kit repository's Kit.lua instead
+-- addon-kit 5e9b2f0: a copy (kit:sync); edit the addon-kit repository's Kit.lua instead
 -- The kit every addon of the family carries but Keyring (Hearthtale,
 -- Lorekeeper's Codex, Yonder, Second Wind, Palaver, Mealbook, Goodwill, Yours
 -- Truly, Primer): which game this is and the addon's events, its words, the books'
@@ -2689,7 +2689,11 @@ function K.profiles(o)
     return t
   end
   function P:load(seed)
-    key = ("%s - %s"):format(UnitName("player") or "?", GetRealmName() or "?")
+    -- (a name the game hides is no name: "?", as when it has none)
+    local name, realm = UnitName("player"), GetRealmName()
+    if not name or K.secret(name) then name = "?" end
+    if not realm or K.secret(realm) then realm = "?" end
+    key = ("%s - %s"):format(name, realm)
     local t = saved()
     profile = t.profiles[key]
     if profile then return end

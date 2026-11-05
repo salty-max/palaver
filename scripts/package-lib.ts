@@ -1,4 +1,4 @@
-// addon-kit 7c47f9b: a copy (kit:sync); edit the addon-kit repository's package-lib.ts instead
+// addon-kit 5e9b2f0: a copy (kit:sync); edit the addon-kit repository's package-lib.ts instead
 /**
  * The family's package, one way for every addon: addon/<Name> as it is, one
  * zip for every game, each game loading its own TOC (<Name>_Vanilla.toc:
