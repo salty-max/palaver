@@ -985,4 +985,39 @@ PalaverSettings = { enabled = true, camera = false, version = 3 }
 G8.login()
 check(PalaverSettings.camera == false, "turned off since: left off")
 
+-- the key binding (Bindings.xml calls this global): it opens Palaver's page in the game's Options, not in a
+-- fight (a line says so, with Palaver's prefix), and says when the game has no page
+do
+  check(type(PalaverBinding) == "function", "the key binding's function is there")
+  local opened, result = 0, true
+  local pns = G8.ns -- (the last load's: the global belongs to it)
+  local real = pns.openSettings
+  pns.openSettings = function()
+    opened = opened + 1
+    return result
+  end
+  PalaverBinding()
+  check(opened == 1, "the key binding opens Palaver's page in the Options")
+  result = false
+  local lines = #G8.state.printed
+  PalaverBinding()
+  check(
+    #G8.state.printed == lines + 1
+      and G8.state.printed[#G8.state.printed]:find(L["The game's Options have no page for addons here."], 1, true),
+    "… and says so when the game has none"
+  )
+  G8.state.combat = true
+  opened, lines = 0, #G8.state.printed
+  PalaverBinding()
+  check(opened == 0, "in a fight the key binding opens nothing")
+  check(
+    #G8.state.printed == lines + 1
+      and G8.state.printed[#G8.state.printed]:find("Palaver", 1, true)
+      and G8.state.printed[#G8.state.printed]:find(L["%s opens once the fight is over."]:format("Palaver"), 1, true),
+    "… and says so, with Palaver's prefix"
+  )
+  G8.state.combat = false
+  pns.openSettings = real
+end
+
 io.write(("Palaver: %d checks passed (%s, %s).\n"):format(count, G.LOCALE, G.FOREVER and "Forever" or "Classic Era"))

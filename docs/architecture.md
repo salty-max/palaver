@@ -161,3 +161,7 @@ German and Spanish (deDE, esES, esMX) are held back from players since 1 Novembe
   `bun run locales`; French, German and Spanish, the last two flagged), the
   game's words for its buttons and headings, the NPCs' and quests' text the
   game's own in the client's language.
+
+## The key binding
+
+For a controller player (no keyboard for the slash command, a cursor to steer to the minimap button). `addon/Palaver/Bindings.xml` and `ns.kit.binding(...)` at the end of `Settings.lua`: one key or pad button, chosen in the game's Key Bindings under "Palaver" ("Open Palaver"), opens its page in the game's Options. Palaver has no window of its own to toggle (its panel opens beside an NPC), so this is the one thing a pad player can open. Kept out of a fight, to be safe (not verified that the game refuses it there): a line says so. When the game has no page for addons, a line says that too. The binding does nothing until the player puts a key on it. The kit's `K.binding`, the file, what the game does in each game and what is not verified: `addon-kit/docs/controller.md`, "Opening by a pad button". `bun run bindings` (part of `check`) checks the file, the function and the package.

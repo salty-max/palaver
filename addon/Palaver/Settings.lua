@@ -87,3 +87,17 @@ function ns.createSettingsPanel()
 end
 
 function ns.openSettings() return O ~= nil and O:open() end
+
+-- Settings.lua: Palaver has no window of its own to toggle (its panel opens beside an NPC), so the key opens
+-- its page in the game's Options. Kept out of a fight (not verified that the game refuses it there: out of caution),
+-- and a game with no such page says so, as /palaver settings does.
+ns.kit.binding({
+  key = "PALAVER",
+  name = "Palaver",
+  global = "PalaverBinding",
+  toggle = function()
+    if not ns.openSettings() then print(ns.PREFIX .. L["The game's Options have no page for addons here."]) end
+  end,
+  outOfCombat = true,
+  prefix = ns.PREFIX,
+})

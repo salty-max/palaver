@@ -1,0 +1,5 @@
+<Bindings>
+	<Binding name="PALAVER_OPEN" category="BINDING_HEADER_PALAVER">
+		PalaverBinding();
+	</Binding>
+</Bindings>

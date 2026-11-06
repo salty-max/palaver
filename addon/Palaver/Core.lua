@@ -28,6 +28,7 @@ local C = {}
 ns.core = C
 
 local PREFIX = K.prefix("Palaver")
+ns.PREFIX = PREFIX
 local DEFAULTS = {
   enabled = true,
   scale = 1,
