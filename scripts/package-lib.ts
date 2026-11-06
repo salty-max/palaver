@@ -1,4 +1,4 @@
-// addon-kit 5e9b2f0: a copy (kit:sync); edit the addon-kit repository's package-lib.ts instead
+// addon-kit 4bfc9b6: a copy (kit:sync); edit the addon-kit repository's package-lib.ts instead
 /**
  * The family's package, one way for every addon: addon/<Name> as it is, one
  * zip for every game, each game loading its own TOC (<Name>_Vanilla.toc:
@@ -84,6 +84,8 @@ export function run(o: {
       if (line) fail(`${t.toc} has ${line[1]}, a language held back (locales-lib.ts's HIDDEN_LOCALES)`);
     }
     const files = lines(toc);
+    // (the game loads an addon's Bindings.xml by itself, as it does Blizzard's: bindings.ts)
+    if (files.includes("Bindings.xml")) fail(`${t.toc} lists Bindings.xml: the game loads it by itself`);
     for (const f of files) {
       // (the client's own language file: Text_[TextLocale].lua, one per language)
       const each = f.includes("[TextLocale]") ? LOCALES.map((l) => f.replace("[TextLocale]", l)) : [f];

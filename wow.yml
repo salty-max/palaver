@@ -1,4 +1,4 @@
-# addon-kit 5e9b2f0: a copy (kit:sync); edit the addon-kit repository's wow.yml instead
+# addon-kit 4bfc9b6: a copy (kit:sync); edit the addon-kit repository's wow.yml instead
 # The game's globals the family's addons use, and the kit's own three
 # (SaltyMaxCollector, SaltyMaxWelcomes, AchievementShield_OnLoad): selene's
 # standard library for every addon's Lua, copied into each by kit:sync. An
@@ -19,12 +19,6 @@ globals:
   AlertFrame:
     any: true
   AlertFrame_OnClick:
-    any: true
-  and:
-    any: true
-  as:
-    any: true
-  be:
     any: true
   bit:
     any: true
@@ -92,13 +86,9 @@ globals:
     any: true
   CameraZoomOut:
     any: true
-  can:
-    any: true
   CanDualWield:
     any: true
   CanLootUnit:
-    any: true
-  cause:
     any: true
   ChatFontNormal:
     any: true
@@ -115,8 +105,6 @@ globals:
   CombatLogGetCurrentEventInfo:
     any: true
   CompleteQuest:
-    any: true
-  confusing:
     any: true
   ConsoleExec:
     any: true
@@ -187,6 +175,8 @@ globals:
   FACTION_STANDING_LABEL8_FEMALE:
     any: true
   GameEvent:
+    any: true
+  GamepadMode:
     any: true
   GameTooltip:
     any: true
@@ -388,8 +378,6 @@ globals:
     any: true
   GossipFrame:
     any: true
-  hard:
-    any: true
   HasFullControl:
     any: true
   HasNewMail:
@@ -399,6 +387,8 @@ globals:
   InboxFrame:
     any: true
   InCombatLockdown:
+    any: true
+  InputUtil:
     any: true
   IsActiveQuestTrivial:
     any: true
@@ -546,6 +536,8 @@ globals:
   SaltyMaxWelcomes:
     property: full-write
   SECONDARY_SKILLS:
+    any: true
+  securecallfunction:
     any: true
   SelectActiveQuest:
     any: true
