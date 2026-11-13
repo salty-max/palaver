@@ -16,7 +16,7 @@
 -- (its ITEM_TEXT_ events), where the books setting says.
 --
 -- PalaverSettings: { enabled, scale, font, keys, readOn, camera, value,
--- upgrades, books, hideUI, version, point, cameraBackup }. PalaverErrors:
+-- upgrades, books, hideUI, paper, version, point, cameraBackup }. PalaverErrors:
 -- the last few errors (a page that failed to draw hands its conversation to
 -- Blizzard's window for the rest of the session, said once in chat; a
 -- reward's mark that failed only drops the marks).
@@ -33,6 +33,7 @@ local DEFAULTS = {
   enabled = true,
   scale = 1,
   font = 15,
+  paper = false,
   keys = true,
   camera = true,
   value = true,

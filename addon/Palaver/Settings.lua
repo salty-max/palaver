@@ -83,6 +83,7 @@ function ns.createSettingsPanel()
     L["Sets the size of the text and of the lines you pick from."],
     values(FONTS, tostring)
   )
+  O:look("paper")
   O:done()
 end
 

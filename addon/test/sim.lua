@@ -55,6 +55,9 @@ local RIBS = {
 }
 
 -- ── login: Blizzard's windows muted, as they were registered ─────────────────
+-- (PAPER=1: a player who chose the paper colours)
+local PAPER = os.getenv("PAPER") == "1"
+if PAPER then PalaverSettings = { paper = true } end
 G.login()
 check(ns.settings.enabled and ns.settings.font == 15, "the settings start with their defaults")
 check(
@@ -95,6 +98,12 @@ check(O.opened == 42, "/palaver settings opens the page")
 s.npc, s.quest, s.talking = RAGNAR, RIBS, true
 fire("GOSSIP_SHOW")
 check(P.shown() and bar() == "Ragnar Thunderbrew", "a gossip opens the window, the NPC's name in its title bar")
+check(
+  ns.kit.paper == PAPER and ns.settings.paper == PAPER,
+  "the look: the player's choice is the kit's (" .. (PAPER and "paper" or "dark") .. ")"
+)
+check(ns.kit.lookGet and ns.kit.lookGet("paper") == PAPER, "the kit reads the look from the options")
+check(ns.settings.bookSize == nil, "no book size: the panel has its own size and text size options")
 check(title() == "", "a gossip: no title beside the face, the name is in the bar")
 
 -- a name the game keeps secret (a quest giver inside a Forever dungeon): the window opens, the name left out
@@ -1018,6 +1027,57 @@ do
   )
   G8.state.combat = false
   pns.openSettings = real
+end
+
+-- RENDER=dir [PAPER=1] luajit addon/test/sim.lua: the panel as HTML with its real colours (the buttons' paper
+-- branch, the key badges, the level colours), Chrome's fonts: the game has the last word
+if os.getenv("RENDER") then
+  local K = ns.kit
+  local T = K.T
+  local function col(c, a)
+    return ("rgba(%d,%d,%d,%.2f)"):format(c[1] * 255 + 0.5, c[2] * 255 + 0.5, c[3] * 255 + 0.5, a or c[4] or 1)
+  end
+  local paper = K.paper
+  local body = paper and T.back or { 0.10, 0.09, 0.075 }
+  local edge = paper and T.edge or { 0.40, 0.33, 0.20 }
+  local level = K.hex(paper and K.ink({ 1, 0.82, 0 }, { T.ground, T.back }, 3.2) or { 1, 0.82, 0 }) .. "Level 8|r"
+  local function button(label, key, primary)
+    local bg, border, ink
+    if paper then
+      bg, border, ink = col(T.field), col(primary and T.accent or edge), col(primary and T.accent or T.text)
+    elseif primary then
+      bg, border, ink = "rgba(74,51,23,0.92)", "rgb(230,191,115)", "rgb(255,224,161)"
+    else
+      bg, border, ink = "rgba(20,18,13,0.88)", "rgb(148,125,92)", col(T.text)
+    end
+    local badge = paper and col(T.field) or "rgba(0,0,0,0.6)"
+    return ('<div style="flex:1;height:32px;background:%s;border:1px solid %s;color:%s;font-size:13px;line-height:30px;padding-left:9px;box-sizing:border-box"><span style="display:inline-block;background:%s;border:1px solid %s;font-size:10px;line-height:16px;height:18px;padding:0 6px;margin-right:9px;color:%s">%s</span>%s</div>'):format(
+      bg,
+      border,
+      ink,
+      badge,
+      col(T.accent, 0.55),
+      col(T.text),
+      key,
+      label
+    )
+  end
+  local html = ('<body style="margin:0;background:#202820;font-family:\'Trebuchet MS\',sans-serif"><div style="width:400px;height:424px;background:%s;border:2px solid %s;box-sizing:border-box;position:relative"><div style="position:absolute;left:66px;top:18px;font:18px Palatino,serif;color:%s">A Choice of Rewards</div><div style="position:absolute;left:12px;top:62px;right:12px;bottom:56px;font-size:15px;line-height:1.4;color:%s;overflow:hidden"><div style="font-size:12px;color:%s;margin-bottom:8px">%s  &middot;  <span style="color:%s">Group</span></div>Bring me six Crag Boar Ribs and a cask of Rhapsody Malt, and the whole tavern will remember your name.<div style="font:16px Palatino,serif;color:%s;margin:12px 0 4px">Rewards</div><div style="background:%s;padding:6px;font-size:13px">Beer Basted Boar Ribs x6</div></div><div style="position:absolute;left:8px;right:8px;bottom:8px;display:flex;gap:12px">%s%s</div></div></body>'):format(
+    col(body),
+    col(edge),
+    col(T.accent),
+    col(T.text),
+    col(T.soft),
+    level:gsub("|cff(%x%x%x%x%x%x)(.-)|r", '<span style="color:#%1">%2</span>'),
+    col(T.accent),
+    col(T.gold),
+    paper and col(T.wash) or "rgba(0,0,0,0.35)",
+    button("Accept", "1", true),
+    button("Decline", "Esc", false)
+  )
+  local f = assert(io.open(("%s/panel_%s.html"):format(os.getenv("RENDER"), paper and "paper" or "dark"), "w"))
+  f:write(html)
+  f:close()
 end
 
 io.write(("Palaver: %d checks passed (%s, %s).\n"):format(count, G.LOCALE, G.FOREVER and "Forever" or "Classic Era"))

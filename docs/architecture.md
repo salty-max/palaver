@@ -165,3 +165,15 @@ German and Spanish (deDE, esES, esMX) are held back from players since 1 Novembe
 ## The key binding
 
 For a controller player (no keyboard for the slash command, a cursor to steer to the minimap button). `addon/Palaver/Bindings.xml` and `ns.kit.binding(...)` at the end of `Settings.lua`: one key or pad button, chosen in the game's Key Bindings under "Palaver" ("Open Palaver"), opens its page in the game's Options. Palaver has no window of its own to toggle (its panel opens beside an NPC), so this is the one thing a pad player can open. Kept out of a fight, to be safe (not verified that the game refuses it there): a line says so. When the game has no page for addons, a line says that too. The binding does nothing until the player puts a key on it. The kit's `K.binding`, the file, what the game does in each game and what is not verified: `addon-kit/docs/controller.md`, "Opening by a pad button". `bun run bindings` (part of `check`) checks the file, the function and the package.
+
+## The paper look
+
+(13 November 2026, the kit's `O:look("paper")` in `Settings.lua`: the account-wide setting `paper`, in
+`PalaverSettings`.) Palaver offers the paper colours only: its panel has its own Panel size and Text size, a
+third size option beside them would only confuse, and the panel is not a kit book. The paper look is dark ink
+on tan and takes effect after a reload. Every colour is read from `K.T` when a piece is built (`T.text`, never a
+copy kept at load); the footer buttons, key badges, level colour, item quality colours and reward cards have a
+paper branch (`T.field`, `T.accent`, `K.ink`); the tooltips are the game's and dark whatever the look, so their
+lines use `K.TIP_KNOWN` and `K.TIP_NEW`. `PAPER=1 luajit addon/test/sim.lua` plays a player on the paper;
+`RENDER=dir [PAPER=1] luajit addon/test/sim.lua` writes the panel as HTML with its real colours (Chrome's fonts:
+the game has the last word).

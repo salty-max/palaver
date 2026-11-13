@@ -26,8 +26,7 @@ local INNER = 12 -- the text's distance from the panel's sides
 local BUTTON_H, BUTTON_GAP = 32, 12
 local FOOT = EDGE + BUTTON_H + 8 -- the panel's bottom, above the buttons
 local BOOK_ICON = "Interface\\QuestFrame\\UI-QuestLog-BookIcon"
-local TEXT = T.text
-local KEY_BADGE = { 0, 0, 0, 0.6 }
+local KEY_BADGE = { 0, 0, 0, 0.6 } -- (on paper: the paper's own light field)
 
 local frame, scroll, child
 local pools = { para = {}, heading = {}, row = {}, card = {}, line = {} }
@@ -48,9 +47,9 @@ local function keyBadge(parent)
     edgeSize = 8,
     insets = { left = 2, right = 2, top = 2, bottom = 2 },
   })
-  b:SetBackdropColor(unpack(KEY_BADGE))
+  b:SetBackdropColor(unpack(K.paper and T.field or KEY_BADGE))
   b:SetBackdropBorderColor(T.accent[1], T.accent[2], T.accent[3], 0.55)
-  b.text = K.label(b, K.BODY_FONT, 10, TEXT)
+  b.text = K.label(b, K.BODY_FONT, 10, T.text)
   b.text:SetPoint("CENTER", 0, 0)
   b:SetHeight(18)
   function b:SetKey(key)
@@ -75,12 +74,30 @@ local function button(primary)
   b.primary = primary
   b.badge = keyBadge(b)
   b.badge:SetPoint("LEFT", 9, 0)
-  b.label = K.label(b, K.BODY_FONT, 13, TEXT)
+  b.label = K.label(b, K.BODY_FONT, 13, T.text)
   b.label:SetPoint("LEFT", b.badge, "RIGHT", 9, 0)
   b.label:SetPoint("RIGHT", -8, 0)
   b.label:SetWordWrap(false)
   function b:Paint(lit)
     local off = self.disabled
+    if K.paper then
+      -- (on paper: the paper's field, ink on it, the primary one with a deep rust edge)
+      local edge = T.edge
+      self:SetBackdropColor(T.field[1], T.field[2], T.field[3], lit and 1 or (T.field[4] or 1))
+      if off then
+        self:SetBackdropBorderColor(edge[1], edge[2], edge[3], 0.4)
+      else
+        self:SetBackdropBorderColor(
+          (self.primary or lit) and T.accent[1] or edge[1],
+          (self.primary or lit) and T.accent[2] or edge[2],
+          (self.primary or lit) and T.accent[3] or edge[3],
+          1
+        )
+      end
+      local ink = self.primary and T.accent or T.text
+      self.label:SetTextColor(ink[1], ink[2], ink[3], off and 0.45 or 1)
+      return
+    end
     if self.primary and not off then
       self:SetBackdropColor(0.29, 0.20, 0.09, lit and 1 or 0.92)
       self:SetBackdropBorderColor(0.9, 0.75, 0.45, 1)
@@ -94,7 +111,7 @@ local function button(primary)
       else
         self:SetBackdropBorderColor(0.58, 0.49, 0.36, 1)
       end
-      self.label:SetTextColor(TEXT[1], TEXT[2], TEXT[3], off and 0.45 or 1)
+      self.label:SetTextColor(T.text[1], T.text[2], T.text[3], off and 0.45 or 1)
     end
   end
   b:SetScript("OnEnter", function(self) self:Paint(true) end)
@@ -199,7 +216,7 @@ local function build()
     tip:SetOwner(self, "ANCHOR_TOP")
     tip:SetText(self.tip or "")
     if ns.settings and ns.settings.keys ~= false then
-      tip:AddLine(ns.game.word("KEY_BACKSPACE", "Backspace"), T.soft[1], T.soft[2], T.soft[3])
+      tip:AddLine(ns.game.word("KEY_BACKSPACE", "Backspace"), K.TIP_KNOWN[1], K.TIP_KNOWN[2], K.TIP_KNOWN[3]) -- (the tooltip is the game's, dark whatever the look)
     end
     tip:Show()
   end)
@@ -261,9 +278,9 @@ local y, inner
 
 local function para(text, color, size)
   if not text or text == "" then return end
-  local fs = take("para", function() return K.label(child, K.BODY_FONT, 15, TEXT) end)
+  local fs = take("para", function() return K.label(child, K.BODY_FONT, 15, T.text) end)
   fs:SetFont(K.BODY_FONT, size or fontSize(), "")
-  fs:SetTextColor(unpack(color or TEXT))
+  fs:SetTextColor(unpack(color or T.text))
   fs:SetWidth(inner)
   fs:SetSpacing(4)
   fs:SetText(text)
@@ -280,7 +297,11 @@ local function facts(f)
   if (f.level or 0) > 0 then
     local text = ns.game.word("UNIT_LEVEL_TEMPLATE", "Level %d"):format(f.level)
     local c = GetQuestDifficultyColor and GetQuestDifficultyColor(f.level)
-    if c and c.r then text = ("|cff%02x%02x%02x%s|r"):format(c.r * 255, c.g * 255, c.b * 255, text) end
+    if c and c.r then
+      local rgb = { c.r, c.g, c.b }
+      if K.paper then rgb = K.ink(rgb, { T.ground, T.back }, 3.2) end -- (the game's yellow and green, darkened to read on paper)
+      text = K.hex(rgb) .. text .. "|r"
+    end
     table.insert(bits, text)
   end
   local kind = (f.kind or 0) > 0 and ns.questTypes[f.kind]
@@ -321,7 +342,7 @@ local function row(r, n)
     f.badge:SetPoint("TOPLEFT", 0, -1)
     f.icon = f:CreateTexture(nil, "ARTWORK")
     f.icon:SetSize(16, 16)
-    f.text = K.label(f, K.BODY_FONT, 15, TEXT)
+    f.text = K.label(f, K.BODY_FONT, 15, T.text)
     f.text:SetSpacing(2)
     f:SetHighlightTexture(K.HIGHLIGHT, "ADD")
     f:SetScript("OnClick", function(self) ns.core.pick(self.n) end)
@@ -341,7 +362,7 @@ local function row(r, n)
   b.text:SetFont(K.BODY_FONT, fontSize(), "")
   b.text:SetWidth(inner - left - 22)
   b.text:SetText(r.text or "")
-  local c = r.faded and T.soft or TEXT
+  local c = r.faded and T.soft or T.text
   b.text:SetTextColor(c[1], c[2], c[3])
   local h = math.max(20, b.text:GetStringHeight() + 4)
   b:SetSize(inner, h)
@@ -359,7 +380,7 @@ local function card(item, x, chooseIndex)
     f.slot = K.slot(f, 34)
     f.slot:SetPoint("LEFT", 3, 0)
     f.slot:EnableMouse(false)
-    f.name = K.label(f, K.BODY_FONT, 13, TEXT)
+    f.name = K.label(f, K.BODY_FONT, 13, T.text)
     f.name:SetPoint("LEFT", f.slot, "RIGHT", 9, 0)
     f.name:SetPoint("RIGHT", -6, 0)
     f.name:SetMaxLines(2)
@@ -411,7 +432,7 @@ local function card(item, x, chooseIndex)
   end)
   local w = math.floor((inner - 10) / 2)
   c:SetSize(w, 40)
-  c:SetBackdropColor(0, 0, 0, 0.35)
+  c:SetBackdropColor(unpack(K.paper and T.wash or { 0, 0, 0, 0.35 }))
   K.setSlot(c.slot, item.icon, item.count, item.quality)
   -- (one the character can't use: red, as the game's own window shows it)
   if item.usable == false then c.slot.icon:SetVertexColor(0.9, 0, 0) end
@@ -423,9 +444,11 @@ local function card(item, x, chooseIndex)
   c.name:SetText(name)
   local q = item.quality and item.quality >= 2 and ITEM_QUALITY_COLORS and ITEM_QUALITY_COLORS[item.quality]
   if q then
-    c.name:SetTextColor(q.r, q.g, q.b)
+    local rgb = { q.r, q.g, q.b }
+    if K.paper then rgb = K.ink(rgb, { T.ground, T.back }, 3.2) end -- (an item's quality colour, darkened in its hue on paper)
+    c.name:SetTextColor(rgb[1], rgb[2], rgb[3])
   else
-    c.name:SetTextColor(unpack(TEXT))
+    c.name:SetTextColor(unpack(T.text))
   end
   c.item = item
   c.chooseIndex = chooseIndex
@@ -456,7 +479,7 @@ local function lines(pairsList)
       f:SetHeight(18)
       f.label = K.label(f, K.BODY_FONT, 13, T.soft)
       f.label:SetPoint("LEFT")
-      f.value = K.label(f, K.BODY_FONT, 13, TEXT)
+      f.value = K.label(f, K.BODY_FONT, 13, T.text)
       return f
     end)
     local wide = pair[3]
@@ -544,7 +567,11 @@ function P.mark()
     if c then
       c.value:Show()
       c.name:SetPoint("RIGHT", -20, 0)
-      note(c, L["Best value: it sells for %s, more than the other rewards."]:format(ns.game.coins(best.price)), T.gold)
+      note(
+        c,
+        L["Best value: it sells for %s, more than the other rewards."]:format(ns.game.coins(best.price)),
+        K.TIP_NEW
+      )
     end
   end
 end
