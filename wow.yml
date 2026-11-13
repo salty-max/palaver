@@ -1,4 +1,4 @@
-# addon-kit 4bfc9b6: a copy (kit:sync); edit the addon-kit repository's wow.yml instead
+# addon-kit 726a8e9: a copy (kit:sync); edit the addon-kit repository's wow.yml instead
 # The game's globals the family's addons use, and the kit's own three
 # (SaltyMaxCollector, SaltyMaxWelcomes, AchievementShield_OnLoad): selene's
 # standard library for every addon's Lua, copied into each by kit:sync. An
@@ -113,6 +113,10 @@ globals:
   CreateFrame:
     any: true
   CreateFromMixins:
+    any: true
+  CreateSettingsButtonInitializer:
+    any: true
+  CreateSettingsListSectionHeaderInitializer:
     any: true
   CreateUnitHealPredictionCalculator:
     any: true
@@ -531,6 +535,8 @@ globals:
     any: true
   QuestInfoFrame:
     any: true
+  ReloadUI:
+    any: true
   SaltyMaxCollector:
     property: full-write
   SaltyMaxWelcomes:
@@ -553,11 +559,15 @@ globals:
     any: true
   Settings:
     any: true
+  SettingsCallbackRegistry:
+    any: true
   SetUIVisibility:
     any: true
   should:
     any: true
   SlashCmdList:
+    any: true
+  SmartNavigation:
     any: true
   SOUNDKIT:
     any: true
