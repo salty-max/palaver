@@ -1,4 +1,4 @@
--- addon-kit e48fbe8: a copy (kit:sync); edit the addon-kit repository's Kit.lua instead
+-- addon-kit 3c3b501: a copy (kit:sync); edit the addon-kit repository's Kit.lua instead
 -- The kit every addon of the family carries but Keyring (Hearthtale,
 -- Lorekeeper's Codex, Yonder, Second Wind, Palaver, Mealbook, Goodwill, Yours
 -- Truly, Primer): which game this is and the addon's events, its words, the books'
@@ -295,7 +295,7 @@ K.SHARED_WORDS = {
 
 -- The family's ways of speaking outside the book, one in every addon (the
 -- user's calls, 27 October 2026). K.prefix: the addon's name before its lines
--- in chat ("Mealbook: "), in its own accent (its theme set first).
+-- in chat ("Mealbook: "), in its own accent (its theme set first). Called at load, before the look is chosen: chat is dark, so the name keeps the dark look's accent.
 -- K.tooltipLine: its line on the game's tooltip (a creature's, an item's), in
 -- the game's gold for something still to find (new), a quiet brown once known,
 -- on one line (the tooltip widens for it) unless wrap.
@@ -1070,7 +1070,7 @@ end
 -- An addon's links in chat (|H<scheme>:<target>|h[text]|h): follow(target)
 -- when one is clicked, through the client's link registry, else SetItemRef.
 -- The function returned writes one, in a colour of its own (the game's
--- quest yellow by default).
+-- link yellow by default, whatever the look: chat is dark).
 function K.links(scheme, follow, colour)
   local function heard(link)
     local target = type(link) == "string" and link:match("^" .. scheme .. ":(.+)$")
@@ -1085,7 +1085,7 @@ function K.links(scheme, follow, colour)
     hooksecurefunc("SetItemRef", heard)
   end
   return function(target, text, c)
-    return ("|cff%s|H%s:%s|h[%s]|h|r"):format(c or colour or K.linkColour(), scheme, target, text)
+    return ("|cff%s|H%s:%s|h[%s]|h|r"):format(c or colour or "ffd100", scheme, target, text)
   end
 end
 
@@ -2521,7 +2521,7 @@ function K.deeds(o)
     return n, shown
   end
   local function announce(d)
-    local link = o.link and o.link(d) or ("|cff%s[%s]|r"):format(K.linkColour(), d.title)
+    local link = o.link and o.link(d) or ("|cffffd100[%s]|r"):format(d.title) -- (chat is dark whatever the look: the game's link yellow)
     print((o.prefix or "") .. L["Achievement earned: %s."]:format(link))
     K.achievementSound(o.sound and o.sound())
     if o.show then return o.show(d) end
@@ -4411,19 +4411,23 @@ function K.options(o)
   end
   -- The book's size and the paper look, the same two choices in every addon
   -- (the settings bookSize, 1 to 4, and paper). The size is applied at once to
-  -- the windows already built, the look from the next reload.
-  function O:look()
+  -- the windows already built, the look from the next reload. only = "paper":
+  -- the paper alone, for an addon whose window already has size options of its
+  -- own (Palaver's panel size and text size): no third one beside them.
+  function O:look(only)
     padWatcher()
-    if o.defaults.bookSize == nil then o.defaults.bookSize = 1 end
     if o.defaults.paper == nil then o.defaults.paper = false end
     K.lookGet = o.get
-    self:choice(
-      "bookSize",
-      L["Book size"],
-      L["Makes the whole book bigger, its text and pictures together. A book is never made bigger than your screen."],
-      function() return { { 1, L["Normal"] }, { 2, L["Large"] }, { 3, L["Larger"] }, { 4, L["Largest"] } } end,
-      K.resize
-    )
+    if only ~= "paper" then
+      if o.defaults.bookSize == nil then o.defaults.bookSize = 1 end
+      self:choice(
+        "bookSize",
+        L["Book size"],
+        L["Makes the whole book bigger, its text and pictures together. A book is never made bigger than your screen."],
+        function() return { { 1, L["Normal"] }, { 2, L["Large"] }, { 3, L["Larger"] }, { 4, L["Largest"] } } end,
+        K.resize
+      )
+    end
     self:check(
       "paper",
       L["Paper colours"],

@@ -1,4 +1,4 @@
-// addon-kit e48fbe8: a copy (kit:sync); edit the addon-kit repository's locales-lib.ts instead
+// addon-kit 3c3b501: a copy (kit:sync); edit the addon-kit repository's locales-lib.ts instead
 /**
  * The family's languages, one core: each addon's scripts/locales.ts (its own
  * names, pages, chapters, letters) is built on it. A copy of addon-kit's in
