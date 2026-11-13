@@ -57,6 +57,10 @@ The NPCs' words, the quests and the game's buttons are the game's own, in your c
 
 Every setting is on Palaver's page under **Options > AddOns > Palaver**, or through `/palaver settings`. Settings are shared by all your characters.
 
+**Paper colours** replace the dark look with dark ink on tan paper, which some players find easier on the eyes. They take effect after a reload, and the settings page ends with a **Reload** button for it.
+
+**Options > Key Bindings** lists **Open Palaver** under a heading of its own. Put a key on it, or on Forever a controller button, and one press opens or closes the panel. Nothing is bound until you choose.
+
 - `/palaver on` or `/palaver off` switches between Palaver and the game's own windows.
 - `/palaver scale 1.1` sets the panel size to 110%, from 0.7 (70%) to 1.5 (150%).
 - `/palaver font 16` sets the text size, from 12 to 22.

@@ -41,6 +41,10 @@ why. The arrow weighs the stats your class wants against what you wear, and
 Palaver needs no other addon for it. The marks never choose for you.
 
 Every setting is also on Palaver's page in the game's Options, under AddOns.
+It offers paper colours too (dark ink on tan paper, applied by a reload: the
+page ends with a Reload button). **Options > Key Bindings** lists **Open
+Palaver**: one key, or on Forever a controller button, opens and closes the
+panel. Nothing is bound until you choose.
 
 ```text
 /palaver on | off        Palaver's panel, or the game's own windows
