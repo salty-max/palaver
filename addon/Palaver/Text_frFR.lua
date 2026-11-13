@@ -58,7 +58,7 @@ ns.translate({
     ["Conversations in Palaver"] = "Conversations dans Palaver",
     ["Copy settings from"] = "Copier les réglages de",
     ["Copy their choices"] = "Copier ses choix",
-    ["Dark ink on tan paper, easier on the eyes than light text on a dark ground. Takes effect when you reload the interface. Use the Reload button below."] = "Encre sombre sur papier beige, plus reposant pour les yeux qu'un texte clair sur fond sombre. S'applique au rechargement de l'interface. Utilisez le bouton « Recharger » ci-dessous.",
+    ["Dark ink on tan paper, easier on the eyes than light text on a dark ground. Takes effect when you reload the interface. Use the Reload button below."] = "Encre sombre sur papier beige, plus reposant pour les yeux qu'un texte clair sur fond sombre. S'applique au rechargement de l'interface. Utilisez le bouton « Recharger » ci-dessous.",
     ["Dec"] = "déc.",
     ["earned"] = "obtenus",
     ["Esc"] = "Échap",
