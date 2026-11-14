@@ -4,7 +4,7 @@
 ## Notes-frFR: Les quêtes et les conversations avec les PNJ dans un panneau à leurs côtés, que l'on lit et auxquelles on répond au clavier.
 ## Category: Quests & Leveling
 ## Author: salty-max
-## Version: 0.3.1
+## Version: 0.4.0
 ## SavedVariables: PalaverSettings, PalaverErrors
 ## IconTexture: Interface\AddOns\Palaver\Media\Logo
 ## X-Website: https://github.com/salty-max/palaver
